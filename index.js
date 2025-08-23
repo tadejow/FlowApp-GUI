@@ -131,32 +131,124 @@ const TrophyIconSVG = ({ size = "60px", color = DarkTextMockup }) => (
     )
 );
 
+const WaterBackground = ({ beta, gamma }) => {
+  const styles = {
+    container: {
+      position: 'absolute',
+      top: '45%', 
+      left: '-25%',
+      width: '150%',
+      height: '100%',
+      transition: 'transform 0.5s ease-out',
+      transform: `rotate(${gamma}deg) translateY(${beta * 2}px)`,
+    },
+    svg: {
+      width: '100%',
+      height: '100%',
+    },
+    wave: {
+      fill: 'rgba(48, 201, 255, 0.7)',
+      animation: 'waveAnimation 8s ease-in-out infinite alternate',
+    },
+    wave2: {
+        fill: 'rgba(0, 169, 224, 0.5)',
+        animation: 'waveAnimation2 10s ease-in-out infinite alternate',
+    }
+  };
+
+  const wavePath = "M-10,50 C150,150 350,-50 510,50 L510,250 L-10,250 Z";
+  const wavePath2 = "M-10,60 C200,100 300,0 510,60 L510,250 L-10,250 Z";
+
+  return React.createElement('div', { style: styles.container },
+    React.createElement('svg', { style: styles.svg, viewBox: "0 0 500 250", preserveAspectRatio: "none" },
+      React.createElement('path', { d: wavePath2, style: styles.wave2 }),
+      React.createElement('path', { d: wavePath, style: styles.wave })
+    )
+  );
+};
+
 
 const App = () => {
   const [currentView, setCurrentView] = useState('splash'); // 'splash', 'main', 'summary'
   const [currentStation, setCurrentStation] = useState(1);
   const [sliderValue, setSliderValue] = useState(10); // For station 1
   const [shapeIndex, setShapeIndex] = useState(0); // For station 3
+  const [orientation, setOrientation] = useState({ beta: 0, gamma: 0 });
 
-  const navigateToMainApp = () => {
+  useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = `
+      @keyframes floatAnimation {
+        0% { transform: translateY(0px) rotate(-0.5deg); }
+        50% { transform: translateY(-10px) rotate(0.5deg); }
+        100% { transform: translateY(0px) rotate(-0.5deg); }
+      }
+      @keyframes waveAnimation {
+        0% { transform: translateX(0) translateY(0); }
+        100% { transform: translateX(-50px) translateY(10px); }
+      }
+      @keyframes waveAnimation2 {
+        0% { transform: translateX(0) translateY(0); }
+        100% { transform: translateX(40px) translateY(5px); }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+    return () => { document.head.removeChild(styleSheet); };
+  }, []);
+
+  useEffect(() => {
+    if (currentView !== 'splash') return;
+
+    const handleOrientation = (event) => {
+      let { beta, gamma } = event;
+      beta = beta || 0;
+      gamma = gamma || 0;
+      
+      const clampedGamma = Math.max(-45, Math.min(45, gamma));
+      const clampedBeta = Math.max(-45, Math.min(45, beta));
+
+      window.requestAnimationFrame(() => {
+        setOrientation({ beta: clampedBeta, gamma: clampedGamma });
+      });
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation, true);
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation, true);
+    };
+  }, [currentView]);
+
+  const navigateToMainApp = async () => {
     const element = document.documentElement;
-    // API must be called after a user gesture (like a click)
-    // to enter true fullscreen mode.
     if (element.requestFullscreen) {
         element.requestFullscreen().catch(err => {
-            console.error(`Fullscreen request failed: ${err.message} (${err.name})`);
+            console.warn(`Fullscreen request failed, likely requires user gesture on the page first.`);
         });
     }
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permissionState = await DeviceOrientationEvent.requestPermission();
+        if (permissionState === 'granted') {
+          console.log("Device orientation permission granted.");
+        }
+      } catch (error) {
+        console.error("Device orientation permission request failed:", error);
+      }
+    }
+
     setCurrentView('main');
   };
+
   const navigateToSummary = () => setCurrentView('summary');
   const navigateToSplash = () => {
-      setCurrentStation(1); // Reset station for a fresh start
+      setCurrentStation(1);
       setCurrentView('splash');
   };
   const selectStation = (stationNumber) => {
     setCurrentStation(stationNumber);
-    setCurrentView('main'); // Ensure view is 'main' when a station is selected from summary
+    setCurrentView('main');
   };
   const nextStation = () => {
     if (currentStation < 5) {
@@ -182,15 +274,39 @@ const App = () => {
         marginRight: '-5px',
     },
     splashScreen: {
+      position: 'relative',
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-around',
+      justifyContent: 'center',
       alignItems: 'center',
-      textAlign: 'center',
       height: '100%',
-      padding: '40px 20px',
       boxSizing: 'border-box',
-      background: SkyBlue,
+    },
+    splashBackground: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: `linear-gradient(180deg, ${SkyBlue} 0%, ${SkyBlueDarker} 100%)`,
+        zIndex: 0,
+    },
+    parallaxContainer: {
+        position: 'absolute',
+        top: 0, left: 0, width: '100%', height: '100%',
+        zIndex: 1,
+        animation: 'floatAnimation 5s ease-in-out infinite',
+    },
+    splashContent: {
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        textAlign: 'center',
+        height: '100%',
+        width: '100%',
+        padding: '40px 20px',
+        boxSizing: 'border-box',
     },
     splashSubtitle: {
         fontSize: '16px',
@@ -387,22 +503,45 @@ const App = () => {
 
   if (currentView === 'splash') {
     return React.createElement('div', { style: styles.splashScreen },
-      React.createElement('div', {},
-          React.createElement(FlowAppLogo, {
-            svgSize: "100px",
-            textSize: "40px",
-            layout: "vertical",
-            theme: "splash"
-          }),
-          React.createElement('p', {style: styles.splashSubtitle}, "The unique experience of the Mandau River")
+      React.createElement('div', { style: styles.splashBackground }),
+      React.createElement('div', { style: styles.parallaxContainer },
+        React.createElement(WaterBackground, { beta: orientation.beta, gamma: orientation.gamma })
       ),
-      React.createElement('button', {
-        style: dynamicGoButtonStyle,
-        onClick: navigateToMainApp,
-        onMouseEnter: () => setIsGoButtonHovered(true),
-        onMouseLeave: () => setIsGoButtonHovered(false),
-        'aria-label': 'Przejdź do aplikacji FlowApp'
-      }, "Go with the Flow")
+      React.createElement('div', { style: styles.splashContent },
+          React.createElement('div', null,
+              React.createElement('div', {
+                  style: {
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                  }
+              },
+                  React.createElement('div', {
+                      style: {
+                          animation: 'floatAnimation 5s ease-in-out infinite',
+                      }
+                  },
+                      React.createElement(DropletLogoSVG, {
+                          size: "100px",
+                          theme: "splash"
+                      })
+                  ),
+                  React.createElement(FlowAppText, {
+                      size: "40px",
+                      isHeader: false,
+                      theme: "splash"
+                  })
+              ),
+              React.createElement('p', {style: styles.splashSubtitle}, "The unique experience of the Mandau River")
+          ),
+          React.createElement('button', {
+            style: dynamicGoButtonStyle,
+            onClick: navigateToMainApp,
+            onMouseEnter: () => setIsGoButtonHovered(true),
+            onMouseLeave: () => setIsGoButtonHovered(false),
+            'aria-label': 'Przejdź do aplikacji FlowApp'
+          }, "Go with the Flow")
+      )
     );
   }
 
