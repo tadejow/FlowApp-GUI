@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Reynolds Experiment</title>
+    <style>
+        body { margin: 0; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+        .container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        canvas { background-color: #000; max-width: 100%; max-height: 100%; object-fit: contain; }
+        #info { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 8px; border-radius: 5px; font-size: 14px; pointer-events: none; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="fluid-canvas"></canvas>
+        <div id="info"></div>
+    </div>
+    <script>
+        // --- Simulation Constants ---
+        const U_FIELD = 0, V_FIELD = 1, S_FIELD = 2;
+
+        // --- Canvas Setup ---
+        const canvas = document.getElementById('fluid-canvas');
+        const infoDiv = document.getElementById('info');
+        const ctx = canvas.getContext('2d');
+
+        let canvasWidth = Math.min(window.innerWidth, 800);
+        let canvasHeight = Math.min(window.innerHeight, 1200);
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        const simHeight = 1.1;
+        const cScale = canvasHeight / simHeight;
+        const simWidth = canvasWidth / cScale;
+
+        // --- Fluid Simulation Class ---
+        class Fluid {
+            constructor(density, numX, numY, h) {
+                this.density = density;
+                this.h = h;
+                this.numX = numX + 2;
+                this.numY = numY + 2;
+                const size = this.numX * this.numY;
+
+                this.u = new Float32Array(size);
+                this.v = new Float32Array(size);
+                this.p = new Float32Array(size);
+                this.s = new Float32Array(size);
+                this.m = new Float32Array(size).fill(1.0);
+
+                const pipeH = 0.1 * this.numY;
+                this.inletMinJ = Math.floor(0.5 * this.numY - 0.5 * pipeH);
+                this.inletMaxJ = Math.floor(0.5 * this.numY + 0.5 * pipeH);
+            }
+
+            _idx(i, j) {
+                return i * this.numY + j;
+            }
+
+            simulate(dt, gravity, numIters, overRelaxation, flowVelocity) {
+                for (let j = 1; j < this.numY - 1; j++) {
+                    this.u[this._idx(1, j)] = 0.0;
+                }
+
+                const inletCenterJ = (this.inletMinJ + this.inletMaxJ) / 2.0;
+                const inletHalfWidth = (this.inletMaxJ - this.inletMinJ) / 2.0;
+
+                if (inletHalfWidth > 0) {
+                    for (let j = this.inletMinJ; j < this.inletMaxJ; j++) {
+                        const relativePos = (j - inletCenterJ) / inletHalfWidth;
+                        const speed = flowVelocity * (1 - relativePos * relativePos);
+                        this.u[this._idx(1, j)] = Math.max(0.0, speed);
+                    }
+                }
+
+                for (let j = this.inletMinJ; j < this.inletMaxJ; j++) {
+                    this.m[this._idx(1, j)] = 0.0;
+                }
+
+                integrate(this, gravity, dt);
+                this.p.fill(0.0);
+                solveIncompressibility(this, numIters, overRelaxation, dt);
+                extrapolate(this);
+                advectVel(this, dt);
+                advectSmoke(this, dt);
+            }
+        }
+
+        function integrate(f, gravity, dt) {
+            for (let i = 1; i < f.numX; i++) {
+                for (let j = 1; j < f.numY - 1; j++) {
+                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) {
+                        f.v[f._idx(i, j)] += gravity * dt;
+                    }
+                }
+            }
+        }
+
+        function solveIncompressibility(f, numIters, overRelaxation, dt) {
+            const cp = f.density * f.h / dt;
+            for (let iter = 0; iter < numIters; iter++) {
+                for (let i = 1; i < f.numX - 1; i++) {
+                    for (let j = 1; j < f.numY - 1; j++) {
+                        if (f.s[f._idx(i, j)] === 0.0) continue;
+
+                        let sSum = f.s[f._idx(i - 1, j)] + f.s[f._idx(i + 1, j)] + f.s[f._idx(i, j - 1)] + f.s[f._idx(i, j + 1)];
+                        if (sSum === 0.0) continue;
+
+                        let div = f.u[f._idx(i + 1, j)] - f.u[f._idx(i, j)] +
+                                  f.v[f._idx(i, j + 1)] - f.v[f._idx(i, j)];
+
+                        let p = -div / sSum * overRelaxation;
+                        f.p[f._idx(i, j)] += cp * p;
+                        f.u[f._idx(i, j)] -= f.s[f._idx(i - 1, j)] * p;
+                        f.u[f._idx(i + 1, j)] += f.s[f._idx(i + 1, j)] * p;
+                        f.v[f._idx(i, j)] -= f.s[f._idx(i, j - 1)] * p;
+                        f.v[f._idx(i, j + 1)] += f.s[f._idx(i, j + 1)] * p;
+                    }
+                }
+            }
+        }
+        
+        function extrapolate(f) {
+            for (let i = 0; i < f.numX; i++) {
+                f.u[f._idx(i, 0)] = f.u[f._idx(i, 1)];
+                f.u[f._idx(i, f.numY - 1)] = f.u[f._idx(i, f.numY - 2)];
+            }
+            for (let j = 0; j < f.numY; j++) {
+                f.v[f._idx(0, j)] = f.v[f._idx(1, j)];
+                f.v[f._idx(f.numX - 1, j)] = f.v[f._idx(f.numX - 2, j)];
+            }
+        }
+        
+        function sampleField(f, x, y, fieldType, fieldData) {
+            const h1 = 1.0 / f.h;
+            const h2 = 0.5 * f.h;
+            x = Math.max(Math.min(x, f.numX * f.h), f.h);
+            y = Math.max(Math.min(y, f.numY * f.h), f.h);
+
+            let dx = 0.0, dy = 0.0;
+            if (fieldType === U_FIELD) dy = h2;
+            else if (fieldType === V_FIELD) dx = h2;
+            else if (fieldType === S_FIELD) { dx = h2; dy = h2; }
+            
+            const x0 = Math.min(Math.floor((x - dx) * h1), f.numX - 2);
+            const tx = ((x - dx) - x0 * f.h) * h1;
+            const x1 = Math.min(x0 + 1, f.numX - 2);
+            const y0 = Math.min(Math.floor((y - dy) * h1), f.numY - 2);
+            const ty = ((y - dy) - y0 * f.h) * h1;
+            const y1 = Math.min(y0 + 1, f.numY - 2);
+
+            const sx = 1.0 - tx;
+            const sy = 1.0 - ty;
+
+            return sx * sy * fieldData[f._idx(x0, y0)] + tx * sy * fieldData[f._idx(x1, y0)] +
+                   tx * ty * fieldData[f._idx(x1, y1)] + sx * ty * fieldData[f._idx(x0, y1)];
+        }
+
+        function advectVel(f, dt) {
+            const newU = new Float32Array(f.u);
+            const newV = new Float32Array(f.v);
+            const h2 = 0.5 * f.h;
+            for (let i = 1; i < f.numX - 1; i++) {
+                for (let j = 1; j < f.numY - 1; j++) {
+                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i - 1, j)] !== 0.0) {
+                        let px = i * f.h;
+                        let py = j * f.h + h2;
+                        const u = f.u[f._idx(i, j)];
+                        const avgV = 0.25 * (f.v[f._idx(i - 1, j)] + f.v[f._idx(i, j)] + f.v[f._idx(i - 1, j + 1)] + f.v[f._idx(i, j + 1)]);
+                        px -= dt * u;
+                        py -= dt * avgV;
+                        newU[f._idx(i, j)] = sampleField(f, px, py, U_FIELD, f.u);
+                    }
+                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) {
+                        let px = i * f.h + h2;
+                        let py = j * f.h;
+                        const avgU = 0.25 * (f.u[f._idx(i, j - 1)] + f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j - 1)] + f.u[f._idx(i + 1, j)]);
+                        const v = f.v[f._idx(i, j)];
+                        px -= dt * avgU;
+                        py -= dt * v;
+                        newV[f._idx(i, j)] = sampleField(f, px, py, V_FIELD, f.v);
+                    }
+                }
+            }
+            f.u.set(newU);
+            f.v.set(newV);
+        }
+
+        function advectSmoke(f, dt) {
+            const newM = new Float32Array(f.m);
+            const h2 = 0.5 * f.h;
+            for (let i = 1; i < f.numX - 1; i++) {
+                for (let j = 1; j < f.numY - 1; j++) {
+                    if (f.s[f._idx(i, j)] !== 0.0) {
+                        const avgU = (f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j)]) * 0.5;
+                        const avgV = (f.v[f._idx(i, j)] + f.v[f._idx(i, j + 1)]) * 0.5;
+                        let x = i * f.h + h2 - dt * avgU;
+                        let y = j * f.h + h2 - dt * avgV;
+                        newM[f._idx(i, j)] = sampleField(f, x, y, S_FIELD, f.m);
+                    }
+                }
+            }
+            f.m.set(newM);
+        }
+
+        const scene = { fluid: null, dt: 1.0 / 60.0, numIters: 40, overRelaxation: 1.9, paused: false, flowVelocity: 2.0 };
+        let offscreenCanvas, offscreenCtx, imageData;
+
+        function setupScene() {
+            const res = 100;
+            const domainHeight = 100.0;
+            const domainWidth = domainHeight / simHeight * simWidth;
+            const h = domainHeight / res;
+            const numX = Math.floor(domainWidth / h);
+            const numY = Math.floor(domainHeight / h);
+            
+            const f = new Fluid(1000.0, numX, numY, h);
+            scene.fluid = f;
+
+            f.s.fill(1.0);
+            for(let j = 0; j < f.numY; j++) { f.s[f._idx(0, j)] = 0.0; }
+            for(let i = 0; i < f.numX; i++) {
+                f.s[f._idx(i, 0)] = 0.0;
+                f.s[f._idx(i, f.numY - 1)] = 0.0;
+            }
+
+            offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = f.numX;
+            offscreenCanvas.height = f.numY;
+            offscreenCtx = offscreenCanvas.getContext('2d');
+            imageData = offscreenCtx.createImageData(f.numX, f.numY);
+        }
+
+        function draw() {
+            const f = scene.fluid;
+            const data = imageData.data;
+
+            for (let i = 0; i < f.numX; i++) {
+                for (let j = 0; j < f.numY; j++) {
+                    const index = (j * f.numX + i) * 4;
+                    if (f.s[f._idx(i, j)] === 0.0) {
+                        data.set([0, 0, 0, 255], index);
+                    } else {
+                        const sVal = 1.0 - Math.max(0, Math.min(1, f.m[f._idx(i, j)]));
+                        data[index] = sVal * 0 + (1 - sVal) * 255;
+                        data[index + 1] = sVal * 128 + (1 - sVal) * 255;
+                        data[index + 2] = sVal * 255 + (1 - sVal) * 255;
+                        data[index + 3] = 255;
+                    }
+                }
+            }
+            offscreenCtx.putImageData(imageData, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
+            
+            infoDiv.innerHTML = `Fluid Simulation<br><b>[Space]</b> to pause<br>Peak Flow: <b>${scene.flowVelocity.toFixed(2)}</b><br><b>Left-Click:</b> Increase Flow<br><b>Right-Click:</b> Decrease Flow`;
+        }
+        
+        function mainLoop() {
+            if (!scene.paused) {
+                scene.fluid.simulate(scene.dt, 0.0, scene.numIters, scene.overRelaxation, scene.flowVelocity);
+            }
+            draw();
+            requestAnimationFrame(mainLoop);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                scene.paused = !scene.paused;
+            }
+        });
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (e.button === 0) { scene.flowVelocity += 0.5; } 
+            else if (e.button === 2) { scene.flowVelocity = Math.max(0.0, scene.flowVelocity - 0.5); }
+        });
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+        setupScene();
+        requestAnimationFrame(mainLoop);
+    </script>
+</body>
+</html>
