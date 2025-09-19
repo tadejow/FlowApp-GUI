@@ -1,0 +1,5 @@
+{
+  "name": "DUCK RACE - Pure HTML",
+  "description": "A fun and interactive duck racing game in a single HTML file, powered by a real-time fluid simulation. Race against AI opponents, give your duck a speed boost by splashing, and avoid obstacles to be the first to cross the finish line!",
+  "requestFramePermissions": []
+}
