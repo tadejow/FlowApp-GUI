@@ -1,0 +1,5 @@
+1. Zainstaluj Node.js
+2. Po zainstalowaniu folderu lokalnie, należy wejść w terminalu do folderu w którym znajdują się pliki
+3. Za pierwszym razem użyć komendy npm install
+4. Aby uruchomić aplikację należy w terminalu wpisać npm run dev
+5. Pojawi się parę linków, ten w formacie 'ip_urządzenia:port' umożliwi załączenie aplikacji na dowolnym urządzeniu podłączonym do tej samej sieci wifi w której uruchomiony jest serwer (np. telefonie)
