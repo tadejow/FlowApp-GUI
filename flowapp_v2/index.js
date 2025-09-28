@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -585,6 +584,7 @@ const App = () => {
 
   const stationButtonRefs = useRef([]);
   const [pillStyle, setPillStyle] = useState({});
+  const API_URL = 'http://localhost:3001';
 
   const t = (key, ...args) => {
     const value = translations[lang][key] || translations['en'][key];
@@ -592,28 +592,57 @@ const App = () => {
   };
 
   useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
-  useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
 
+  // Load nickname from local storage on initial load
   useEffect(() => {
     const storedNickname = localStorage.getItem('userNickname');
-    if (storedNickname) setUserNickname(storedNickname);
-    const storedScores = localStorage.getItem('flowapp_scores');
-    if (storedScores) setScores(JSON.parse(storedScores));
+    if (storedNickname) {
+      setUserNickname(storedNickname);
+    }
   }, []);
-  
+
+  // Fetch scores when user is identified
   useEffect(() => {
-    const handleGameMessage = (event) => {
-      if (event.data && event.data.type === 'gameScore') {
-        const { station, score } = event.data;
-        if (station && typeof score === 'number') {
-          setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
-          setGameModal({ isOpen: false, url: null });
-        }
+    if (userNickname) {
+      fetch(`${API_URL}/scores/${userNickname}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return res.json();
+        })
+        .then(data => setScores(data))
+        .catch(err => console.error("Failed to fetch scores:", err));
+    }
+  }, [userNickname]);
+
+  // Handle score updates from games
+  const handleGameMessage = useCallback((event) => {
+    if (event.data && event.data.type === 'gameScore') {
+      const { station, score } = event.data;
+      if (station && typeof score === 'number' && userNickname) {
+
+        // Optimistically update UI
+        setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
+        setGameModal({ isOpen: false, url: null });
+
+        // Persist to backend
+        fetch(`${API_URL}/scores`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname: userNickname, gameId: station, score })
+        })
+        .then(res => res.json())
+        .then(data => console.log('Score update:', data.message))
+        .catch(err => console.error("Failed to save score:", err));
       }
-    };
+    }
+  }, [userNickname, API_URL]);
+
+  useEffect(() => {
     window.addEventListener('message', handleGameMessage);
     return () => window.removeEventListener('message', handleGameMessage);
-  }, []);
+  }, [handleGameMessage]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
