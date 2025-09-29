@@ -1,6 +1,9 @@
-
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
+
+// !!! WAŻNE !!!
+// ZASTĄP PONIŻSZY ADRES URL ADRESEM SWOJEGO WORKERA CLOUDFLARE
+const API_URL = 'https://flowapp-api.maciej-tadej.workers.dev/api/scores';
 
 const translations = {
   en: {
@@ -591,6 +594,35 @@ const App = () => {
     return typeof value === 'function' ? value(...args) : value || key;
   };
 
+  const sendGameTimeToServer = async (timeInMs) => {
+    if (!userNickname) {
+      console.error("Cannot send time without a user nickname.");
+      return;
+    }
+    console.log(`Sending time to server: Nickname: ${userNickname}, Time: ${timeInMs}ms`);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          player_name: userNickname,
+          completion_time_ms: timeInMs
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Time successfully sent to the server!");
+      } else {
+        console.error("Failed to send time to the server:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error sending time to the server:", error);
+    }
+  };
+
   useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
   useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
 
@@ -610,10 +642,17 @@ const App = () => {
           setGameModal({ isOpen: false, url: null });
         }
       }
+      else if (event.data && event.data.type === 'gameTime') {
+        const { completion_time_ms } = event.data;
+        if (typeof completion_time_ms === 'number') {
+          sendGameTimeToServer(completion_time_ms);
+          setGameModal({ isOpen: false, url: null });
+        }
+      }
     };
     window.addEventListener('message', handleGameMessage);
     return () => window.removeEventListener('message', handleGameMessage);
-  }, []);
+  }, [userNickname]);
 
   useEffect(() => {
     const onFullscreenChange = () => {

@@ -36,6 +36,7 @@
         <!-- Level Complete Screen -->
         <div id="level-complete-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
             <h2 id="level-complete-title" class="text-5xl font-bold text-yellow-300 mb-4"></h2>
+            <p id="level-complete-stats" class="text-xl text-cyan-200 mb-6"></p>
             <p id="level-complete-desc" class="text-2xl text-white mb-6"></p>
             <button id="next-level-button" class="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
             </button>
@@ -45,6 +46,7 @@
         <div id="game-over-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
             <h2 class="text-5xl font-bold text-yellow-300 mb-4">Race Over!</h2>
             <p id="game-over-text" class="text-3xl text-white mb-6"></p>
+            <p id="game-over-stats" class="text-xl text-cyan-200 mb-6"></p>
             <button id="restart-button" class="px-8 py-4 bg-yellow-400 text-gray-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500 transition-transform transform hover:scale-105">
                 Race Again
             </button>
@@ -55,7 +57,11 @@
             <div id="game-ui" class="text-white bg-black bg-opacity-50 px-4 py-2 rounded-t-lg flex justify-between items-center">
                 <div>
                     <h2 id="level-display" class="text-xl font-bold text-yellow-300"></h2>
-                    <p class="text-sm text-cyan-100">Click the water to splash. Click an obstacle to remove it!</p>
+                    <p class="text-sm text-cyan-100">Click water to splash, click garbage for +10 points!</p>
+                </div>
+                 <div class="text-center mx-4">
+                    <p class="text-lg font-bold">Score: <span id="score-display" class="font-mono">0</span></p>
+                    <p class="text-lg font-bold">Time: <span id="time-display" class="font-mono">00:00</span></p>
                 </div>
                 <div class="flex flex-col items-center text-white ml-4">
                     <label for="splashStrength" class="text-sm font-bold text-yellow-300 mb-1">
@@ -69,6 +75,21 @@
     </main>
 
     <script type="module">
+        // --- Types (Enums) ---
+        const GameState = { StartScreen: 0, Playing: 1, GameOver: 2, LevelComplete: 3 };
+        const PlayerType = { Human: 0, Bot: 1 };
+        const ObstacleType = { Log: 0, Garbage: 1 };
+
+        // --- Level Configurations ---
+        const LEVEL_CONFIGS = [
+            { level: 1, flow: 0.5, spawnRate: 500, maxObs: 15, types: [ObstacleType.Log], hasFog: false, name: "The Calm River" },
+            { level: 2, flow: 0.5, spawnRate: 450, maxObs: 20, types: [ObstacleType.Garbage], hasFog: false, name: "Polluted Pass" },
+            { level: 3, flow: 0.6, spawnRate: 400, maxObs: 25, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "Tricky Turn" },
+            { level: 4, flow: 1.0, spawnRate: 300, maxObs: 30, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "The Rapids" },
+            { level: 5, flow: 0.9, spawnRate: 320, maxObs: 35, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: true, name: "The Foggy Finish" }
+        ];
+        const MAX_LEVEL = LEVEL_CONFIGS.length;
+
         // --- Constants ---
         const SIM_HEIGHT = 1.1;
         const CANVAS_HEIGHT = 300;
@@ -79,7 +100,6 @@
         const DT = 1.0 / 60.0;
         const NUM_ITERS = 20;
         const OVER_RELAXATION = 1.9;
-        const FLOW_VELOCITY = 0.5;
         const NUM_PLAYERS = 3;
         const DUCK_SIZE = 12;
         const FINISH_LINE_X = 0.95;
@@ -91,16 +111,15 @@
         const DAMPING_FACTOR = 0.80;
         const SPLASH_RADIUS_RATE = 60;
         const SPLASH_OPACITY_RATE = 1.2;
-        const MAX_OBSTACLES = 20;
-        const OBSTACLE_SPAWN_RATE = 500;
         const OBSTACLE_FLUID_FORCE_FACTOR = DT;
-        const MAX_LEVEL = 3;
         const RIVERBANK_MARGIN = 0.05 * SIM_HEIGHT; // 5% of sim height for each bank
+        const FOG_START_X = 0.6; // Fog starts at 60% of the screen
+        const SCORE_PER_GARBAGE = 10;
 
-        // --- Types (Enums) ---
-        const GameState = { StartScreen: 0, Playing: 1, GameOver: 2, LevelComplete: 3 };
-        const PlayerType = { Human: 0, Bot: 1 };
-        const ObstacleType = { Log: 0, Garbage: 1 };
+        // --- AI Constants ---
+        const BOT_AVOID_DISTANCE = 0.3;
+        const BOT_OFFENSIVE_RANGE = 0.4;
+        const BOT_OFFENSIVE_CHANCE = 0.3;
 
         // --- Fluid Simulator Class ---
         const U_FIELD = 0;
@@ -255,6 +274,8 @@
             let animationFrameId = 0;
             let isGameOver = false;
             let splashStrength = 1.0;
+            let score = 0;
+            let levelStartTime = 0;
 
             // Game Objects
             let fluid = null;
@@ -286,7 +307,11 @@
             const splashStrengthValue = document.getElementById('splash-strength-value');
             const levelCompleteTitle = document.getElementById('level-complete-title');
             const levelCompleteDesc = document.getElementById('level-complete-desc');
+            const levelCompleteStats = document.getElementById('level-complete-stats');
             const gameOverText = document.getElementById('game-over-text');
+            const gameOverStats = document.getElementById('game-over-stats');
+            const scoreDisplay = document.getElementById('score-display');
+            const timeDisplay = document.getElementById('time-display');
             
             // Setup
             canvas.width = CANVAS_WIDTH;
@@ -311,10 +336,10 @@
             }
             
             function spawnObstacle() {
-                let obstacleType;
-                if (level === 1) obstacleType = ObstacleType.Log;
-                else if (level === 2) obstacleType = ObstacleType.Garbage;
-                else obstacleType = Math.random() < 0.5 ? ObstacleType.Log : ObstacleType.Garbage;
+                const config = LEVEL_CONFIGS[level - 1];
+                const availableTypes = config.types;
+                const obstacleType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
                 obstacles.push({
                     id: Date.now() + Math.random(),
                     x: -0.1 * SIM_WIDTH,
@@ -330,6 +355,9 @@
             function initializeGame() {
                 isGameOver = false;
                 splashes = [];
+                score = 0;
+                levelStartTime = performance.now();
+
                 const simWidth = CANVAS_WIDTH / C_SCALE;
                 const domainHeight = SIM_HEIGHT;
                 const h = domainHeight / RESOLUTION;
@@ -362,6 +390,7 @@
 
             function draw() {
                 ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                const config = LEVEL_CONFIGS[level - 1];
 
                 // --- Draw Riverbanks ---
                 const bankTopY = RIVERBANK_MARGIN * C_SCALE;
@@ -393,7 +422,6 @@
                 ctx.closePath();
                 ctx.fill();
 
-
                 if (fluid) {
                     const h = fluid.h;
                     for (let i = 0; i < fluid.numX; i++) {
@@ -407,14 +435,6 @@
                     }
                 }
                 
-                ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]);
-                ctx.beginPath();
-                const finishLineCanvasX = FINISH_LINE_X * CANVAS_WIDTH;
-                ctx.moveTo(finishLineCanvasX, 0);
-                ctx.lineTo(finishLineCanvasX, CANVAS_HEIGHT);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
                 obstacles.forEach(obs => {
                     ctx.save();
                     ctx.translate(obs.x * C_SCALE, obs.y * C_SCALE);
@@ -455,16 +475,44 @@
                     }
                     ctx.restore();
                 });
+
+                // --- Draw Fog ---
+                if (config.hasFog) {
+                    const fogX = FOG_START_X * CANVAS_WIDTH;
+                    const gradient = ctx.createLinearGradient(fogX, 0, CANVAS_WIDTH, 0);
+                    gradient.addColorStop(0, 'rgba(200, 200, 220, 0.0)');
+                    gradient.addColorStop(0.3, 'rgba(200, 200, 220, 0.7)');
+                    gradient.addColorStop(1, 'rgba(200, 200, 220, 0.9)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(fogX, 0, CANVAS_WIDTH - fogX, CANVAS_HEIGHT);
+                }
+
+                // --- Draw Finish Line ---
+                ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]);
+                ctx.beginPath();
+                const finishLineCanvasX = FINISH_LINE_X * CANVAS_WIDTH;
+                ctx.moveTo(finishLineCanvasX, 0);
+                ctx.lineTo(finishLineCanvasX, CANVAS_HEIGHT);
+                ctx.stroke();
+                ctx.setLineDash([]);
             }
 
             function update(currentTime) {
                 const deltaTime = (currentTime - lastFrameTime) / 1000;
                 lastFrameTime = currentTime;
+                const config = LEVEL_CONFIGS[level - 1];
 
                 if (!isGameOver) {
+                    // Update score and time display
+                    const elapsedTime = (performance.now() - levelStartTime) / 1000;
+                    const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+                    const seconds = Math.floor(elapsedTime % 60).toString().padStart(2, '0');
+                    timeDisplay.textContent = `${minutes}:${seconds}`;
+                    scoreDisplay.textContent = score;
+
                     splashes = splashes.map(s => ({...s, radius: s.radius + SPLASH_RADIUS_RATE * deltaTime, opacity: s.opacity - SPLASH_OPACITY_RATE * deltaTime, })).filter(s => s.opacity > 0);
-                    fluid.simulate(DT, 0.0, NUM_ITERS, OVER_RELAXATION, FLOW_VELOCITY, currentTime / 1000.0);
-                    if (currentTime - lastObstacleSpawnTime > OBSTACLE_SPAWN_RATE && obstacles.length < MAX_OBSTACLES) {
+                    fluid.simulate(DT, 0.0, NUM_ITERS, OVER_RELAXATION, config.flow, currentTime / 1000.0);
+                    if (currentTime - lastObstacleSpawnTime > config.spawnRate && obstacles.length < config.maxObs) {
                         spawnObstacle();
                         lastObstacleSpawnTime = currentTime;
                     }
@@ -474,24 +522,40 @@
                             duck.stunned = Math.max(0, duck.stunned - deltaTime);
                             duck.vx *= 0.95; duck.vy *= 0.95;
                         } else if (duck.type === PlayerType.Bot && duck.splashCooldown <= 0) {
-                            const AVOID_DISTANCE = 0.25;
-                            const sortedObstacles = obstacles.filter(obs => obs.x > duck.x && (obs.x - duck.x) < AVOID_DISTANCE)
-                                .sort((a,b) => Math.hypot(a.x - duck.x, a.y - duck.y) - Math.hypot(b.x - duck.x, b.y - duck.y));
-                            const closestObstacle = sortedObstacles.length > 0 ? sortedObstacles[0] : null;
-                            let splashReason = 'none', splashX = 0, splashY = 0;
-                            if (closestObstacle && Math.hypot(closestObstacle.x - duck.x, closestObstacle.y - duck.y) < AVOID_DISTANCE) {
-                                splashReason = 'avoid'; splashX = closestObstacle.x; splashY = closestObstacle.y;
-                            } else {
-                                const leadingDuckX = Math.max(...ducks.map(d => d.x));
-                                if (duck.x < leadingDuckX - 0.02 * SIM_WIDTH) {
-                                    splashReason = 'propel'; splashX = duck.x - (0.1 + Math.random() * 0.05);
-                                    const steerDirection = Math.sign(SIM_HEIGHT / 2 - duck.y);
-                                    splashY = duck.y - steerDirection * (0.05 + Math.random() * 0.1);
+                            let actionTaken = false;
+                            // Bot AI logic
+                            const otherDucks = ducks.filter(d => d.id !== duck.id);
+                            const target = otherDucks.find(d => d.x > duck.x && (d.x - duck.x) < BOT_OFFENSIVE_RANGE && Math.abs(d.y - duck.y) < BOT_OFFENSIVE_RANGE / 2);
+                            if (target && Math.random() < BOT_OFFENSIVE_CHANCE) {
+                                createSplash(target.x + 0.1, target.y, BOT_SPLASH_STRENGTH * 0.8);
+                                duck.splashCooldown = SPLASH_COOLDOWN * (1.5 + Math.random());
+                                actionTaken = true;
+                            }
+                            if (!actionTaken) {
+                                const obstaclesInPath = obstacles.filter(obs => obs.x > duck.x && (obs.x - duck.x) < BOT_AVOID_DISTANCE).sort((a, b) => (a.x - duck.x) - (b.x - duck.x));
+                                if (obstaclesInPath.length > 0) {
+                                    const closestObstacle = obstaclesInPath[0];
+                                    const predictionTime = 0.5;
+                                    const duckFutureY = duck.y + duck.vy * predictionTime;
+                                    const obsFutureY = closestObstacle.y + closestObstacle.vy * predictionTime;
+                                    if (Math.abs(duckFutureY - obsFutureY) < (DUCK_SIZE / C_SCALE + closestObstacle.height / 2)) {
+                                        const pushDirectionY = duck.y < obsFutureY ? -1 : 1;
+                                        const splashOffsetY = -pushDirectionY * 0.15;
+                                        createSplash(duck.x - 0.1, duck.y + splashOffsetY, BOT_SPLASH_STRENGTH * 1.2);
+                                        duck.splashCooldown = SPLASH_COOLDOWN * (0.8 + Math.random() * 0.4);
+                                        actionTaken = true;
+                                    }
                                 }
                             }
-                            if (splashReason !== 'none') {
-                                duck.splashCooldown = SPLASH_COOLDOWN * (1.2 + Math.random());
-                                createSplash(splashX, splashY, (splashReason === 'avoid') ? BOT_SPLASH_STRENGTH * 1.2 : BOT_SPLASH_STRENGTH);
+                            if (!actionTaken) {
+                                const leadingDuckX = Math.max(...ducks.map(d => d.x));
+                                if (duck.x < leadingDuckX - 0.05 * SIM_WIDTH || duck.x < SIM_WIDTH * 0.2) {
+                                    const splashX = duck.x - 0.15;
+                                    const steerDirection = Math.sign(SIM_HEIGHT / 2 - duck.y);
+                                    const splashY = duck.y - steerDirection * 0.1;
+                                    createSplash(splashX, splashY, BOT_SPLASH_STRENGTH);
+                                    duck.splashCooldown = SPLASH_COOLDOWN * (1.2 + Math.random());
+                                }
                             }
                         }
                         duck.splashCooldown = Math.max(0, duck.splashCooldown - deltaTime);
@@ -538,7 +602,7 @@
             
             // --- UI & State Management ---
 
-            function updateUI() {
+            function updateUI(finalTime = 0) {
                 Object.values(screens).forEach(s => s.classList.add('hidden'));
                 switch(currentGameState) {
                     case GameState.StartScreen:
@@ -547,22 +611,33 @@
                     case GameState.LevelComplete:
                         screens.levelComplete.classList.remove('hidden');
                         levelCompleteTitle.textContent = `Level ${level} Complete!`;
+                        const minutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
+                        const seconds = (finalTime % 60).toFixed(2).padStart(5, '0');
+                        levelCompleteStats.textContent = `Time: ${minutes}:${seconds} | Score: ${score}`;
+
                         const nextLevel = level + 1;
                         let desc = "";
-                        if (nextLevel === 2) desc = "Great job! Level 2 has garbage, don't touch it!";
-                        else if (nextLevel === 3) desc = "Watch out! Level 3 has both logs and garbage!";
+                        if (nextLevel === 2) desc = "Next: Polluted Pass. Garbage will send you back to the start!";
+                        else if (nextLevel === 3) desc = "Next: Tricky Turn. A mix of logs and garbage awaits.";
+                        else if (nextLevel === 4) desc = "Next: The Rapids! The current is much faster here!";
+                        else if (nextLevel === 5) desc = "Next: The Foggy Finish! Navigate through thick fog to win!";
                         levelCompleteDesc.textContent = desc;
                         nextLevelButton.textContent = `Start Level ${nextLevel}`;
                         break;
                     case GameState.GameOver:
                         screens.gameOver.classList.remove('hidden');
+                        const finalMinutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
+                        const finalSeconds = (finalTime % 60).toFixed(2).padStart(5, '0');
+                        gameOverStats.textContent = `Final Time: ${finalMinutes}:${finalSeconds} | Final Score: ${score}`;
+
                         gameOverText.textContent = winner === 'You' && level === MAX_LEVEL
                             ? `🎉 You beat all the levels! You're the champion! 🎉`
-                            : winner?.startsWith('Bot') ? `${winner} won!` : `${winner}`;
+                            : winner?.startsWith('Bot') ? `${winner} won the race!` : `You won Level ${level}!`;
                         break;
                     case GameState.Playing:
                         screens.canvasContainer.classList.remove('hidden');
-                        levelDisplay.textContent = `Level ${level}`;
+                        const config = LEVEL_CONFIGS[level - 1];
+                        levelDisplay.textContent = `Level ${config.level}: ${config.name}`;
                         break;
                 }
             }
@@ -570,12 +645,27 @@
             function handleGameEnd(winnerName) {
                 cancelAnimationFrame(animationFrameId);
                 winner = winnerName;
+                const finalTimeInMs = (performance.now() - levelStartTime);
+                
+                if (winnerName === 'You') {
+                    const completionTimeInMs = Math.round(finalTimeInMs);
+                    console.log(`Player won! Sending time: ${completionTimeInMs}ms`);
+
+                    // Send message to the parent window (the main React app)
+                    window.parent.postMessage({
+                        type: 'gameTime',
+                        completion_time_ms: completionTimeInMs
+                    }, '*'); // In production, replace '*' with your app's origin for security
+                }
+
+                const finalTimeInSeconds = finalTimeInMs / 1000;
+                
                 if (winnerName === 'You' && level < MAX_LEVEL) {
                     currentGameState = GameState.LevelComplete;
                 } else {
                     currentGameState = GameState.GameOver;
                 }
-                updateUI();
+                updateUI(finalTimeInSeconds);
             }
 
             function startGameFlow() {
@@ -608,6 +698,10 @@
                 
                 const clickedObstacleIdx = obstacles.findIndex(obs => Math.hypot(simX - obs.x, simY - obs.y) < obs.width / 2);
                 if (clickedObstacleIdx !== -1) {
+                    const clickedObstacle = obstacles[clickedObstacleIdx];
+                    if (clickedObstacle.type === ObstacleType.Garbage) {
+                        score += SCORE_PER_GARBAGE;
+                    }
                     obstacles.splice(clickedObstacleIdx, 1);
                     return;
                 }
