@@ -142,11 +142,11 @@ const translations = {
 };
 
 const GAMES = {
-  1: { url: './public/river-guardian-game/index.html', name: 'River Guardian' },
-  2: { url: './public/reynolds-experiment.html', name: 'Reynolds Experiment' },
-  3: { url: './public/falling-drop/index.html', name: 'Falling Drop' },
-  4: { url: './public/hex-connect/index.html', name: 'Hex Connect' },
-  5: { url: './public/duck-race-game/index.html', name: 'Duck Race Game' }
+  1: { url: './river-guardian-game/index.html', name: 'River Guardian' },
+  2: { url: './reynolds-experiment.html', name: 'Reynolds Experiment' },
+  3: { url: './falling-drop/index.html', name: 'Falling Drop' },
+  4: { url: './hex-connect/index.html', name: 'Hex Connect' },
+  5: { url: './duck-race-game/index.html', name: 'Duck Race Game' }
 };
 
 const SkyBlue = '#00A9E0';
