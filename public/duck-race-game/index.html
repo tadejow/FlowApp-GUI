@@ -21,7 +21,8 @@
     </style>
 </head>
 <body class="bg-gray-900">
-    <main class="relative w-screen h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('https://picsum.photos/1920/1080?blur=5')">
+    <!-- ZMIANA: Tło jest teraz związane z kaczkami -->
+    <main class="relative w-screen h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1598555769741-a120a1691a84?auto=format&fit=crop&w=1920&q=80')">
         <div class="absolute inset-0 bg-blue-900 bg-opacity-40 backdrop-blur-sm"></div>
 
         <!-- Start Screen -->
@@ -39,6 +40,17 @@
             <p id="level-complete-stats" class="text-xl text-cyan-200 mb-6"></p>
             <p id="level-complete-desc" class="text-2xl text-white mb-6"></p>
             <button id="next-level-button" class="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
+            </button>
+        </div>
+        
+        <!-- NOWOŚĆ: Ekran końcowy po wygranej -->
+        <div id="final-win-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
+            <h2 class="text-5xl font-bold text-yellow-300 mb-4">Wyścig Ukończony!</h2>
+            <p class="text-2xl text-white mb-2">Gratulacje, pokonałeś wszystkie 5 poziomów!</p>
+            <p class="text-xl text-cyan-200 mb-8">Twój końcowy czas:</p>
+            <p id="final-time-display" class="text-4xl font-mono text-yellow-300 mb-8"></p>
+            <button id="close-and-save-button" class="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg hover:bg-blue-600 transition-transform transform hover:scale-105">
+                Zapisz wynik i wróć do aplikacji
             </button>
         </div>
 
@@ -76,7 +88,7 @@
 
     <script type="module">
         // --- Types (Enums) ---
-        const GameState = { StartScreen: 0, Playing: 1, GameOver: 2, LevelComplete: 3 };
+        const GameState = { StartScreen: 0, Playing: 1, GameOver: 2, LevelComplete: 3, FinalWin: 4 }; // Dodano nowy stan
         const PlayerType = { Human: 0, Bot: 1 };
         const ObstacleType = { Log: 0, Garbage: 1 };
 
@@ -276,6 +288,8 @@
             let splashStrength = 1.0;
             let score = 0;
             let levelStartTime = 0;
+            let totalTimeMs = 0; // Zmienna do przechowywania całkowitego czasu
+            let finalCompletionTimeMs = 0; // Przechowuje końcowy czas do wysłania
 
             // Game Objects
             let fluid = null;
@@ -293,6 +307,7 @@
                 levelComplete: document.getElementById('level-complete-screen'),
                 gameOver: document.getElementById('game-over-screen'),
                 canvasContainer: document.getElementById('game-canvas-container'),
+                finalWin: document.getElementById('final-win-screen'), // Nowy ekran
             };
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
@@ -312,11 +327,21 @@
             const gameOverStats = document.getElementById('game-over-stats');
             const scoreDisplay = document.getElementById('score-display');
             const timeDisplay = document.getElementById('time-display');
-            
+            const finalTimeDisplay = document.getElementById('final-time-display'); // Nowy element UI
+            const closeAndSaveButton = document.getElementById('close-and-save-button'); // Nowy przycisk
+
             // Setup
             canvas.width = CANVAS_WIDTH;
             canvas.height = CANVAS_HEIGHT;
             gameUi.style.width = `${CANVAS_WIDTH}px`;
+
+            function formatTime(ms) {
+                const totalSeconds = ms / 1000;
+                const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+                const milliseconds = (ms % 1000).toString().padStart(3, '0');
+                return `${minutes}:${seconds}.${milliseconds}`;
+            }
 
             // --- Game Logic Functions ---
             
@@ -503,11 +528,8 @@
                 const config = LEVEL_CONFIGS[level - 1];
 
                 if (!isGameOver) {
-                    // Update score and time display
-                    const elapsedTime = (performance.now() - levelStartTime) / 1000;
-                    const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
-                    const seconds = Math.floor(elapsedTime % 60).toString().padStart(2, '0');
-                    timeDisplay.textContent = `${minutes}:${seconds}`;
+                    const elapsedTimeMs = performance.now() - levelStartTime;
+                    timeDisplay.textContent = formatTime(elapsedTimeMs).slice(0, -4); // Pokaż MM:SS
                     scoreDisplay.textContent = score;
 
                     splashes = splashes.map(s => ({...s, radius: s.radius + SPLASH_RADIUS_RATE * deltaTime, opacity: s.opacity - SPLASH_OPACITY_RATE * deltaTime, })).filter(s => s.opacity > 0);
@@ -602,7 +624,7 @@
             
             // --- UI & State Management ---
 
-            function updateUI(finalTime = 0) {
+            function updateUI(finalTimeInSeconds = 0) {
                 Object.values(screens).forEach(s => s.classList.add('hidden'));
                 switch(currentGameState) {
                     case GameState.StartScreen:
@@ -611,10 +633,7 @@
                     case GameState.LevelComplete:
                         screens.levelComplete.classList.remove('hidden');
                         levelCompleteTitle.textContent = `Level ${level} Complete!`;
-                        const minutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
-                        const seconds = (finalTime % 60).toFixed(2).padStart(5, '0');
-                        levelCompleteStats.textContent = `Time: ${minutes}:${seconds} | Score: ${score}`;
-
+                        levelCompleteStats.textContent = `Time: ${formatTime(finalTimeInSeconds * 1000)} | Score: ${score}`;
                         const nextLevel = level + 1;
                         let desc = "";
                         if (nextLevel === 2) desc = "Next: Polluted Pass. Garbage will send you back to the start!";
@@ -626,13 +645,11 @@
                         break;
                     case GameState.GameOver:
                         screens.gameOver.classList.remove('hidden');
-                        const finalMinutes = Math.floor(finalTime / 60).toString().padStart(2, '0');
-                        const finalSeconds = (finalTime % 60).toFixed(2).padStart(5, '0');
-                        gameOverStats.textContent = `Final Time: ${finalMinutes}:${finalSeconds} | Final Score: ${score}`;
-
-                        gameOverText.textContent = winner === 'You' && level === MAX_LEVEL
-                            ? `🎉 You beat all the levels! You're the champion! 🎉`
-                            : winner?.startsWith('Bot') ? `${winner} won the race!` : `You won Level ${level}!`;
+                        gameOverStats.textContent = `Final Time: ${formatTime(finalTimeInSeconds * 1000)} | Final Score: ${score}`;
+                        gameOverText.textContent = winner?.startsWith('Bot') ? `${winner} won the race!` : `You lost the race!`;
+                        break;
+                    case GameState.FinalWin:
+                        screens.finalWin.classList.remove('hidden');
                         break;
                     case GameState.Playing:
                         screens.canvasContainer.classList.remove('hidden');
@@ -642,34 +659,25 @@
                 }
             }
             
-            // --- POCZĄTEK ZMIANY ---
             function handleGameEnd(winnerName) {
                 cancelAnimationFrame(animationFrameId);
                 winner = winnerName;
-                const finalTimeInMs = (performance.now() - levelStartTime);
-                
-                // Wysyłaj wiadomość TYLKO jeśli gracz wygrał OSTATNI poziom
-                if (winnerName === 'You' && level === MAX_LEVEL) {
-                    const completionTimeInMs = Math.round(finalTimeInMs);
-                    console.log(`Player won FINAL level! Sending time: ${completionTimeInMs}ms`);
-
-                    // Wyślij wiadomość do nadrzędnej aplikacji
-                    window.parent.postMessage({
-                        type: 'gameTime',
-                        completion_time_ms: completionTimeInMs
-                    }, '*');
-                }
-
-                const finalTimeInSeconds = finalTimeInMs / 1000;
+                const levelTime = performance.now() - levelStartTime;
+                totalTimeMs += levelTime;
                 
                 if (winnerName === 'You' && level < MAX_LEVEL) {
                     currentGameState = GameState.LevelComplete;
+                    updateUI(levelTime / 1000);
+                } else if (winnerName === 'You' && level === MAX_LEVEL) {
+                    currentGameState = GameState.FinalWin;
+                    finalCompletionTimeMs = Math.round(totalTimeMs);
+                    finalTimeDisplay.textContent = formatTime(finalCompletionTimeMs);
+                    updateUI();
                 } else {
                     currentGameState = GameState.GameOver;
+                    updateUI(totalTimeMs / 1000);
                 }
-                updateUI(finalTimeInSeconds);
             }
-            // --- KONIEC ZMIANY ---
 
             function startGameFlow() {
                 currentGameState = GameState.Playing;
@@ -679,8 +687,12 @@
                 animationFrameId = requestAnimationFrame(update);
             }
             
-            const startGame = () => { level = 1; startGameFlow(); };
-            const restartGame = () => { level = 1; startGameFlow(); };
+            function startGame() { 
+                level = 1; 
+                totalTimeMs = 0; // Resetuj całkowity czas na starcie
+                startGameFlow(); 
+            };
+            const restartGame = startGame;
             const startNextLevel = () => { level++; startGameFlow(); };
 
             // --- Event Listeners ---
@@ -690,6 +702,13 @@
             splashStrengthSlider.addEventListener('input', (e) => {
                 splashStrength = parseFloat(e.target.value);
                 splashStrengthValue.textContent = splashStrength.toFixed(1);
+            });
+            closeAndSaveButton.addEventListener('click', () => {
+                console.log(`Sending final time: ${finalCompletionTimeMs}ms`);
+                window.parent.postMessage({
+                    type: 'gameTime',
+                    completion_time_ms: finalCompletionTimeMs
+                }, '*');
             });
             canvas.addEventListener('click', (e) => {
                 if (currentGameState !== GameState.Playing) return;
