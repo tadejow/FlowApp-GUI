@@ -1,0 +1,23 @@
+
+{
+  "name": "FlowApp - Mandau River Experience",
+  "short_name": "FlowApp",
+  "description": "An interactive web application for an educational journey along the Mandau river, displaying simulation results (GIFs) based on user choices across 5 stations.",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#F4F7F9",
+  "theme_color": "#00A9E0",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/google/generative-ai-docs/main/site/en/gemma/images/gemma_logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/google/generative-ai-docs/main/site/en/gemma/images/gemma_logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

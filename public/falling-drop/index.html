@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Spadająca Kropla</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #0c141f;
+        touch-action: none; /* Disables pinch-zoom and other gestures */
+      }
+      canvas {
+        display: block;
+      }
+      #orientation-lock-overlay {
+        display: none; /* Hidden by default */
+        position: fixed;
+        inset: 0;
+        background-color: #0c141f;
+        color: white;
+        z-index: 9999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      @media (min-width: 640px) and (orientation: landscape) {
+        #root {
+          display: none;
+        }
+        #orientation-lock-overlay {
+          display: flex;
+        }
+      }
+    </style>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-c3y0qdQi.js"></script>
+</head>
+  <body>
+    <div id="root"></div>
+    <div id="orientation-lock-overlay">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-screen-share-off"><path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m22 3-5 5"/><path d="m17 3 5 5"/></svg>
+      <h2 id="orientation-title" style="margin-top: 20px; font-size: 1.5rem;">Proszę obrócić urządzenie</h2>
+      <p id="orientation-subtitle" style="margin-top: 10px; font-size: 1rem;">Ta gra jest zoptymalizowana pod tryb pionowy.</p>
+    </div>
+    <script>
+      // This script runs before React to translate the orientation lock message.
+      document.addEventListener('DOMContentLoaded', function () {
+        const translations = {
+          cs: {
+            title: 'Prosím, otočte zařízení',
+            subtitle: 'Tato hra je optimalizována pro režim na výšku.',
+          },
+          de: {
+            title: 'Bitte drehen Sie Ihr Gerät',
+            subtitle: 'Dieses Spiel ist für den Hochformatmodus optimiert.',
+          },
+          en: {
+            title: 'Please rotate your device',
+            subtitle: 'This game is optimized for portrait mode.',
+          },
+          pl: {
+            title: 'Proszę obrócić urządzenie',
+            subtitle: 'Ta gra jest zoptymalizowana pod tryb pionowy.',
+          }
+        };
+
+        const userLang = (navigator.language || navigator.userLanguage || 'en').substring(0, 2);
+        const langKey = translations[userLang] ? userLang : 'en';
+        const content = translations[langKey];
+
+        const titleEl = document.getElementById('orientation-title');
+        const subtitleEl = document.getElementById('orientation-subtitle');
+
+        if (titleEl && subtitleEl && content) {
+          titleEl.textContent = content.title;
+          subtitleEl.textContent = content.subtitle;
+        }
+      });
+    </script>
+  </body>
+</html>
