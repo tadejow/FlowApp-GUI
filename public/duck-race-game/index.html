@@ -642,20 +642,22 @@
                 }
             }
             
+            // --- POCZĄTEK ZMIANY ---
             function handleGameEnd(winnerName) {
                 cancelAnimationFrame(animationFrameId);
                 winner = winnerName;
                 const finalTimeInMs = (performance.now() - levelStartTime);
                 
-                if (winnerName === 'You') {
+                // Wysyłaj wiadomość TYLKO jeśli gracz wygrał OSTATNI poziom
+                if (winnerName === 'You' && level === MAX_LEVEL) {
                     const completionTimeInMs = Math.round(finalTimeInMs);
-                    console.log(`Player won! Sending time: ${completionTimeInMs}ms`);
+                    console.log(`Player won FINAL level! Sending time: ${completionTimeInMs}ms`);
 
-                    // Send message to the parent window (the main React app)
+                    // Wyślij wiadomość do nadrzędnej aplikacji
                     window.parent.postMessage({
                         type: 'gameTime',
                         completion_time_ms: completionTimeInMs
-                    }, '*'); // In production, replace '*' with your app's origin for security
+                    }, '*');
                 }
 
                 const finalTimeInSeconds = finalTimeInMs / 1000;
@@ -667,6 +669,7 @@
                 }
                 updateUI(finalTimeInSeconds);
             }
+            // --- KONIEC ZMIANY ---
 
             function startGameFlow() {
                 currentGameState = GameState.Playing;
