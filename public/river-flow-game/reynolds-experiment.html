@@ -3,37 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Reynolds Experiment</title>
+    <title>Zittau's Reynolds Challenge</title>
     <style>
-        body { margin: 0; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
-        .container { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
-        canvas { background-color: #000; max-width: 100%; max-height: 100%; object-fit: contain; }
-        #info { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 8px; border-radius: 5px; font-size: 14px; pointer-events: none; line-height: 1.5; }
+        :root {
+            --cyan-300: #67e8f9;
+            --cyan-400: #22d3ee;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --yellow-400: #facc15;
+            --green-400: #4ade80;
+            --red-400: #f87171;
+            --grass-dark: #3a7d44;
+            --grass-light: #4a9d56;
+            --concrete-light: #aab2b8;
+            --concrete-dark: #848b91;
+            --obstacle-color: #6b4f3a; /* Brown for obstacles */
+        }
+        body { 
+            margin: 0; 
+            background-color: var(--gray-900); 
+            color: white;
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 64rem;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .simulation-frame {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1024px;
+            aspect-ratio: 16 / 10;
+            max-height: 80vh;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: var(--grass-dark);
+            padding: 1rem;
+            box-sizing: border-box;
+            border: 2px solid var(--gray-700);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .grass {
+            background-color: var(--grass-dark);
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 3px, var(--grass-light) 3px, var(--grass-light) 6px),
+                repeating-linear-gradient(-45deg, transparent, transparent 3px, var(--grass-light) 3px, var(--grass-light) 6px);
+            background-size: 10px 10px;
+        }
+        .grass-top { height: 5%; }
+        .grass-bottom { height: 5%; }
+        .middle-section {
+            display: flex;
+            flex-grow: 1;
+            height: 90%;
+        }
+        .canal {
+            width: 7%;
+            background-color: var(--concrete-light);
+            border-right: 4px solid var(--concrete-dark);
+            box-shadow: inset 5px 0 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .canal::before, .canal::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: var(--concrete-dark);
+            height: 25%;
+        }
+        .canal::before { top: 0; }
+        .canal::after { bottom: 0; }
+        .canvas-container { 
+            position: relative;
+            flex-grow: 1;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        canvas { 
+            display: block;
+            width: 100%; 
+            height: 100%;
+            object-fit: contain; 
+        }
+        #info { 
+            position: absolute; 
+            top: 0.75rem; 
+            left: 0.75rem; 
+            background: rgba(17, 24, 39, 0.6); 
+            color: white; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--gray-700);
+            font-size: 0.875rem;
+            font-family: monospace;
+            pointer-events: none;
+        }
+        #info p { margin: 0 0 0.25rem 0; }
+        #info p:last-child { margin-bottom: 0; }
+        #info .flow-state-stable { color: var(--green-400); }
+        #info .flow-state-unstable { color: var(--yellow-400); }
+        #info .flow-state-chaotic { color: var(--red-400); }
+        #info .font-semibold { font-weight: 600; }
+        .controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background-color: var(--gray-800);
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-700);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .btn {
+            background-color: var(--gray-700);
+            border: 1px solid var(--gray-600);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn:hover { background-color: var(--gray-600); }
+        .btn:active { transform: scale(0.95); }
+        .btn.active {
+             background-color: var(--cyan-400);
+             color: var(--gray-900);
+             border-color: var(--cyan-300);
+        }
+        .btn:disabled {
+            background-color: var(--gray-800);
+            color: var(--gray-600);
+            cursor: not-allowed;
+            border-color: var(--gray-700);
+        }
+
+        /* --- Modal and UI Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(17, 24, 39, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--gray-800);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-700);
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .modal-content h2, .modal-content h3 {
+            margin-top: 0;
+            color: var(--cyan-300);
+        }
+        .modal-content p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .modal-content .btn {
+            margin-top: 1rem;
+            background-color: var(--cyan-400);
+            color: var(--gray-900);
+            border-color: var(--cyan-300);
+        }
+        #timer {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--yellow-400);
+            background: rgba(17, 24, 39, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <canvas id="fluid-canvas"></canvas>
-        <div id="info"></div>
+    <div class="app-container">
+        <main class="simulation-frame">
+            <div class="grass grass-top"></div>
+            <div class="middle-section">
+                <div id="canal-div" class="canal"></div>
+                <div class="canvas-container">
+                    <canvas id="fluid-canvas"></canvas>
+                    <div id="info"></div>
+                    <div id="timer">10</div>
+                </div>
+                <div id="outflow-div" class="outflow-area" style="width: 3%; background-color: white;"></div>
+            </div>
+            <div class="grass grass-bottom"></div>
+        </main>
+        
+        <footer id="main-controls" class="controls-container">
+            <button id="decrease-flow" class="btn">Decrease Flow</button>
+            <button id="increase-flow" class="btn">Increase Flow</button>
+            <button id="pause-sim" class="btn">Pause</button>
+            <button id="toggle-pressure" class="btn">Show Pressure</button>
+            <button id="submit-velocity-btn" class="btn">Submit Velocity</button>
+        </footer>
+
+        <div id="build-controls" class="controls-container" style="display: none;">
+            <span>Shape:</span>
+            <button id="shape-square-btn" class="btn active">Square</button>
+            <button id="shape-circle-btn" class="btn">Circle</button>
+            <button id="shape-triangle-btn" class="btn">Triangle</button>
+            <button id="clear-obstacles-btn" class="btn">Clear Obstacles</button>
+            <button id="flow-btn" class="btn">Go with the Flow!</button>
+        </div>
     </div>
+    
+    <!-- MODALS -->
+    <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2>Welcome to the Reynolds Challenge!</h2><p>Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p>You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn">Start Experiment</button></div></div>
+    <div id="info-popup-velocity" class="modal-overlay"><div class="modal-content"><h3>Observe the Turbulence</h3><p>Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.</p><button id="close-velocity-popup-btn" class="btn">Next Lesson</button></div></div>
+    <div id="pressure-intro-modal" class="modal-overlay"><div class="modal-content"><h2>The Role of Pressure</h2><p>Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.</p><p>Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style="color: var(--yellow-400); font-size: 1.2rem;"><span id="target-velocity-display"></span></strong> and press 'Submit'.</p><button id="start-pressure-challenge-btn" class="btn">Start Pressure Challenge</button></div></div>
+    <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3>Observing Pressure</h3><p>Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!</p><p>Well done! You will now have 5 seconds to observe before the final challenge.</p><button id="close-pressure-popup-btn" class="btn">Final Challenge</button></div></div>
+    <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.</p><button id="try-again-btn" class="btn">Try Again</button></div></div>
+    <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p>Your Velocity: <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | Target: <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn">Try Again</button></div></div>
+    <div id="obstacle-intro-modal" class="modal-overlay"><div class="modal-content"><h2>Final Challenge: Build a River Bank</h2><p>Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.</p><p>The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!</p><button id="start-building-btn" class="btn">Start Building</button></div></div>
+    <div id="fail-modal-obstacle" class="modal-overlay"><div class="modal-content"><h2>Leaky Riverbank!</h2><p>The water reached a boundary other than the outlet. Refine your design to better control the flow.</p><button id="try-again-obstacle-btn" class="btn">Try Again</button></div></div>
+    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2>Congratulations!</h2><p>You have successfully mastered fluid dynamics and completed all challenges!</p><div><p>Total Time: <strong style="color: var(--cyan-300);" id="total-time-display"></strong></p><p>Outlet to inlet velocity ratio: <strong style="color: var(--cyan-300);" id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn">Play Again</button></div></div>
+
+
     <script>
         // --- Simulation Constants ---
         const U_FIELD = 0, V_FIELD = 1, S_FIELD = 2;
 
-        // --- Canvas Setup ---
+        // --- DOM Elements ---
         const canvas = document.getElementById('fluid-canvas');
         const infoDiv = document.getElementById('info');
         const ctx = canvas.getContext('2d');
+        const container = document.querySelector('.canvas-container');
+        const decreaseBtn = document.getElementById('decrease-flow');
+        const increaseBtn = document.getElementById('increase-flow');
+        const pauseBtn = document.getElementById('pause-sim');
+        const pressureBtn = document.getElementById('toggle-pressure');
+        const submitVelocityBtn = document.getElementById('submit-velocity-btn');
+        const timerDiv = document.getElementById('timer');
+        const canalDiv = document.getElementById('canal-div');
+        const outflowDiv = document.getElementById('outflow-div');
+        const mainControls = document.getElementById('main-controls');
+        const buildControls = document.getElementById('build-controls');
+        // Modals
+        const modals = {
+            intro: document.getElementById('intro-modal'),
+            infoVelocity: document.getElementById('info-popup-velocity'),
+            pressureIntro: document.getElementById('pressure-intro-modal'),
+            infoPressure: document.getElementById('info-popup-pressure'),
+            failVelocity: document.getElementById('fail-modal'),
+            failPressure: document.getElementById('fail-modal-pressure'),
+            obstacleIntro: document.getElementById('obstacle-intro-modal'),
+            failObstacle: document.getElementById('fail-modal-obstacle'),
+            win: document.getElementById('win-modal')
+        };
+        // Modal Buttons
+        document.getElementById('start-btn').addEventListener('click', () => { game.state = 'CHALLENGE_VELOCITY'; updateUIForState(); });
+        document.getElementById('close-velocity-popup-btn').addEventListener('click', handleCloseVelocityPopup);
+        document.getElementById('start-pressure-challenge-btn').addEventListener('click', handleStartPressureChallenge);
+        document.getElementById('close-pressure-popup-btn').addEventListener('click', handleClosePressurePopup);
+        document.getElementById('start-building-btn').addEventListener('click', () => { game.state = 'BUILD_OBSTACLE'; setupScene(3); updateUIForState(); });
+        document.getElementById('try-again-btn').addEventListener('click', resetGame);
+        document.getElementById('try-again-pressure-btn').addEventListener('click', resetGame);
+        document.getElementById('try-again-obstacle-btn').addEventListener('click', () => { 
+            if (game.stage3TimerInterval) {
+                clearInterval(game.stage3TimerInterval);
+                game.stage3TimerInterval = null;
+            }
+            game.state = 'BUILD_OBSTACLE'; 
+            setupScene(3); 
+            updateUIForState(); 
+        });
+        document.getElementById('play-again-btn').addEventListener('click', resetGame);
+        // Build Controls
+        const shapeBtns = {
+            square: document.getElementById('shape-square-btn'),
+            circle: document.getElementById('shape-circle-btn'),
+            triangle: document.getElementById('shape-triangle-btn'),
+        };
+        shapeBtns.square.addEventListener('click', () => setShape('square'));
+        shapeBtns.circle.addEventListener('click', () => setShape('circle'));
+        shapeBtns.triangle.addEventListener('click', () => setShape('triangle'));
+        document.getElementById('clear-obstacles-btn').addEventListener('click', () => setupScene(3));
+        document.getElementById('flow-btn').addEventListener('click', () => {
+            scene.flowVelocity = 100.0; // Set a fixed velocity for the challenge
+            game.state = 'SIMULATE_OBSTACLE';
+            startStage3Timer();
+            updateUIForState();
+        });
 
-        let canvasWidth = Math.min(window.innerWidth, 800);
-        let canvasHeight = Math.min(window.innerHeight, 1200);
-
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        const simHeight = 1.1;
-        const cScale = canvasHeight / simHeight;
-        const simWidth = canvasWidth / cScale;
 
         // --- Fluid Simulation Class ---
         class Fluid {
@@ -43,244 +343,329 @@
                 this.numX = numX + 2;
                 this.numY = numY + 2;
                 const size = this.numX * this.numY;
-
-                this.u = new Float32Array(size);
-                this.v = new Float32Array(size);
-                this.p = new Float32Array(size);
-                this.s = new Float32Array(size);
+                this.u = new Float32Array(size); this.v = new Float32Array(size);
+                this.p = new Float32Array(size); this.s = new Float32Array(size);
                 this.m = new Float32Array(size).fill(1.0);
-
-                const pipeH = 0.1 * this.numY;
-                this.inletMinJ = Math.floor(0.5 * this.numY - 0.5 * pipeH);
-                this.inletMaxJ = Math.floor(0.5 * this.numY + 0.5 * pipeH);
+                this.inletMinJ = 0; this.inletMaxJ = 0;
+                this.outletMinI = 0; this.outletMaxI = 0;
             }
-
-            _idx(i, j) {
-                return i * this.numY + j;
-            }
-
-            simulate(dt, gravity, numIters, overRelaxation, flowVelocity) {
-                for (let j = 1; j < this.numY - 1; j++) {
-                    this.u[this._idx(1, j)] = 0.0;
-                }
-
-                const inletCenterJ = (this.inletMinJ + this.inletMaxJ) / 2.0;
-                const inletHalfWidth = (this.inletMaxJ - this.inletMinJ) / 2.0;
-
-                if (inletHalfWidth > 0) {
+            _idx(i, j) { return i * this.numY + j; }
+            simulate(dt, numIters, overRelaxation, flowVelocity) {
+                if (this.inletMaxJ > this.inletMinJ) {
+                    const inletCenterJ = (this.inletMinJ + this.inletMaxJ) / 2.0;
+                    const inletHalfWidth = (this.inletMaxJ - this.inletMinJ) / 2.0;
                     for (let j = this.inletMinJ; j < this.inletMaxJ; j++) {
                         const relativePos = (j - inletCenterJ) / inletHalfWidth;
                         const speed = flowVelocity * (1 - relativePos * relativePos);
                         this.u[this._idx(1, j)] = Math.max(0.0, speed);
                     }
+                    for (let j = this.inletMinJ; j < this.inletMaxJ; j++) { this.m[this._idx(1, j)] = 0.0; }
                 }
-
-                for (let j = this.inletMinJ; j < this.inletMaxJ; j++) {
-                    this.m[this._idx(1, j)] = 0.0;
+                if (this.outletMaxI > this.outletMinI) {
+                   for (let i = this.outletMinI; i < this.outletMaxI; i++) { this.p[this._idx(i, this.numY - 2)] = 0.0; }
                 }
-
-                integrate(this, gravity, dt);
                 this.p.fill(0.0);
                 solveIncompressibility(this, numIters, overRelaxation, dt);
-                extrapolate(this);
-                advectVel(this, dt);
-                advectSmoke(this, dt);
+                extrapolate(this); advectVel(this, dt); advectSmoke(this, dt);
             }
         }
 
-        function integrate(f, gravity, dt) {
-            for (let i = 1; i < f.numX; i++) {
-                for (let j = 1; j < f.numY - 1; j++) {
-                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) {
-                        f.v[f._idx(i, j)] += gravity * dt;
-                    }
-                }
-            }
-        }
+        // --- Physics Functions (unchanged) ---
+        function solveIncompressibility(f, numIters, overRelaxation, dt) { const cp = f.density * f.h / dt; for (let iter = 0; iter < numIters; iter++) { for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { if (f.s[f._idx(i, j)] === 0.0) continue; let sSum = f.s[f._idx(i - 1, j)] + f.s[f._idx(i + 1, j)] + f.s[f._idx(i, j - 1)] + f.s[f._idx(i, j + 1)]; if (sSum === 0.0) continue; let div = f.u[f._idx(i + 1, j)] - f.u[f._idx(i, j)] + f.v[f._idx(i, j + 1)] - f.v[f._idx(i, j)]; let p = -div / sSum * overRelaxation; f.p[f._idx(i, j)] += cp * p; f.u[f._idx(i, j)] -= f.s[f._idx(i - 1, j)] * p; f.u[f._idx(i + 1, j)] += f.s[f._idx(i + 1, j)] * p; f.v[f._idx(i, j)] -= f.s[f._idx(i, j - 1)] * p; f.v[f._idx(i, j + 1)] += f.s[f._idx(i, j + 1)] * p; } } } }
+        function extrapolate(f) { for (let i = 0; i < f.numX; i++) { f.u[f._idx(i, 0)] = f.u[f._idx(i, 1)]; f.u[f._idx(i, f.numY - 1)] = f.u[f._idx(i, f.numY - 2)]; } for (let j = 0; j < f.numY; j++) { f.v[f._idx(0, j)] = f.v[f._idx(1, j)]; f.v[f._idx(f.numX - 1, j)] = f.v[f._idx(f.numX - 2, j)]; } }
+        function sampleField(f, x, y, fieldType, fieldData) { const h1 = 1.0 / f.h; const h2 = 0.5 * f.h; x = Math.max(Math.min(x, f.numX * f.h), f.h); y = Math.max(Math.min(y, f.numY * f.h), f.h); let dx = 0.0, dy = 0.0; if (fieldType === U_FIELD) dy = h2; else if (fieldType === V_FIELD) dx = h2; else if (fieldType === S_FIELD) { dx = h2; dy = h2; } const x0 = Math.min(Math.floor((x - dx) * h1), f.numX - 2); const tx = ((x - dx) - x0 * f.h) * h1; const x1 = Math.min(x0 + 1, f.numX - 2); const y0 = Math.min(Math.floor((y - dy) * h1), f.numY - 2); const ty = ((y - dy) - y0 * f.h) * h1; const y1 = Math.min(y0 + 1, f.numY - 2); const sx = 1.0 - tx; const sy = 1.0 - ty; return sx * sy * fieldData[f._idx(x0, y0)] + tx * sy * fieldData[f._idx(x1, y0)] + tx * ty * fieldData[f._idx(x1, y1)] + sx * ty * fieldData[f._idx(x0, y1)]; }
+        function advectVel(f, dt) { const newU = new Float32Array(f.u); const newV = new Float32Array(f.v); const h2 = 0.5 * f.h; for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i - 1, j)] !== 0.0) { let px = i * f.h; let py = j * f.h + h2; const u = f.u[f._idx(i, j)]; const avgV = 0.25 * (f.v[f._idx(i - 1, j)] + f.v[f._idx(i, j)] + f.v[f._idx(i - 1, j + 1)] + f.v[f._idx(i, j + 1)]); px -= dt * u; py -= dt * avgV; newU[f._idx(i, j)] = sampleField(f, px, py, U_FIELD, f.u); } if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) { let px = i * f.h + h2; let py = j * f.h; const avgU = 0.25 * (f.u[f._idx(i, j - 1)] + f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j - 1)] + f.u[f._idx(i + 1, j)]); const v = f.v[f._idx(i, j)]; px -= dt * avgU; py -= dt * v; newV[f._idx(i, j)] = sampleField(f, px, py, V_FIELD, f.v); } } } f.u.set(newU); f.v.set(newV); }
+        function advectSmoke(f, dt) { const newM = new Float32Array(f.m); const h2 = 0.5 * f.h; for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { if (f.s[f._idx(i, j)] !== 0.0) { const avgU = (f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j)]) * 0.5; const avgV = (f.v[f._idx(i, j)] + f.v[f._idx(i, j + 1)]) * 0.5; let x = i * f.h + h2 - dt * avgU; let y = j * f.h + h2 - dt * avgV; newM[f._idx(i, j)] = sampleField(f, x, y, S_FIELD, f.m); } } } f.m.set(newM); }
 
-        function solveIncompressibility(f, numIters, overRelaxation, dt) {
-            const cp = f.density * f.h / dt;
-            for (let iter = 0; iter < numIters; iter++) {
-                for (let i = 1; i < f.numX - 1; i++) {
-                    for (let j = 1; j < f.numY - 1; j++) {
-                        if (f.s[f._idx(i, j)] === 0.0) continue;
-
-                        let sSum = f.s[f._idx(i - 1, j)] + f.s[f._idx(i + 1, j)] + f.s[f._idx(i, j - 1)] + f.s[f._idx(i, j + 1)];
-                        if (sSum === 0.0) continue;
-
-                        let div = f.u[f._idx(i + 1, j)] - f.u[f._idx(i, j)] +
-                                  f.v[f._idx(i, j + 1)] - f.v[f._idx(i, j)];
-
-                        let p = -div / sSum * overRelaxation;
-                        f.p[f._idx(i, j)] += cp * p;
-                        f.u[f._idx(i, j)] -= f.s[f._idx(i - 1, j)] * p;
-                        f.u[f._idx(i + 1, j)] += f.s[f._idx(i + 1, j)] * p;
-                        f.v[f._idx(i, j)] -= f.s[f._idx(i, j - 1)] * p;
-                        f.v[f._idx(i, j + 1)] += f.s[f._idx(i, j + 1)] * p;
-                    }
-                }
-            }
-        }
-        
-        function extrapolate(f) {
-            for (let i = 0; i < f.numX; i++) {
-                f.u[f._idx(i, 0)] = f.u[f._idx(i, 1)];
-                f.u[f._idx(i, f.numY - 1)] = f.u[f._idx(i, f.numY - 2)];
-            }
-            for (let j = 0; j < f.numY; j++) {
-                f.v[f._idx(0, j)] = f.v[f._idx(1, j)];
-                f.v[f._idx(f.numX - 1, j)] = f.v[f._idx(f.numX - 2, j)];
-            }
-        }
-        
-        function sampleField(f, x, y, fieldType, fieldData) {
-            const h1 = 1.0 / f.h;
-            const h2 = 0.5 * f.h;
-            x = Math.max(Math.min(x, f.numX * f.h), f.h);
-            y = Math.max(Math.min(y, f.numY * f.h), f.h);
-
-            let dx = 0.0, dy = 0.0;
-            if (fieldType === U_FIELD) dy = h2;
-            else if (fieldType === V_FIELD) dx = h2;
-            else if (fieldType === S_FIELD) { dx = h2; dy = h2; }
-            
-            const x0 = Math.min(Math.floor((x - dx) * h1), f.numX - 2);
-            const tx = ((x - dx) - x0 * f.h) * h1;
-            const x1 = Math.min(x0 + 1, f.numX - 2);
-            const y0 = Math.min(Math.floor((y - dy) * h1), f.numY - 2);
-            const ty = ((y - dy) - y0 * f.h) * h1;
-            const y1 = Math.min(y0 + 1, f.numY - 2);
-
-            const sx = 1.0 - tx;
-            const sy = 1.0 - ty;
-
-            return sx * sy * fieldData[f._idx(x0, y0)] + tx * sy * fieldData[f._idx(x1, y0)] +
-                   tx * ty * fieldData[f._idx(x1, y1)] + sx * ty * fieldData[f._idx(x0, y1)];
-        }
-
-        function advectVel(f, dt) {
-            const newU = new Float32Array(f.u);
-            const newV = new Float32Array(f.v);
-            const h2 = 0.5 * f.h;
-            for (let i = 1; i < f.numX - 1; i++) {
-                for (let j = 1; j < f.numY - 1; j++) {
-                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i - 1, j)] !== 0.0) {
-                        let px = i * f.h;
-                        let py = j * f.h + h2;
-                        const u = f.u[f._idx(i, j)];
-                        const avgV = 0.25 * (f.v[f._idx(i - 1, j)] + f.v[f._idx(i, j)] + f.v[f._idx(i - 1, j + 1)] + f.v[f._idx(i, j + 1)]);
-                        px -= dt * u;
-                        py -= dt * avgV;
-                        newU[f._idx(i, j)] = sampleField(f, px, py, U_FIELD, f.u);
-                    }
-                    if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) {
-                        let px = i * f.h + h2;
-                        let py = j * f.h;
-                        const avgU = 0.25 * (f.u[f._idx(i, j - 1)] + f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j - 1)] + f.u[f._idx(i + 1, j)]);
-                        const v = f.v[f._idx(i, j)];
-                        px -= dt * avgU;
-                        py -= dt * v;
-                        newV[f._idx(i, j)] = sampleField(f, px, py, V_FIELD, f.v);
-                    }
-                }
-            }
-            f.u.set(newU);
-            f.v.set(newV);
-        }
-
-        function advectSmoke(f, dt) {
-            const newM = new Float32Array(f.m);
-            const h2 = 0.5 * f.h;
-            for (let i = 1; i < f.numX - 1; i++) {
-                for (let j = 1; j < f.numY - 1; j++) {
-                    if (f.s[f._idx(i, j)] !== 0.0) {
-                        const avgU = (f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j)]) * 0.5;
-                        const avgV = (f.v[f._idx(i, j)] + f.v[f._idx(i, j + 1)]) * 0.5;
-                        let x = i * f.h + h2 - dt * avgU;
-                        let y = j * f.h + h2 - dt * avgV;
-                        newM[f._idx(i, j)] = sampleField(f, x, y, S_FIELD, f.m);
-                    }
-                }
-            }
-            f.m.set(newM);
-        }
-
-        const scene = { fluid: null, dt: 1.0 / 60.0, numIters: 40, overRelaxation: 1.9, paused: false, flowVelocity: 2.0 };
+        // --- Scene and Game State ---
+        const scene = { fluid: null, dt: 1.0 / 60.0, numIters: 40, overRelaxation: 1.9, paused: true, flowVelocity: 5.0, showPressure: false };
+        const game = {
+            state: 'INTRO_VELOCITY', flowState: 'Stable', timerValue: 10, timerInterval: null,
+            targetVelocity: 0, currentShape: 'square', isBuilding: false, totalGameStartTime: null,
+            stage3TimerValue: 10, stage3TimerInterval: null
+        };
         let offscreenCanvas, offscreenCtx, imageData;
 
-        function setupScene() {
-            const res = 100;
-            const domainHeight = 100.0;
-            const domainWidth = domainHeight / simHeight * simWidth;
+        function setupScene(stage = 1) {
+            const rect = container.getBoundingClientRect(); if (rect.width === 0 || rect.height === 0) return;
+            canvas.width = rect.width; canvas.height = rect.height;
+            const simHeight = 1.0; const cScale = canvas.height / simHeight;
+            const simWidth = canvas.width / cScale;
+            const res = 120; const domainHeight = 100.0; const domainWidth = domainHeight / simHeight * simWidth;
             const h = domainHeight / res;
-            const numX = Math.floor(domainWidth / h);
-            const numY = Math.floor(domainHeight / h);
-            
+            const numX = Math.floor(domainWidth / h); const numY = Math.floor(domainHeight / h);
             const f = new Fluid(1000.0, numX, numY, h);
             scene.fluid = f;
+            f.s.fill(0.0); // All solid by default
+            for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { f.s[f._idx(i, j)] = 1.0; } } // Fluid in the middle
 
-            f.s.fill(1.0);
-            for(let j = 0; j < f.numY; j++) { f.s[f._idx(0, j)] = 0.0; }
-            for(let i = 0; i < f.numX; i++) {
-                f.s[f._idx(i, 0)] = 0.0;
-                f.s[f._idx(i, f.numY - 1)] = 0.0;
+            if (stage <= 2) {
+                const pipeH = 0.4 * f.numY;
+                f.inletMinJ = Math.floor(0.5 * f.numY - 0.5 * pipeH); f.inletMaxJ = Math.floor(0.5 * f.numY + 0.5 * pipeH);
+                for (let j = f.inletMinJ; j < f.inletMaxJ; j++) { f.s[f._idx(1, j)] = 1.0; } // Inlet
+                for (let j = 1; j < f.numY - 1; j++) { f.s[f._idx(f.numX - 1, j)] = 1.0; } // Outlet
+            } else { // Stage 3
+                const pipeH = 0.2 * f.numY; // 50% smaller inlet
+                f.inletMinJ = Math.floor(0.5 * f.numY - 0.5 * pipeH); f.inletMaxJ = Math.floor(0.5 * f.numY + 0.5 * pipeH);
+                const outletW = 0.2 * f.numX;
+                f.outletMinI = Math.floor(0.5 * f.numX - 0.5 * outletW); f.outletMaxI = Math.floor(0.5 * f.numX + 0.5 * outletW);
+                for(let i = f.outletMinI; i < f.outletMaxI; i++) { f.s[f._idx(i, f.numY - 2)] = 1.0; }
             }
-
-            offscreenCanvas = document.createElement('canvas');
-            offscreenCanvas.width = f.numX;
-            offscreenCanvas.height = f.numY;
-            offscreenCtx = offscreenCanvas.getContext('2d');
-            imageData = offscreenCtx.createImageData(f.numX, f.numY);
+            
+            offscreenCanvas = document.createElement('canvas'); offscreenCanvas.width = f.numX; offscreenCanvas.height = f.numY;
+            offscreenCtx = offscreenCanvas.getContext('2d'); imageData = offscreenCtx.createImageData(f.numX, f.numY);
         }
 
+        function updateFlowCharacter() { if (scene.flowVelocity < 80) game.flowState = 'Stable'; else if (scene.flowVelocity <= 100) game.flowState = 'Unstable'; else game.flowState = 'Chaotic'; }
+        
         function draw() {
-            const f = scene.fluid;
+            const f = scene.fluid; if (!f) return;
             const data = imageData.data;
+            let minP = 0, maxP = 0;
+            if (scene.showPressure) {
+                minP = f.p[0], maxP = f.p[0];
+                for (let i = 0; i < f.p.length; i++) { if (f.s[i] !== 0.0) { minP = Math.min(minP, f.p[i]); maxP = Math.max(maxP, f.p[i]); } }
+            }
 
             for (let i = 0; i < f.numX; i++) {
                 for (let j = 0; j < f.numY; j++) {
-                    const index = (j * f.numX + i) * 4;
-                    if (f.s[f._idx(i, j)] === 0.0) {
-                        data.set([0, 0, 0, 255], index);
+                    const idx = (j * f.numX + i) * 4;
+                    const isSolid = f.s[f._idx(i, j)] === 0.0;
+                    
+                    if (isSolid) {
+                        data.set([107, 79, 58, 255], idx); // obstacle color
+                    } else if (scene.showPressure) {
+                        const p = f.p[f._idx(i, j)];
+                        const normP = (maxP - minP === 0) ? 0.5 : (p - minP) / (maxP - minP);
+                        const r = Math.max(0, 255 * normP); const b = Math.max(0, 255 * (1.0 - normP));
+                        data.set([r, 50, b, 255], idx);
                     } else {
-                        const sVal = 1.0 - Math.max(0, Math.min(1, f.m[f._idx(i, j)]));
-                        data[index] = sVal * 0 + (1 - sVal) * 255;
-                        data[index + 1] = sVal * 128 + (1 - sVal) * 255;
-                        data[index + 2] = sVal * 255 + (1 - sVal) * 255;
-                        data[index + 3] = 255;
+                        if (game.state === 'BUILD_OBSTACLE') {
+                            data.set([0, 0, 0, 255], idx); // Use black for the fluid area during build mode
+                        } else {
+                             const sVal = 1.0 - Math.max(0, Math.min(1, f.m[f._idx(i, j)]));
+                             data.set([sVal * 0 + (1 - sVal) * 255, sVal * 128 + (1 - sVal) * 255, sVal * 255 + (1 - sVal) * 255, 255], idx);
+                        }
+                    }
+
+                    if (game.state === 'BUILD_OBSTACLE') {
+                        if (i === 1 && j >= f.inletMinJ && j < f.inletMaxJ) {
+                             data.set([67, 232, 249, 255], idx); // Inlet: cyan
+                        }
+                        if (j === f.numY - 2 && i >= f.outletMinI && i < f.outletMaxI) {
+                            data.set([74, 222, 128, 255], idx); // Outlet: green
+                        }
                     }
                 }
             }
             offscreenCtx.putImageData(imageData, 0, 0);
-            ctx.imageSmoothingEnabled = false;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
             
-            infoDiv.innerHTML = `Fluid Simulation<br><b>[Space]</b> to pause<br>Peak Flow: <b>${scene.flowVelocity.toFixed(2)}</b><br><b>Left-Click:</b> Increase Flow<br><b>Right-Click:</b> Decrease Flow`;
+            const flowStateClass = `flow-state-${game.flowState.toLowerCase()}`;
+            infoDiv.innerHTML = `<p>Peak Flow: <span class="font-semibold">${scene.flowVelocity.toFixed(2)}</span></p><p>Flow Character: <span class="font-semibold ${flowStateClass}">${game.flowState}</span></p>`;
         }
         
-        function mainLoop() {
-            if (!scene.paused) {
-                scene.fluid.simulate(scene.dt, 0.0, scene.numIters, scene.overRelaxation, scene.flowVelocity);
+        function updateUIForState() {
+            Object.values(modals).forEach(m => m.classList.remove('visible'));
+            mainControls.style.display = 'none'; buildControls.style.display = 'none';
+            timerDiv.style.display = 'none'; infoDiv.style.display = 'block';
+            canalDiv.style.display = 'flex'; outflowDiv.style.display = 'block';
+
+            const showMainControls = () => {
+                mainControls.style.display = 'flex';
+                Array.from(mainControls.children).forEach(btn => btn.style.display = 'none');
+                increaseBtn.disabled = true; decreaseBtn.disabled = true;
+            };
+
+            switch (game.state) {
+                case 'INTRO_VELOCITY': modals.intro.classList.add('visible'); scene.paused = true; break;
+                case 'CHALLENGE_VELOCITY': 
+                    showMainControls(); 
+                    scene.paused = false; 
+                    pauseBtn.style.display = 'inline-block';
+                    increaseBtn.style.display = 'inline-block';
+                    decreaseBtn.style.display = 'inline-block';
+                    increaseBtn.disabled = false; 
+                    decreaseBtn.disabled = false; 
+                    startTimer(); 
+                    break;
+                case 'POST_CHALLENGE_VELOCITY': showMainControls(); scene.paused = true; modals.infoVelocity.classList.add('visible'); pauseBtn.style.display = 'inline-block'; break;
+                case 'GAME_OVER_VELOCITY_FAIL': scene.paused = true; modals.failVelocity.classList.add('visible'); break;
+                case 'INTRO_PRESSURE': scene.paused = true; modals.pressureIntro.classList.add('visible'); break;
+                case 'CHALLENGE_PRESSURE': 
+                    showMainControls(); 
+                    scene.paused = false; 
+                    submitVelocityBtn.style.display = 'inline-block'; 
+                    increaseBtn.style.display = 'inline-block';
+                    decreaseBtn.style.display = 'inline-block';
+                    increaseBtn.disabled = false; 
+                    decreaseBtn.disabled = false; 
+                    infoDiv.style.display = 'none'; 
+                    break;
+                case 'POST_CHALLENGE_PRESSURE': showMainControls(); scene.paused = true; modals.infoPressure.classList.add('visible'); pressureBtn.style.display = 'inline-block'; break;
+                case 'GAME_OVER_PRESSURE_FAIL': scene.paused = true; document.getElementById('your-velocity-display').textContent = scene.flowVelocity.toFixed(2); document.getElementById('target-velocity-display-pressure-fail').textContent = game.targetVelocity.toFixed(2); modals.failPressure.classList.add('visible'); break;
+                case 'INTRO_OBSTACLE': scene.paused = true; modals.obstacleIntro.classList.add('visible'); break;
+                case 'BUILD_OBSTACLE': scene.paused = true; buildControls.style.display = 'flex'; canalDiv.style.display = 'none'; outflowDiv.style.display = 'none'; infoDiv.style.display = 'none'; break;
+                case 'SIMULATE_OBSTACLE':
+                    scene.paused = false;
+                    buildControls.style.display = 'none';
+                    mainControls.style.display = 'flex';
+                    Array.from(mainControls.children).forEach(btn => btn.style.display = 'none');
+                    pressureBtn.style.display = 'inline-block';
+                    canalDiv.style.display = 'none';
+                    outflowDiv.style.display = 'none';
+                    infoDiv.style.display = 'none';
+                    break;
+                case 'GAME_OVER_OBSTACLE_FAIL': scene.paused = true; modals.failObstacle.classList.add('visible'); break;
+                case 'GAME_OVER_OBSTACLE_WIN': scene.paused = true; modals.win.classList.add('visible'); calculateEndGameStats(); break;
             }
-            draw();
+            pauseBtn.textContent = scene.paused ? 'Play' : 'Pause'; pauseBtn.classList.toggle('active', scene.paused);
+            pressureBtn.textContent = scene.showPressure ? 'Show Dye' : 'Show Pressure'; pressureBtn.classList.toggle('active', scene.showPressure);
+        }
+        function startTimer() {
+            timerDiv.style.display = 'block'; game.timerValue = 10; timerDiv.textContent = game.timerValue;
+            if (game.timerInterval) clearInterval(game.timerInterval);
+            game.timerInterval = setInterval(() => {
+                game.timerValue--; timerDiv.textContent = game.timerValue;
+                if (game.timerValue <= 0) {
+                    clearInterval(game.timerInterval);
+                    if (scene.flowVelocity >= 90) { game.targetVelocity = scene.flowVelocity; game.state = 'POST_CHALLENGE_VELOCITY'; } 
+                    else { game.state = 'GAME_OVER_VELOCITY_FAIL'; }
+                    updateUIForState();
+                }
+            }, 1000);
+        }
+        function startStage3Timer() {
+            timerDiv.style.display = 'block';
+            game.stage3TimerValue = 10;
+            timerDiv.textContent = game.stage3TimerValue;
+            if (game.stage3TimerInterval) clearInterval(game.stage3TimerInterval);
+            game.stage3TimerInterval = setInterval(() => {
+                game.stage3TimerValue--;
+                timerDiv.textContent = game.stage3TimerValue;
+                if (game.stage3TimerValue <= 0) {
+                    clearInterval(game.stage3TimerInterval);
+                    game.stage3TimerInterval = null;
+                    game.state = 'GAME_OVER_OBSTACLE_WIN';
+                    updateUIForState();
+                }
+            }, 1000);
+        }
+        function checkWinLossStage3() {
+            const f = scene.fluid; if (!f) return;
+            const endGame = (newState) => {
+                if (game.stage3TimerInterval) { clearInterval(game.stage3TimerInterval); game.stage3TimerInterval = null; }
+                game.state = newState; updateUIForState();
+            };
+            for (let i = f.outletMinI; i < f.outletMaxI; i++) {
+                if (f.m[f._idx(i, f.numY - 2)] < 0.5) { endGame('GAME_OVER_OBSTACLE_WIN'); return; }
+            }
+            let lost = false;
+            for (let j = 1; j < f.numY - 1; j++) { if (f.m[f._idx(f.numX - 2, j)] < 0.9) { lost = true; break; } }
+            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
+            for (let i = 1; i < f.numX - 1; i++) { if (f.m[f._idx(i, 1)] < 0.9) { lost = true; break; } }
+            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
+            for (let i = 1; i < f.outletMinI; i++) { if (f.m[f._idx(i, f.numY - 2)] < 0.9) { lost = true; break; } }
+            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
+            for (let i = f.outletMaxI; i < f.numX - 1; i++) { if (f.m[f._idx(i, f.numY - 2)] < 0.9) { lost = true; break; } }
+            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
+        }
+        function mainLoop() {
+            if (!scene.fluid) { setupScene(); requestAnimationFrame(mainLoop); return; }
+            if (!scene.paused) {
+                scene.fluid.simulate(scene.dt, scene.numIters, scene.overRelaxation, scene.flowVelocity);
+                if (game.state === 'SIMULATE_OBSTACLE') checkWinLossStage3();
+            }
+            updateFlowCharacter(); draw();
             requestAnimationFrame(mainLoop);
         }
+        function resetGame() {
+            if (game.timerInterval) clearInterval(game.timerInterval);
+            if (game.stage3TimerInterval) clearInterval(game.stage3TimerInterval);
+            game.stage3TimerInterval = null;
+            setupScene(1); scene.flowVelocity = 5.0; game.totalGameStartTime = Date.now();
+            game.state = 'INTRO_VELOCITY'; updateUIForState();
+        }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                scene.paused = !scene.paused;
+        // --- Event Handlers & UI Logic ---
+        increaseBtn.addEventListener('click', () => scene.flowVelocity += 5.0);
+        decreaseBtn.addEventListener('click', () => scene.flowVelocity = Math.max(0.0, scene.flowVelocity - 5.0));
+        pauseBtn.addEventListener('click', () => { if (game.state === 'CHALLENGE_VELOCITY' || game.state === 'POST_CHALLENGE_VELOCITY') { scene.paused = !scene.paused; updateUIForState(); } });
+        pressureBtn.addEventListener('click', () => { scene.showPressure = !scene.showPressure; updateUIForState(); });
+        submitVelocityBtn.addEventListener('click', () => {
+            if (Math.abs(scene.flowVelocity - game.targetVelocity) > 20) { game.state = 'GAME_OVER_PRESSURE_FAIL'; } 
+            else { game.state = 'POST_CHALLENGE_PRESSURE'; scene.showPressure = true; }
+            updateUIForState();
+        });
+        function handleCloseVelocityPopup() {
+            modals.infoVelocity.classList.remove('visible'); scene.paused = false;
+            mainControls.style.display = 'flex'; increaseBtn.disabled = true; decreaseBtn.disabled = true; pauseBtn.style.display = 'none';
+            setTimeout(() => {
+                game.state = 'INTRO_PRESSURE';
+                document.getElementById('target-velocity-display').textContent = game.targetVelocity.toFixed(2);
+                updateUIForState();
+            }, 5000);
+        }
+        function handleStartPressureChallenge() {
+            setupScene(2); scene.flowVelocity = 5.0;
+            game.state = 'CHALLENGE_PRESSURE'; updateUIForState();
+        }
+        function handleClosePressurePopup() {
+            modals.infoPressure.classList.remove('visible'); scene.paused = false;
+            mainControls.style.display = 'flex'; Array.from(mainControls.children).forEach(btn => btn.style.display = 'none'); pressureBtn.style.display = 'inline-block';
+            setTimeout(() => { game.state = 'INTRO_OBSTACLE'; updateUIForState(); }, 5000);
+        }
+        function setShape(shape) {
+            game.currentShape = shape;
+            Object.values(shapeBtns).forEach(b => b.classList.remove('active'));
+            shapeBtns[shape].classList.add('active');
+        }
+        function drawObstacle(i, j, size = 3) {
+            const f = scene.fluid; if (!f) return;
+            const half = Math.floor(size / 2);
+            for (let dx = -half; dx <= half; dx++) {
+                for (let dy = -half; dy <= half; dy++) {
+                    const ci = i + dx, cj = j + dy;
+                    if (ci > 0 && ci < f.numX - 1 && cj > 0 && cj < f.numY - 1) {
+                        let place = false;
+                        if (game.currentShape === 'square') place = true;
+                        else if (game.currentShape === 'circle') place = dx*dx + dy*dy < (half+0.5)**2;
+                        else if (game.currentShape === 'triangle') place = dy >= Math.abs(dx) - half;
+                        if(place) f.s[f._idx(ci, cj)] = 0.0;
+                    }
+                }
             }
-        });
-        canvas.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            if (e.button === 0) { scene.flowVelocity += 0.5; } 
-            else if (e.button === 2) { scene.flowVelocity = Math.max(0.0, scene.flowVelocity - 0.5); }
-        });
-        canvas.addEventListener('contextmenu', e => e.preventDefault());
+        }
+        function handleCanvasDraw(e) {
+            if (!game.isBuilding) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const i = Math.floor(x / canvas.width * scene.fluid.numX);
+            const j = Math.floor(y / canvas.height * scene.fluid.numY);
+            drawObstacle(i, j);
+        }
+        canvas.addEventListener('mousedown', e => { if (game.state === 'BUILD_OBSTACLE') { game.isBuilding = true; handleCanvasDraw(e); } });
+        canvas.addEventListener('mousemove', e => { if (game.state === 'BUILD_OBSTACLE') handleCanvasDraw(e); });
+        canvas.addEventListener('mouseup', () => { game.isBuilding = false; });
+        function calculateEndGameStats() {
+            const totalMs = Date.now() - game.totalGameStartTime;
+            const minutes = Math.floor(totalMs / 60000);
+            const seconds = ((totalMs % 60000) / 1000).toFixed(0);
+            document.getElementById('total-time-display').textContent = `${minutes}:${seconds.padStart(2, '0')}`;
+            const f = scene.fluid;
+            let inletVel = 0, outletVel = 0;
+            for(let j = f.inletMinJ; j < f.inletMaxJ; j++) { inletVel += f.u[f._idx(1, j)]; }
+            for(let i = f.outletMinI; i < f.outletMaxI; i++) { outletVel += Math.abs(f.v[f._idx(i, f.numY-2)]); }
+            const ratio = (inletVel > 0) ? (outletVel / inletVel).toFixed(2) : "N/A";
+            document.getElementById('flow-ratio-display').textContent = ratio;
+        }
 
-        setupScene();
+        let resizeTimeout;
+        window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => setupScene(1), 100); });
+        
+        // --- Initial Setup ---
+        resetGame();
         requestAnimationFrame(mainLoop);
     </script>
 </body>
