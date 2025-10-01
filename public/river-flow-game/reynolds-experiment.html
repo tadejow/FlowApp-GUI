@@ -45,6 +45,22 @@
             align-items: center;
             gap: 1rem;
         }
+        .language-selector {
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        .lang-btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+        }
+        .lang-btn.active {
+            background-color: var(--yellow-400);
+            color: var(--gray-900);
+            border-color: var(--yellow-400);
+        }
         .simulation-frame {
             display: flex;
             flex-direction: column;
@@ -130,6 +146,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
             gap: 0.75rem;
             padding: 0.75rem;
             background-color: var(--gray-800);
@@ -224,6 +241,12 @@
 </head>
 <body>
     <div class="app-container">
+        <div class="language-selector">
+            <button data-lang="en" class="btn lang-btn">EN</button>
+            <button data-lang="de" class="btn lang-btn">DE</button>
+            <button data-lang="pl" class="btn lang-btn">PL</button>
+            <button data-lang="cs" class="btn lang-btn">CS</button>
+        </div>
         <main class="simulation-frame">
             <div class="grass grass-top"></div>
             <div class="middle-section">
@@ -239,36 +262,44 @@
         </main>
         
         <footer id="main-controls" class="controls-container">
-            <button id="decrease-flow" class="btn">Decrease Flow</button>
-            <button id="increase-flow" class="btn">Increase Flow</button>
-            <button id="pause-sim" class="btn">Pause</button>
-            <button id="toggle-pressure" class="btn">Show Pressure</button>
-            <button id="submit-velocity-btn" class="btn">Submit Velocity</button>
+            <button id="decrease-flow" class="btn" data-translate="decreaseFlow">Decrease Flow</button>
+            <button id="increase-flow" class="btn" data-translate="increaseFlow">Increase Flow</button>
+            <button id="pause-sim" class="btn" data-translate="pause">Pause</button>
+            <button id="toggle-pressure" class="btn" data-translate="showPressure">Show Pressure</button>
+            <button id="submit-velocity-btn" class="btn" data-translate="submitVelocity">Submit Velocity</button>
         </footer>
 
         <div id="build-controls" class="controls-container" style="display: none;">
-            <span>Shape:</span>
-            <button id="shape-square-btn" class="btn active">Square</button>
-            <button id="shape-circle-btn" class="btn">Circle</button>
-            <button id="shape-triangle-btn" class="btn">Triangle</button>
-            <button id="clear-obstacles-btn" class="btn">Clear Obstacles</button>
-            <button id="flow-btn" class="btn">Go with the Flow!</button>
+            <span data-translate="shape">Shape:</span>
+            <button id="shape-square-btn" class="btn active" data-translate="square">Square</button>
+            <button id="shape-circle-btn" class="btn" data-translate="circle">Circle</button>
+            <button id="shape-triangle-btn" class="btn" data-translate="triangle">Triangle</button>
+            <button id="clear-obstacles-btn" class="btn" data-translate="clearObstacles">Clear Obstacles</button>
+            <button id="flow-btn" class="btn" data-translate="goWithTheFlow">Go with the Flow!</button>
         </div>
     </div>
     
     <!-- MODALS -->
-    <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2>Welcome to the Reynolds Challenge!</h2><p>Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p>You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn">Start Experiment</button></div></div>
-    <div id="info-popup-velocity" class="modal-overlay"><div class="modal-content"><h3>Observe the Turbulence</h3><p>Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.</p><button id="close-velocity-popup-btn" class="btn">Next Lesson</button></div></div>
-    <div id="pressure-intro-modal" class="modal-overlay"><div class="modal-content"><h2>The Role of Pressure</h2><p>Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.</p><p>Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style="color: var(--yellow-400); font-size: 1.2rem;"><span id="target-velocity-display"></span></strong> and press 'Submit'.</p><button id="start-pressure-challenge-btn" class="btn">Start Pressure Challenge</button></div></div>
-    <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3>Observing Pressure</h3><p>Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!</p><p>Well done! You will now have 5 seconds to observe before the final challenge.</p><button id="close-pressure-popup-btn" class="btn">Final Challenge</button></div></div>
-    <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.</p><button id="try-again-btn" class="btn">Try Again</button></div></div>
-    <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p>Your Velocity: <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | Target: <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn">Try Again</button></div></div>
-    <div id="obstacle-intro-modal" class="modal-overlay"><div class="modal-content"><h2>Final Challenge: Build a River Bank</h2><p>Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.</p><p>The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!</p><button id="start-building-btn" class="btn">Start Building</button></div></div>
-    <div id="fail-modal-obstacle" class="modal-overlay"><div class="modal-content"><h2>Leaky Riverbank!</h2><p>The water reached a boundary other than the outlet. Refine your design to better control the flow.</p><button id="try-again-obstacle-btn" class="btn">Try Again</button></div></div>
-    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2>Congratulations!</h2><p>You have successfully mastered fluid dynamics and completed all challenges!</p><div><p>Total Time: <strong style="color: var(--cyan-300);" id="total-time-display"></strong></p><p>Outlet to inlet velocity ratio: <strong style="color: var(--cyan-300);" id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn">Play Again</button></div></div>
+    <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="welcomeTitle">Welcome to the Reynolds Challenge!</h2><p data-translate="welcomeP1">Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p data-translate="welcomeP2">You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn" data-translate="startExperiment">Start Experiment</button></div></div>
+    <div id="info-popup-velocity" class="modal-overlay"><div class="modal-content"><h3 data-translate="observeTurbulenceTitle">Observe the Turbulence</h3><p data-translate="observeTurbulenceP1">Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.</p><button id="close-velocity-popup-btn" class="btn" data-translate="nextLesson">Next Lesson</button></div></div>
+    <div id="pressure-intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="pressureIntroTitle">The Role of Pressure</h2><p data-translate="pressureIntroP1">Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.</p><p data-translate="pressureIntroP2">Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style="color: var(--yellow-400); font-size: 1.2rem;"><span id="target-velocity-display"></span></strong> and press 'Submit'.</p><button id="start-pressure-challenge-btn" class="btn" data-translate="startPressureChallenge">Start Pressure Challenge</button></div></div>
+    <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3 data-translate="observingPressureTitle">Observing Pressure</h3><p data-translate="observingPressureP1">Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!</p><p data-translate="observingPressureP2">Well done! You will now have 5 seconds to observe before the final challenge.</p><button id="close-pressure-popup-btn" class="btn" data-translate="finalChallengeBtn">Final Challenge</button></div></div>
+    <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="failTitle">Challenge Failed</h2><p data-translate="failVelocityP1">You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.</p><button id="try-again-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
+    <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2 data-translate="failTitle">Challenge Failed</h2><p data-translate="failPressureP1">You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p data-translate="failPressureP2">Your Velocity: <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | Target: <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
+    <div id="obstacle-intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="obstacleIntroTitle">Final Challenge: Build a River Bank</h2><p data-translate="obstacleIntroP1">Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.</p><p data-translate="obstacleIntroP2">The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!</p><button id="start-building-btn" class="btn" data-translate="startBuilding">Start Building</button></div></div>
+    <div id="fail-modal-obstacle" class="modal-overlay"><div class="modal-content"><h2 data-translate="failObstacleTitle">Leaky Riverbank!</h2><p data-translate="failObstacleP1">The water reached a boundary other than the outlet. Refine your design to better control the flow.</p><button id="try-again-obstacle-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
+    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="winTitle">Congratulations!</h2><p data-translate="winP1">You have successfully mastered fluid dynamics and completed all challenges!</p><div><p><span data-translate="totalTime">Total Time:</span> <strong style="color: var(--cyan-300);" id="total-time-display"></strong></p><p><span data-translate="flowRatio">Outlet to inlet velocity ratio:</span> <strong style="color: var(--cyan-300);" id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn" data-translate="playAgain">Play Again</button></div></div>
 
 
     <script>
+        // --- I18N Translations ---
+        const translations = {
+            en: { title: "Zittau's Reynolds Challenge", decreaseFlow: "Decrease Flow", increaseFlow: "Increase Flow", pause: "Pause", play: "Play", showPressure: "Show Pressure", showDye: "Show Dye", submitVelocity: "Submit Velocity", shape: "Shape:", square: "Square", circle: "Circle", triangle: "Triangle", clearObstacles: "Clear Obstacles", goWithTheFlow: "Go with the Flow!", welcomeTitle: "Welcome to the Reynolds Challenge!", welcomeP1: "Your goal is to create turbulence by increasing the water's velocity. Use the \"Increase Flow\" button to speed up the water.", welcomeP2: "You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.", startExperiment: "Start Experiment", observeTurbulenceTitle: "Observe the Turbulence", observeTurbulenceP1: "Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.", nextLesson: "Next Lesson", pressureIntroTitle: "The Role of Pressure", pressureIntroP1: "Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.", pressureIntroP2: "Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> and press 'Submit'.", startPressureChallenge: "Start Pressure Challenge", observingPressureTitle: "Observing Pressure", observingPressureP1: "Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!", observingPressureP2: "Well done! You will now have 5 seconds to observe before the final challenge.", finalChallengeBtn: "Final Challenge", failTitle: "Challenge Failed", failVelocityP1: "You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.", tryAgain: "Try Again", failPressureP1: "You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.", failPressureP2: "Your Velocity: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Target: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Final Challenge: Build a River Bank", obstacleIntroP1: "Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.", obstacleIntroP2: "The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!", startBuilding: "Start Building", failObstacleTitle: "Leaky Riverbank!", failObstacleP1: "The water reached a boundary other than the outlet. Refine your design to better control the flow.", winTitle: "Congratulations!", winP1: "You have successfully mastered fluid dynamics and completed all challenges!", totalTime: "Total Time:", flowRatio: "Outlet to inlet velocity ratio:", playAgain: "Play Again", peakFlow: "Peak Flow:", flowCharacter: "Flow Character:", stable: "Stable", unstable: "Unstable", chaotic: "Chaotic" },
+            de: { title: "Zittaus Reynolds-Herausforderung", decreaseFlow: "Fluss verringern", increaseFlow: "Fluss erhöhen", pause: "Pause", play: "Start", showPressure: "Druck anzeigen", showDye: "Farbe anzeigen", submitVelocity: "Geschwindigkeit bestätigen", shape: "Form:", square: "Quadrat", circle: "Kreis", triangle: "Dreieck", clearObstacles: "Hindernisse entfernen", goWithTheFlow: "Lass es fließen!", welcomeTitle: "Willkommen zur Reynolds-Herausforderung!", welcomeP1: "Ihr Ziel ist es, durch Erhöhen der Wassergeschwindigkeit Turbulenzen zu erzeugen. Verwenden Sie die Schaltfläche 'Fluss erhöhen', um das Wasser zu beschleunigen.", welcomeP2: "Sie haben <strong>10 Sekunden</strong>, um eine Geschwindigkeit von mindestens <strong>90</strong> zu erreichen.", startExperiment: "Experiment starten", observeTurbulenceTitle: "Beobachten Sie die Turbulenz", observeTurbulenceP1: "Haben Sie bemerkt, wie der glatte Farbstrom in Wirbel und Strudel zerfiel? Das ist <strong>Turbulenz</strong>! Sie haben nun 5 Sekunden Zeit, dies zu beobachten.", nextLesson: "Nächste Lektion", pressureIntroTitle: "Die Rolle des Drucks", pressureIntroP1: "Turbulenz geht nicht nur um Geschwindigkeit; sie wird durch chaotische Druckänderungen angetrieben. Hochdruckzonen drücken Flüssigkeit in Niederdruckzonen und erzeugen so die Wirbel, die Sie gesehen haben.", pressureIntroP2: "Ihre nächste Aufgabe: Stellen Sie die turbulente Strömung aus dem Gedächtnis wieder her. Setzen Sie die Geschwindigkeit zurück auf <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> und drücken Sie 'Bestätigen'.", startPressureChallenge: "Druck-Herausforderung starten", observingPressureTitle: "Druck beobachten", observingPressureP1: "Bemerken Sie die chaotischen, sich schnell ändernden Taschen von hohem (rot) und niedrigem (blau) Druck? Das ist der 'Motor' der Turbulenz!", observingPressureP2: "Gut gemacht! Sie haben nun 5 Sekunden Zeit zur Beobachtung, bevor die letzte Herausforderung beginnt.", finalChallengeBtn: "Letzte Herausforderung", failTitle: "Herausforderung gescheitert", failVelocityP1: "Sie haben die Geschwindigkeit in 10 Sekunden nicht genug erhöht, um starke Turbulenzen zu erzeugen! Eine Geschwindigkeit von mindestens 90 ist erforderlich.", tryAgain: "Erneut versuchen", failPressureP1: "Sie haben die Zielgeschwindigkeit nicht genau genug getroffen. Das Ziel ist es, ein intuitives Gefühl für die Geschwindigkeit und das Aussehen der Strömung zu entwickeln.", failPressureP2: "Ihre Geschwindigkeit: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Ziel: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Letzte Herausforderung: Bauen Sie ein Flussufer", obstacleIntroP1: "Ihre letzte Aufgabe ist es, einen Kanal zu bauen, um das Wasser vom Einlass links zum Auslass unten zu leiten. Verwenden Sie die Formwerkzeuge, um Hindernisse zu erstellen.", obstacleIntroP2: "Das Wasser darf <strong>nur</strong> den Auslass berühren. Wenn es eine andere Wand trifft, müssen Sie es erneut versuchen!", startBuilding: "Mit dem Bau beginnen", failObstacleTitle: "Undichtes Flussufer!", failObstacleP1: "Das Wasser hat eine andere Grenze als den Auslass erreicht. Verbessern Sie Ihr Design, um den Fluss besser zu kontrollieren.", winTitle: "Herzlichen Glückwunsch!", winP1: "Sie haben die Fluiddynamik erfolgreich gemeistert und alle Herausforderungen abgeschlossen!", totalTime: "Gesamtzeit:", flowRatio: "Verhältnis Auslass- zu Einlassgeschwindigkeit:", playAgain: "Nochmal spielen", peakFlow: "Spitzenfluss:", flowCharacter: "Strömungscharakter:", stable: "Stabil", unstable: "Instabil", chaotic: "Chaotisch" },
+            pl: { title: "Wyzwanie Reynoldsa w Zittau", decreaseFlow: "Zmniejsz przepływ", increaseFlow: "Zwiększ przepływ", pause: "Pauza", play: "Wznów", showPressure: "Pokaż ciśnienie", showDye: "Pokaż barwnik", submitVelocity: "Zatwierdź prędkość", shape: "Kształt:", square: "Kwadrat", circle: "Okrąg", triangle: "Trójkąt", clearObstacles: "Wyczyść przeszkody", goWithTheFlow: "Płyń z prądem!", welcomeTitle: "Witaj w Wyzwaniu Reynoldsa!", welcomeP1: "Twoim celem jest stworzenie turbulencji poprzez zwiększenie prędkości wody. Użyj przycisku 'Zwiększ przepływ', aby przyspieszyć wodę.", welcomeP2: "Masz <strong>10 sekund</strong>, aby osiągnąć prędkość co najmniej <strong>90</strong>.", startExperiment: "Rozpocznij eksperyment", observeTurbulenceTitle: "Obserwuj turbulencję", observeTurbulenceP1: "Zauważyłeś, jak gładki strumień barwnika rozpadł się na wiry? To jest <strong>turbulencja</strong>! Masz teraz 5 sekund na obserwację.", nextLesson: "Następna lekcja", pressureIntroTitle: "Rola ciśnienia", pressureIntroP1: "Turbulencja to nie tylko prędkość; jest napędzana przez chaotyczne zmiany ciśnienia. Strefy wysokiego ciśnienia pchają płyn do stref niskiego ciśnienia, tworząc wiry, które widziałeś.", pressureIntroP2: "Twoje następne zadanie: Odtwórz przepływ turbulentny z pamięci. Ustaw prędkość z powrotem na <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> i naciśnij 'Zatwierdź'.", startPressureChallenge: "Rozpocznij wyzwanie ciśnieniowe", observingPressureTitle: "Obserwacja ciśnienia", observingPressureP1: "Zauważasz chaotyczne, szybko zmieniające się kieszenie wysokiego (czerwone) i niskiego (niebieskie) ciśnienia? To jest 'silnik' turbulencji!", observingPressureP2: "Dobra robota! Masz teraz 5 sekund na obserwację przed ostatnim wyzwaniem.", finalChallengeBtn: "Ostatnie wyzwanie", failTitle: "Wyzwanie nieudane", failVelocityP1: "Nie zwiększyłeś prędkości wystarczająco w 10 sekund, aby stworzyć silną turbulencję! Wymagana jest prędkość co najmniej 90.", tryAgain: "Spróbuj ponownie", failPressureP1: "Nie dopasowałeś docelowej prędkości wystarczająco dokładnie. Celem jest rozwinięcie intuicyjnego wyczucia prędkości i wyglądu przepływu.", failPressureP2: "Twoja prędkość: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Cel: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Ostatnie wyzwanie: Zbuduj brzeg rzeki", obstacleIntroP1: "Twoim ostatnim zadaniem jest zbudowanie kanału, który poprowadzi wodę od wlotu po lewej do wylotu na dole. Użyj narzędzi do kształtowania, aby stworzyć przeszkody.", obstacleIntroP2: "Woda może dotknąć <strong>tylko</strong> wylotu. Jeśli uderzy w inną ścianę, będziesz musiał spróbować ponownie!", startBuilding: "Rozpocznij budowę", failObstacleTitle: "Nieszczelny brzeg!", failObstacleP1: "Woda dotarła do innej granicy niż wylot. Popraw swój projekt, aby lepiej kontrolować przepływ.", winTitle: "Gratulacje!", winP1: "Pomyślnie opanowałeś dynamikę płynów i ukończyłeś wszystkie wyzwania!", totalTime: "Całkowity czas:", flowRatio: "Stosunek prędkości na wylocie do wlotu:", playAgain: "Zagraj ponownie", peakFlow: "Szczytowy przepływ:", flowCharacter: "Charakter przepływu:", stable: "Stabilny", unstable: "Niestabilny", chaotic: "Chaotyczny" },
+            cs: { title: "Reynoldsova výzva v Žitavě", decreaseFlow: "Snížit průtok", increaseFlow: "Zvýšit průtok", pause: "Pauza", play: "Spustit", showPressure: "Zobrazit tlak", showDye: "Zobrazit barvivo", submitVelocity: "Potvrdit rychlost", shape: "Tvar:", square: "Čtverec", circle: "Kruh", triangle: "Trojúhelník", clearObstacles: "Odstranit překážky", goWithTheFlow: "Jdi s proudem!", welcomeTitle: "Vítejte u Reynoldsovy výzvy!", welcomeP1: "Vaším cílem je vytvořit turbulenci zvýšením rychlosti vody. Použijte tlačítko 'Zvýšit průtok' k zrychlení vody.", welcomeP2: "Máte <strong>10 sekund</strong> na dosažení rychlosti alespoň <strong>90</strong>.", startExperiment: "Spustit experiment", observeTurbulenceTitle: "Pozorujte turbulenci", observeTurbulenceP1: "Všimli jste si, jak se hladký proud barviva rozpadl na víry? To je <strong>turbulence</strong>! Nyní máte 5 sekund na pozorování.", nextLesson: "Další lekce", pressureIntroTitle: "Role tlaku", pressureIntroP1: "Turbulence není jen o rychlosti; je poháněna chaotickými změnami tlaku. Zóny vysokého tlaku tlačí tekutinu do zón nízkého tlaku, čímž vytvářejí víry, které jste viděli.", pressureIntroP2: "Váš další úkol: Znovu vytvořte turbulentní proudění zpaměti. Nastavte rychlost zpět na <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> a stiskněte 'Potvrdit'.", startPressureChallenge: "Spustit tlakovou výzvu", observingPressureTitle: "Pozorování tlaku", observingPressureP1: "Všímáte si chaotických, rychle se měnících kapes vysokého (červená) a nízkého (modrá) tlaku? To je 'motor' turbulence!", observingPressureP2: "Výborně! Nyní máte 5 sekund na pozorování před finální výzvou.", finalChallengeBtn: "Finální výzva", failTitle: "Výzva neúspěšná", failVelocityP1: "Nezvýšili jste rychlost dostatečně během 10 sekund, abyste vytvořili silnou turbulenci! Je vyžadována rychlost alespoň 90.", tryAgain: "Zkusit znovu", failPressureP1: "Nepodařilo se vám dostatečně přesně trefit cílovou rychlost. Cílem je vyvinout intuitivní cit pro rychlost a vzhled proudění.", failPressureP2: "Vaše rychlost: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Cíl: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Finální výzva: Postavte břeh řeky", obstacleIntroP1: "Vaším posledním úkolem je postavit kanál, který povede vodu od vtoku vlevo k výtoku dole. Použijte nástroje pro tvary k vytvoření překážek.", obstacleIntroP2: "Voda se smí dotknout <strong>pouze</strong> výtoku. Pokud narazí na jinou stěnu, budete to muset zkusit znovu!", startBuilding: "Začít stavět", failObstacleTitle: "Děravý břeh!", failObstacleP1: "Voda dosáhla jiné hranice než výtoku. Vylepšete svůj návrh pro lepší kontrolu proudění.", winTitle: "Gratulujeme!", winP1: "Úspěšně jste zvládli dynamiku kapalin a dokončili všechny výzvy!", totalTime: "Celkový čas:", flowRatio: "Poměr rychlosti na výtoku k vtoku:", playAgain: "Hrát znovu", peakFlow: "Špičkový průtok:", flowCharacter: "Charakter proudění:", stable: "Stabilní", unstable: "Nestabilní", chaotic: "Chaotické" }
+        };
+
         // --- Simulation Constants ---
         const U_FIELD = 0, V_FIELD = 1, S_FIELD = 2;
 
@@ -382,7 +413,7 @@
         const game = {
             state: 'INTRO_VELOCITY', flowState: 'Stable', timerValue: 10, timerInterval: null,
             targetVelocity: 0, currentShape: 'square', isBuilding: false, totalGameStartTime: null,
-            stage3TimerValue: 10, stage3TimerInterval: null
+            stage3TimerValue: 10, stage3TimerInterval: null, currentLang: 'en'
         };
         let offscreenCanvas, offscreenCtx, imageData;
 
@@ -462,8 +493,10 @@
             ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
             
+            const t = translations[game.currentLang];
+            const flowStateText = t[game.flowState.toLowerCase()] || game.flowState;
             const flowStateClass = `flow-state-${game.flowState.toLowerCase()}`;
-            infoDiv.innerHTML = `<p>Peak Flow: <span class="font-semibold">${scene.flowVelocity.toFixed(2)}</span></p><p>Flow Character: <span class="font-semibold ${flowStateClass}">${game.flowState}</span></p>`;
+            infoDiv.innerHTML = `<p>${t.peakFlow} <span class="font-semibold">${scene.flowVelocity.toFixed(2)}</span></p><p>${t.flowCharacter} <span class="font-semibold ${flowStateClass}">${flowStateText}</span></p>`;
         }
         
         function updateUIForState() {
@@ -471,6 +504,8 @@
             mainControls.style.display = 'none'; buildControls.style.display = 'none';
             timerDiv.style.display = 'none'; infoDiv.style.display = 'block';
             canalDiv.style.display = 'flex'; outflowDiv.style.display = 'block';
+            
+            const t = translations[game.currentLang];
 
             const showMainControls = () => {
                 mainControls.style.display = 'flex';
@@ -520,8 +555,10 @@
                 case 'GAME_OVER_OBSTACLE_FAIL': scene.paused = true; modals.failObstacle.classList.add('visible'); break;
                 case 'GAME_OVER_OBSTACLE_WIN': scene.paused = true; modals.win.classList.add('visible'); calculateEndGameStats(); break;
             }
-            pauseBtn.textContent = scene.paused ? 'Play' : 'Pause'; pauseBtn.classList.toggle('active', scene.paused);
-            pressureBtn.textContent = scene.showPressure ? 'Show Dye' : 'Show Pressure'; pressureBtn.classList.toggle('active', scene.showPressure);
+            pauseBtn.textContent = scene.paused ? t.play : t.pause;
+            pauseBtn.classList.toggle('active', scene.paused);
+            pressureBtn.textContent = scene.showPressure ? t.showDye : t.showPressure;
+            pressureBtn.classList.toggle('active', scene.showPressure);
         }
         function startTimer() {
             timerDiv.style.display = 'block'; game.timerValue = 10; timerDiv.textContent = game.timerValue;
@@ -661,10 +698,47 @@
             document.getElementById('flow-ratio-display').textContent = ratio;
         }
 
+        // --- I18n Logic ---
+        function setLanguage(lang) {
+            if (!translations[lang]) lang = 'en';
+            game.currentLang = lang;
+            localStorage.setItem('reynolds_lang', lang);
+
+            document.querySelectorAll('[data-lang]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            const t = translations[lang];
+            document.title = t.title;
+
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                if (t[key]) {
+                    // Use innerHTML since some translations contain HTML tags like <strong>
+                    el.innerHTML = t[key];
+                }
+            });
+            
+            // Re-render dynamic UI elements with new language
+            updateUIForState(); 
+            draw();
+        }
+        
+        document.querySelectorAll('[data-lang]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                setLanguage(e.target.dataset.lang);
+            });
+        });
+
         let resizeTimeout;
         window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => setupScene(1), 100); });
         
         // --- Initial Setup ---
+        const savedLang = localStorage.getItem('reynolds_lang');
+        const browserLang = navigator.language.split('-')[0];
+        const initialLang = savedLang || (translations[browserLang] ? browserLang : 'en');
+        
+        setLanguage(initialLang);
         resetGame();
         requestAnimationFrame(mainLoop);
     </script>
