@@ -45,22 +45,6 @@
             align-items: center;
             gap: 1rem;
         }
-        .language-selector {
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            width: 100%;
-        }
-        .lang-btn {
-            padding: 0.25rem 0.75rem;
-            font-size: 0.8rem;
-        }
-        .lang-btn.active {
-            background-color: var(--yellow-400);
-            color: var(--gray-900);
-            border-color: var(--yellow-400);
-        }
         .simulation-frame {
             display: flex;
             flex-direction: column;
@@ -146,7 +130,6 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
             gap: 0.75rem;
             padding: 0.75rem;
             background-color: var(--gray-800);
@@ -241,12 +224,6 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="language-selector">
-            <button data-lang="en" class="btn lang-btn">EN</button>
-            <button data-lang="de" class="btn lang-btn">DE</button>
-            <button data-lang="pl" class="btn lang-btn">PL</button>
-            <button data-lang="cs" class="btn lang-btn">CS</button>
-        </div>
         <main class="simulation-frame">
             <div class="grass grass-top"></div>
             <div class="middle-section">
@@ -262,44 +239,38 @@
         </main>
         
         <footer id="main-controls" class="controls-container">
-            <button id="decrease-flow" class="btn" data-translate="decreaseFlow">Decrease Flow</button>
-            <button id="increase-flow" class="btn" data-translate="increaseFlow">Increase Flow</button>
-            <button id="pause-sim" class="btn" data-translate="pause">Pause</button>
-            <button id="toggle-pressure" class="btn" data-translate="showPressure">Show Pressure</button>
-            <button id="submit-velocity-btn" class="btn" data-translate="submitVelocity">Submit Velocity</button>
+            <button id="decrease-flow" class="btn">Decrease Flow</button>
+            <button id="increase-flow" class="btn">Increase Flow</button>
+            <button id="pause-sim" class="btn">Pause</button>
+            <button id="toggle-pressure" class="btn">Show Pressure</button>
+            <button id="submit-velocity-btn" class="btn">Submit Velocity</button>
         </footer>
 
         <div id="build-controls" class="controls-container" style="display: none;">
-            <span data-translate="shape">Shape:</span>
-            <button id="shape-square-btn" class="btn active" data-translate="square">Square</button>
-            <button id="shape-circle-btn" class="btn" data-translate="circle">Circle</button>
-            <button id="shape-triangle-btn" class="btn" data-translate="triangle">Triangle</button>
-            <button id="clear-obstacles-btn" class="btn" data-translate="clearObstacles">Clear Obstacles</button>
-            <button id="flow-btn" class="btn" data-translate="goWithTheFlow">Go with the Flow!</button>
+            <span>Shape:</span>
+            <button id="shape-square-btn" class="btn active">Square</button>
+            <button id="shape-circle-btn" class="btn">Circle</button>
+            <button id="shape-triangle-btn" class="btn">Triangle</button>
+            <button id="clear-obstacles-btn" class="btn">Clear Obstacles</button>
+            <button id="flow-btn" class="btn">Go with the Flow!</button>
         </div>
     </div>
     
     <!-- MODALS -->
-    <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="welcomeTitle">Welcome to the Reynolds Challenge!</h2><p data-translate="welcomeP1">Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p data-translate="welcomeP2">You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn" data-translate="startExperiment">Start Experiment</button></div></div>
-    <div id="info-popup-velocity" class="modal-overlay"><div class="modal-content"><h3 data-translate="observeTurbulenceTitle">Observe the Turbulence</h3><p data-translate="observeTurbulenceP1">Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.</p><button id="close-velocity-popup-btn" class="btn" data-translate="nextLesson">Next Lesson</button></div></div>
-    <div id="pressure-intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="pressureIntroTitle">The Role of Pressure</h2><p data-translate="pressureIntroP1">Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.</p><p data-translate="pressureIntroP2">Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style="color: var(--yellow-400); font-size: 1.2rem;"><span id="target-velocity-display"></span></strong> and press 'Submit'.</p><button id="start-pressure-challenge-btn" class="btn" data-translate="startPressureChallenge">Start Pressure Challenge</button></div></div>
-    <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3 data-translate="observingPressureTitle">Observing Pressure</h3><p data-translate="observingPressureP1">Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!</p><p data-translate="observingPressureP2">Well done! You will now have 5 seconds to observe before the final challenge.</p><button id="close-pressure-popup-btn" class="btn" data-translate="finalChallengeBtn">Final Challenge</button></div></div>
-    <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="failTitle">Challenge Failed</h2><p data-translate="failVelocityP1">You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.</p><button id="try-again-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
-    <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2 data-translate="failTitle">Challenge Failed</h2><p data-translate="failPressureP1">You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p data-translate="failPressureP2">Your Velocity: <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | Target: <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
-    <div id="obstacle-intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="obstacleIntroTitle">Final Challenge: Build a River Bank</h2><p data-translate="obstacleIntroP1">Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.</p><p data-translate="obstacleIntroP2">The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!</p><button id="start-building-btn" class="btn" data-translate="startBuilding">Start Building</button></div></div>
-    <div id="fail-modal-obstacle" class="modal-overlay"><div class="modal-content"><h2 data-translate="failObstacleTitle">Leaky Riverbank!</h2><p data-translate="failObstacleP1">The water reached a boundary other than the outlet. Refine your design to better control the flow.</p><button id="try-again-obstacle-btn" class="btn" data-translate="tryAgain">Try Again</button></div></div>
-    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2 data-translate="winTitle">Congratulations!</h2><p data-translate="winP1">You have successfully mastered fluid dynamics and completed all challenges!</p><div><p><span data-translate="totalTime">Total Time:</span> <strong style="color: var(--cyan-300);" id="total-time-display"></strong></p><p><span data-translate="flowRatio">Outlet to inlet velocity ratio:</span> <strong style="color: var(--cyan-300);" id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn" data-translate="playAgain">Play Again</button></div></div>
+    <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2>Welcome to the Reynolds Challenge!</h2><p>Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p>You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn">Start Experiment</button></div></div>
+    <div id="info-popup-velocity" class="modal-overlay"><div class="modal-content"><h3>Observe the Turbulence</h3><p>Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.</p><button id="close-velocity-popup-btn" class="btn">Next Lesson</button></div></div>
+    <div id="pressure-intro-modal" class="modal-overlay"><div class="modal-content"><h2>The Role of Pressure</h2><p>Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.</p><p>Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style="color: var(--yellow-400); font-size: 1.2rem;"><span id="target-velocity-display"></span></strong> and press 'Submit'.</p><button id="start-pressure-challenge-btn" class="btn">Start Pressure Challenge</button></div></div>
+    <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3>Observing Pressure</h3><p>Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!</p><p>Well done! You will now have 5 seconds to observe before the final challenge.</p><button id="close-pressure-popup-btn" class="btn">Final Challenge</button></div></div>
+    <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.</p><button id="try-again-btn" class="btn">Try Again</button></div></div>
+    <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2>Challenge Failed</h2><p>You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p>Your Velocity: <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | Target: <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn">Try Again</button></div></div>
+    <div id="obstacle-intro-modal-3" class="modal-overlay"><div class="modal-content"><h2>Challenge 3: Build a River Bank</h2><p>Your task is to build an efficient channel to guide the water from the inlet on the left to the outlet at the bottom. Aim for the highest possible outlet-to-inlet velocity ratio!</p><button id="start-building-3-btn" class="btn">Start Building</button></div></div>
+    <div id="obstacle-intro-modal-4" class="modal-overlay"><div class="modal-content"><h2>Challenge 4: Split the Flow</h2><p>Now, build a channel that splits the flow to outlets at both the top and bottom. Maximize the combined flow ratio!</p><button id="start-building-4-btn" class="btn">Start Building</button></div></div>
+    <div id="obstacle-intro-modal-5" class="modal-overlay"><div class="modal-content"><h2>Final Challenge: Triple Threat</h2><p>The ultimate test: Channel the water to three outlets (top, bottom, and right). Design the most efficient system to maximize the flow ratio.</p><button id="start-building-5-btn" class="btn">Start Building</button></div></div>
+    <div id="level-win-modal" class="modal-overlay"><div class="modal-content"><h2>Level Complete!</h2><p>Excellent work! The simulation is complete.</p><p>Your Flow Ratio: <strong style="color: var(--cyan-300);" id="level-flow-ratio-display"></strong></p><button id="next-level-btn" class="btn">Next Level</button></div></div>
+    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2>Congratulations!</h2><p>You have successfully mastered fluid dynamics and completed all challenges!</p><div><p>Total Time: <strong style="color: var(--cyan-300);" id="total-time-display"></strong></p><p>Final Flow Ratio: <strong style="color: var(--cyan-300);" id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn">Play Again</button></div></div>
 
 
     <script>
-        // --- I18N Translations ---
-        const translations = {
-            en: { title: "Zittau's Reynolds Challenge", decreaseFlow: "Decrease Flow", increaseFlow: "Increase Flow", pause: "Pause", play: "Play", showPressure: "Show Pressure", showDye: "Show Dye", submitVelocity: "Submit Velocity", shape: "Shape:", square: "Square", circle: "Circle", triangle: "Triangle", clearObstacles: "Clear Obstacles", goWithTheFlow: "Go with the Flow!", welcomeTitle: "Welcome to the Reynolds Challenge!", welcomeP1: "Your goal is to create turbulence by increasing the water's velocity. Use the \"Increase Flow\" button to speed up the water.", welcomeP2: "You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.", startExperiment: "Start Experiment", observeTurbulenceTitle: "Observe the Turbulence", observeTurbulenceP1: "Notice how the smooth dye stream broke apart into swirls and eddies? That's <strong>turbulence</strong>! You will now have 5 seconds to observe.", nextLesson: "Next Lesson", pressureIntroTitle: "The Role of Pressure", pressureIntroP1: "Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.", pressureIntroP2: "Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> and press 'Submit'.", startPressureChallenge: "Start Pressure Challenge", observingPressureTitle: "Observing Pressure", observingPressureP1: "Notice the chaotic, rapidly changing pockets of high (red) and low (blue) pressure? This is the 'engine' of turbulence!", observingPressureP2: "Well done! You will now have 5 seconds to observe before the final challenge.", finalChallengeBtn: "Final Challenge", failTitle: "Challenge Failed", failVelocityP1: "You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of at least 90 is required.", tryAgain: "Try Again", failPressureP1: "You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.", failPressureP2: "Your Velocity: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Target: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Final Challenge: Build a River Bank", obstacleIntroP1: "Your final task is to build a channel to guide the water from the inlet on the left to the outlet at the bottom. Use the shape tools to create obstacles.", obstacleIntroP2: "The water must <strong>only</strong> touch the outlet. If it hits another wall, you'll have to try again!", startBuilding: "Start Building", failObstacleTitle: "Leaky Riverbank!", failObstacleP1: "The water reached a boundary other than the outlet. Refine your design to better control the flow.", winTitle: "Congratulations!", winP1: "You have successfully mastered fluid dynamics and completed all challenges!", totalTime: "Total Time:", flowRatio: "Outlet to inlet velocity ratio:", playAgain: "Play Again", peakFlow: "Peak Flow:", flowCharacter: "Flow Character:", stable: "Stable", unstable: "Unstable", chaotic: "Chaotic" },
-            de: { title: "Zittaus Reynolds-Herausforderung", decreaseFlow: "Fluss verringern", increaseFlow: "Fluss erhöhen", pause: "Pause", play: "Start", showPressure: "Druck anzeigen", showDye: "Farbe anzeigen", submitVelocity: "Geschwindigkeit bestätigen", shape: "Form:", square: "Quadrat", circle: "Kreis", triangle: "Dreieck", clearObstacles: "Hindernisse entfernen", goWithTheFlow: "Lass es fließen!", welcomeTitle: "Willkommen zur Reynolds-Herausforderung!", welcomeP1: "Ihr Ziel ist es, durch Erhöhen der Wassergeschwindigkeit Turbulenzen zu erzeugen. Verwenden Sie die Schaltfläche 'Fluss erhöhen', um das Wasser zu beschleunigen.", welcomeP2: "Sie haben <strong>10 Sekunden</strong>, um eine Geschwindigkeit von mindestens <strong>90</strong> zu erreichen.", startExperiment: "Experiment starten", observeTurbulenceTitle: "Beobachten Sie die Turbulenz", observeTurbulenceP1: "Haben Sie bemerkt, wie der glatte Farbstrom in Wirbel und Strudel zerfiel? Das ist <strong>Turbulenz</strong>! Sie haben nun 5 Sekunden Zeit, dies zu beobachten.", nextLesson: "Nächste Lektion", pressureIntroTitle: "Die Rolle des Drucks", pressureIntroP1: "Turbulenz geht nicht nur um Geschwindigkeit; sie wird durch chaotische Druckänderungen angetrieben. Hochdruckzonen drücken Flüssigkeit in Niederdruckzonen und erzeugen so die Wirbel, die Sie gesehen haben.", pressureIntroP2: "Ihre nächste Aufgabe: Stellen Sie die turbulente Strömung aus dem Gedächtnis wieder her. Setzen Sie die Geschwindigkeit zurück auf <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> und drücken Sie 'Bestätigen'.", startPressureChallenge: "Druck-Herausforderung starten", observingPressureTitle: "Druck beobachten", observingPressureP1: "Bemerken Sie die chaotischen, sich schnell ändernden Taschen von hohem (rot) und niedrigem (blau) Druck? Das ist der 'Motor' der Turbulenz!", observingPressureP2: "Gut gemacht! Sie haben nun 5 Sekunden Zeit zur Beobachtung, bevor die letzte Herausforderung beginnt.", finalChallengeBtn: "Letzte Herausforderung", failTitle: "Herausforderung gescheitert", failVelocityP1: "Sie haben die Geschwindigkeit in 10 Sekunden nicht genug erhöht, um starke Turbulenzen zu erzeugen! Eine Geschwindigkeit von mindestens 90 ist erforderlich.", tryAgain: "Erneut versuchen", failPressureP1: "Sie haben die Zielgeschwindigkeit nicht genau genug getroffen. Das Ziel ist es, ein intuitives Gefühl für die Geschwindigkeit und das Aussehen der Strömung zu entwickeln.", failPressureP2: "Ihre Geschwindigkeit: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Ziel: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Letzte Herausforderung: Bauen Sie ein Flussufer", obstacleIntroP1: "Ihre letzte Aufgabe ist es, einen Kanal zu bauen, um das Wasser vom Einlass links zum Auslass unten zu leiten. Verwenden Sie die Formwerkzeuge, um Hindernisse zu erstellen.", obstacleIntroP2: "Das Wasser darf <strong>nur</strong> den Auslass berühren. Wenn es eine andere Wand trifft, müssen Sie es erneut versuchen!", startBuilding: "Mit dem Bau beginnen", failObstacleTitle: "Undichtes Flussufer!", failObstacleP1: "Das Wasser hat eine andere Grenze als den Auslass erreicht. Verbessern Sie Ihr Design, um den Fluss besser zu kontrollieren.", winTitle: "Herzlichen Glückwunsch!", winP1: "Sie haben die Fluiddynamik erfolgreich gemeistert und alle Herausforderungen abgeschlossen!", totalTime: "Gesamtzeit:", flowRatio: "Verhältnis Auslass- zu Einlassgeschwindigkeit:", playAgain: "Nochmal spielen", peakFlow: "Spitzenfluss:", flowCharacter: "Strömungscharakter:", stable: "Stabil", unstable: "Instabil", chaotic: "Chaotisch" },
-            pl: { title: "Wyzwanie Reynoldsa w Zittau", decreaseFlow: "Zmniejsz przepływ", increaseFlow: "Zwiększ przepływ", pause: "Pauza", play: "Wznów", showPressure: "Pokaż ciśnienie", showDye: "Pokaż barwnik", submitVelocity: "Zatwierdź prędkość", shape: "Kształt:", square: "Kwadrat", circle: "Okrąg", triangle: "Trójkąt", clearObstacles: "Wyczyść przeszkody", goWithTheFlow: "Płyń z prądem!", welcomeTitle: "Witaj w Wyzwaniu Reynoldsa!", welcomeP1: "Twoim celem jest stworzenie turbulencji poprzez zwiększenie prędkości wody. Użyj przycisku 'Zwiększ przepływ', aby przyspieszyć wodę.", welcomeP2: "Masz <strong>10 sekund</strong>, aby osiągnąć prędkość co najmniej <strong>90</strong>.", startExperiment: "Rozpocznij eksperyment", observeTurbulenceTitle: "Obserwuj turbulencję", observeTurbulenceP1: "Zauważyłeś, jak gładki strumień barwnika rozpadł się na wiry? To jest <strong>turbulencja</strong>! Masz teraz 5 sekund na obserwację.", nextLesson: "Następna lekcja", pressureIntroTitle: "Rola ciśnienia", pressureIntroP1: "Turbulencja to nie tylko prędkość; jest napędzana przez chaotyczne zmiany ciśnienia. Strefy wysokiego ciśnienia pchają płyn do stref niskiego ciśnienia, tworząc wiry, które widziałeś.", pressureIntroP2: "Twoje następne zadanie: Odtwórz przepływ turbulentny z pamięci. Ustaw prędkość z powrotem na <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> i naciśnij 'Zatwierdź'.", startPressureChallenge: "Rozpocznij wyzwanie ciśnieniowe", observingPressureTitle: "Obserwacja ciśnienia", observingPressureP1: "Zauważasz chaotyczne, szybko zmieniające się kieszenie wysokiego (czerwone) i niskiego (niebieskie) ciśnienia? To jest 'silnik' turbulencji!", observingPressureP2: "Dobra robota! Masz teraz 5 sekund na obserwację przed ostatnim wyzwaniem.", finalChallengeBtn: "Ostatnie wyzwanie", failTitle: "Wyzwanie nieudane", failVelocityP1: "Nie zwiększyłeś prędkości wystarczająco w 10 sekund, aby stworzyć silną turbulencję! Wymagana jest prędkość co najmniej 90.", tryAgain: "Spróbuj ponownie", failPressureP1: "Nie dopasowałeś docelowej prędkości wystarczająco dokładnie. Celem jest rozwinięcie intuicyjnego wyczucia prędkości i wyglądu przepływu.", failPressureP2: "Twoja prędkość: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Cel: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Ostatnie wyzwanie: Zbuduj brzeg rzeki", obstacleIntroP1: "Twoim ostatnim zadaniem jest zbudowanie kanału, który poprowadzi wodę od wlotu po lewej do wylotu na dole. Użyj narzędzi do kształtowania, aby stworzyć przeszkody.", obstacleIntroP2: "Woda może dotknąć <strong>tylko</strong> wylotu. Jeśli uderzy w inną ścianę, będziesz musiał spróbować ponownie!", startBuilding: "Rozpocznij budowę", failObstacleTitle: "Nieszczelny brzeg!", failObstacleP1: "Woda dotarła do innej granicy niż wylot. Popraw swój projekt, aby lepiej kontrolować przepływ.", winTitle: "Gratulacje!", winP1: "Pomyślnie opanowałeś dynamikę płynów i ukończyłeś wszystkie wyzwania!", totalTime: "Całkowity czas:", flowRatio: "Stosunek prędkości na wylocie do wlotu:", playAgain: "Zagraj ponownie", peakFlow: "Szczytowy przepływ:", flowCharacter: "Charakter przepływu:", stable: "Stabilny", unstable: "Niestabilny", chaotic: "Chaotyczny" },
-            cs: { title: "Reynoldsova výzva v Žitavě", decreaseFlow: "Snížit průtok", increaseFlow: "Zvýšit průtok", pause: "Pauza", play: "Spustit", showPressure: "Zobrazit tlak", showDye: "Zobrazit barvivo", submitVelocity: "Potvrdit rychlost", shape: "Tvar:", square: "Čtverec", circle: "Kruh", triangle: "Trojúhelník", clearObstacles: "Odstranit překážky", goWithTheFlow: "Jdi s proudem!", welcomeTitle: "Vítejte u Reynoldsovy výzvy!", welcomeP1: "Vaším cílem je vytvořit turbulenci zvýšením rychlosti vody. Použijte tlačítko 'Zvýšit průtok' k zrychlení vody.", welcomeP2: "Máte <strong>10 sekund</strong> na dosažení rychlosti alespoň <strong>90</strong>.", startExperiment: "Spustit experiment", observeTurbulenceTitle: "Pozorujte turbulenci", observeTurbulenceP1: "Všimli jste si, jak se hladký proud barviva rozpadl na víry? To je <strong>turbulence</strong>! Nyní máte 5 sekund na pozorování.", nextLesson: "Další lekce", pressureIntroTitle: "Role tlaku", pressureIntroP1: "Turbulence není jen o rychlosti; je poháněna chaotickými změnami tlaku. Zóny vysokého tlaku tlačí tekutinu do zón nízkého tlaku, čímž vytvářejí víry, které jste viděli.", pressureIntroP2: "Váš další úkol: Znovu vytvořte turbulentní proudění zpaměti. Nastavte rychlost zpět na <strong style=\"color: var(--yellow-400); font-size: 1.2rem;\"><span id=\"target-velocity-display\"></span></strong> a stiskněte 'Potvrdit'.", startPressureChallenge: "Spustit tlakovou výzvu", observingPressureTitle: "Pozorování tlaku", observingPressureP1: "Všímáte si chaotických, rychle se měnících kapes vysokého (červená) a nízkého (modrá) tlaku? To je 'motor' turbulence!", observingPressureP2: "Výborně! Nyní máte 5 sekund na pozorování před finální výzvou.", finalChallengeBtn: "Finální výzva", failTitle: "Výzva neúspěšná", failVelocityP1: "Nezvýšili jste rychlost dostatečně během 10 sekund, abyste vytvořili silnou turbulenci! Je vyžadována rychlost alespoň 90.", tryAgain: "Zkusit znovu", failPressureP1: "Nepodařilo se vám dostatečně přesně trefit cílovou rychlost. Cílem je vyvinout intuitivní cit pro rychlost a vzhled proudění.", failPressureP2: "Vaše rychlost: <strong style=\"color: var(--red-400);\"><span id=\"your-velocity-display\"></span></strong> | Cíl: <strong style=\"color: var(--green-400);\"><span id=\"target-velocity-display-pressure-fail\"></span></strong>", obstacleIntroTitle: "Finální výzva: Postavte břeh řeky", obstacleIntroP1: "Vaším posledním úkolem je postavit kanál, který povede vodu od vtoku vlevo k výtoku dole. Použijte nástroje pro tvary k vytvoření překážek.", obstacleIntroP2: "Voda se smí dotknout <strong>pouze</strong> výtoku. Pokud narazí na jinou stěnu, budete to muset zkusit znovu!", startBuilding: "Začít stavět", failObstacleTitle: "Děravý břeh!", failObstacleP1: "Voda dosáhla jiné hranice než výtoku. Vylepšete svůj návrh pro lepší kontrolu proudění.", winTitle: "Gratulujeme!", winP1: "Úspěšně jste zvládli dynamiku kapalin a dokončili všechny výzvy!", totalTime: "Celkový čas:", flowRatio: "Poměr rychlosti na výtoku k vtoku:", playAgain: "Hrát znovu", peakFlow: "Špičkový průtok:", flowCharacter: "Charakter proudění:", stable: "Stabilní", unstable: "Nestabilní", chaotic: "Chaotické" }
-        };
-
         // --- Simulation Constants ---
         const U_FIELD = 0, V_FIELD = 1, S_FIELD = 2;
 
@@ -326,8 +297,10 @@
             infoPressure: document.getElementById('info-popup-pressure'),
             failVelocity: document.getElementById('fail-modal'),
             failPressure: document.getElementById('fail-modal-pressure'),
-            obstacleIntro: document.getElementById('obstacle-intro-modal'),
-            failObstacle: document.getElementById('fail-modal-obstacle'),
+            obstacleIntro3: document.getElementById('obstacle-intro-modal-3'),
+            obstacleIntro4: document.getElementById('obstacle-intro-modal-4'),
+            obstacleIntro5: document.getElementById('obstacle-intro-modal-5'),
+            levelWin: document.getElementById('level-win-modal'),
             win: document.getElementById('win-modal')
         };
         // Modal Buttons
@@ -335,18 +308,13 @@
         document.getElementById('close-velocity-popup-btn').addEventListener('click', handleCloseVelocityPopup);
         document.getElementById('start-pressure-challenge-btn').addEventListener('click', handleStartPressureChallenge);
         document.getElementById('close-pressure-popup-btn').addEventListener('click', handleClosePressurePopup);
-        document.getElementById('start-building-btn').addEventListener('click', () => { game.state = 'BUILD_OBSTACLE'; setupScene(3); updateUIForState(); });
+        const startBuilding = () => { game.state = 'BUILD_OBSTACLE'; setupScene(game.level); updateUIForState(); };
+        document.getElementById('start-building-3-btn').addEventListener('click', startBuilding);
+        document.getElementById('start-building-4-btn').addEventListener('click', startBuilding);
+        document.getElementById('start-building-5-btn').addEventListener('click', startBuilding);
+        document.getElementById('next-level-btn').addEventListener('click', () => { game.level++; game.state = 'INTRO_OBSTACLE'; updateUIForState(); });
         document.getElementById('try-again-btn').addEventListener('click', resetGame);
-        document.getElementById('try-again-pressure-btn').addEventListener('click', resetGame);
-        document.getElementById('try-again-obstacle-btn').addEventListener('click', () => { 
-            if (game.stage3TimerInterval) {
-                clearInterval(game.stage3TimerInterval);
-                game.stage3TimerInterval = null;
-            }
-            game.state = 'BUILD_OBSTACLE'; 
-            setupScene(3); 
-            updateUIForState(); 
-        });
+        document.getElementById('try-again-pressure-btn').addEventListener('click', resetPressureChallenge);
         document.getElementById('play-again-btn').addEventListener('click', resetGame);
         // Build Controls
         const shapeBtns = {
@@ -357,11 +325,11 @@
         shapeBtns.square.addEventListener('click', () => setShape('square'));
         shapeBtns.circle.addEventListener('click', () => setShape('circle'));
         shapeBtns.triangle.addEventListener('click', () => setShape('triangle'));
-        document.getElementById('clear-obstacles-btn').addEventListener('click', () => setupScene(3));
+        document.getElementById('clear-obstacles-btn').addEventListener('click', () => setupScene(game.level));
         document.getElementById('flow-btn').addEventListener('click', () => {
-            scene.flowVelocity = 100.0; // Set a fixed velocity for the challenge
+            scene.flowVelocity = game.targetVelocity || 100.0; // Use target velocity from earlier, with a fallback
             game.state = 'SIMULATE_OBSTACLE';
-            startStage3Timer();
+            startObstacleTimer();
             updateUIForState();
         });
 
@@ -378,7 +346,7 @@
                 this.p = new Float32Array(size); this.s = new Float32Array(size);
                 this.m = new Float32Array(size).fill(1.0);
                 this.inletMinJ = 0; this.inletMaxJ = 0;
-                this.outletMinI = 0; this.outletMaxI = 0;
+                this.outlets = [];
             }
             _idx(i, j) { return i * this.numY + j; }
             simulate(dt, numIters, overRelaxation, flowVelocity) {
@@ -392,9 +360,6 @@
                     }
                     for (let j = this.inletMinJ; j < this.inletMaxJ; j++) { this.m[this._idx(1, j)] = 0.0; }
                 }
-                if (this.outletMaxI > this.outletMinI) {
-                   for (let i = this.outletMinI; i < this.outletMaxI; i++) { this.p[this._idx(i, this.numY - 2)] = 0.0; }
-                }
                 this.p.fill(0.0);
                 solveIncompressibility(this, numIters, overRelaxation, dt);
                 extrapolate(this); advectVel(this, dt); advectSmoke(this, dt);
@@ -402,7 +367,44 @@
         }
 
         // --- Physics Functions (unchanged) ---
-        function solveIncompressibility(f, numIters, overRelaxation, dt) { const cp = f.density * f.h / dt; for (let iter = 0; iter < numIters; iter++) { for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { if (f.s[f._idx(i, j)] === 0.0) continue; let sSum = f.s[f._idx(i - 1, j)] + f.s[f._idx(i + 1, j)] + f.s[f._idx(i, j - 1)] + f.s[f._idx(i, j + 1)]; if (sSum === 0.0) continue; let div = f.u[f._idx(i + 1, j)] - f.u[f._idx(i, j)] + f.v[f._idx(i, j + 1)] - f.v[f._idx(i, j)]; let p = -div / sSum * overRelaxation; f.p[f._idx(i, j)] += cp * p; f.u[f._idx(i, j)] -= f.s[f._idx(i - 1, j)] * p; f.u[f._idx(i + 1, j)] += f.s[f._idx(i + 1, j)] * p; f.v[f._idx(i, j)] -= f.s[f._idx(i, j - 1)] * p; f.v[f._idx(i, j + 1)] += f.s[f._idx(i, j + 1)] * p; } } } }
+        function solveIncompressibility(f, numIters, overRelaxation, dt) { 
+            const cp = f.density * f.h / dt; 
+            for (let iter = 0; iter < numIters; iter++) { 
+                for (let i = 1; i < f.numX - 1; i++) { 
+                    for (let j = 1; j < f.numY - 1; j++) { 
+                        if (f.s[f._idx(i, j)] === 0.0) continue; 
+                        let sSum = f.s[f._idx(i - 1, j)] + f.s[f._idx(i + 1, j)] + f.s[f._idx(i, j - 1)] + f.s[f._idx(i, j + 1)]; 
+                        if (sSum === 0.0) continue; 
+                        let div = f.u[f._idx(i + 1, j)] - f.u[f._idx(i, j)] + f.v[f._idx(i, j + 1)] - f.v[f._idx(i, j)]; 
+                        let p = -div / sSum * overRelaxation; f.p[f._idx(i, j)] += cp * p; 
+                        f.u[f._idx(i, j)] -= f.s[f._idx(i - 1, j)] * p; 
+                        f.u[f._idx(i + 1, j)] += f.s[f._idx(i + 1, j)] * p; 
+                        f.v[f._idx(i, j)] -= f.s[f._idx(i, j - 1)] * p; 
+                        f.v[f._idx(i, j + 1)] += f.s[f._idx(i, j + 1)] * p; 
+                    } 
+                } 
+                // Neumann boundary conditions for pressure at outlets
+                if (f.outlets) {
+                    for (const outlet of f.outlets) {
+                        if (outlet.wall === 'bottom') {
+                            for (let i = outlet.min; i < outlet.max; i++) {
+                                f.p[f._idx(i, f.numY - 2)] = f.p[f._idx(i, f.numY - 3)];
+                            }
+                        }
+                        if (outlet.wall === 'top') {
+                            for (let i = outlet.min; i < outlet.max; i++) {
+                                f.p[f._idx(i, 1)] = f.p[f._idx(i, 2)];
+                            }
+                        }
+                        if (outlet.wall === 'right') {
+                            for (let j = outlet.min; j < outlet.max; j++) {
+                                f.p[f._idx(f.numX - 2, j)] = f.p[f._idx(f.numX - 3, j)];
+                            }
+                        }
+                    }
+                }
+            } 
+        }
         function extrapolate(f) { for (let i = 0; i < f.numX; i++) { f.u[f._idx(i, 0)] = f.u[f._idx(i, 1)]; f.u[f._idx(i, f.numY - 1)] = f.u[f._idx(i, f.numY - 2)]; } for (let j = 0; j < f.numY; j++) { f.v[f._idx(0, j)] = f.v[f._idx(1, j)]; f.v[f._idx(f.numX - 1, j)] = f.v[f._idx(f.numX - 2, j)]; } }
         function sampleField(f, x, y, fieldType, fieldData) { const h1 = 1.0 / f.h; const h2 = 0.5 * f.h; x = Math.max(Math.min(x, f.numX * f.h), f.h); y = Math.max(Math.min(y, f.numY * f.h), f.h); let dx = 0.0, dy = 0.0; if (fieldType === U_FIELD) dy = h2; else if (fieldType === V_FIELD) dx = h2; else if (fieldType === S_FIELD) { dx = h2; dy = h2; } const x0 = Math.min(Math.floor((x - dx) * h1), f.numX - 2); const tx = ((x - dx) - x0 * f.h) * h1; const x1 = Math.min(x0 + 1, f.numX - 2); const y0 = Math.min(Math.floor((y - dy) * h1), f.numY - 2); const ty = ((y - dy) - y0 * f.h) * h1; const y1 = Math.min(y0 + 1, f.numY - 2); const sx = 1.0 - tx; const sy = 1.0 - ty; return sx * sy * fieldData[f._idx(x0, y0)] + tx * sy * fieldData[f._idx(x1, y0)] + tx * ty * fieldData[f._idx(x1, y1)] + sx * ty * fieldData[f._idx(x0, y1)]; }
         function advectVel(f, dt) { const newU = new Float32Array(f.u); const newV = new Float32Array(f.v); const h2 = 0.5 * f.h; for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i - 1, j)] !== 0.0) { let px = i * f.h; let py = j * f.h + h2; const u = f.u[f._idx(i, j)]; const avgV = 0.25 * (f.v[f._idx(i - 1, j)] + f.v[f._idx(i, j)] + f.v[f._idx(i - 1, j + 1)] + f.v[f._idx(i, j + 1)]); px -= dt * u; py -= dt * avgV; newU[f._idx(i, j)] = sampleField(f, px, py, U_FIELD, f.u); } if (f.s[f._idx(i, j)] !== 0.0 && f.s[f._idx(i, j - 1)] !== 0.0) { let px = i * f.h + h2; let py = j * f.h; const avgU = 0.25 * (f.u[f._idx(i, j - 1)] + f.u[f._idx(i, j)] + f.u[f._idx(i + 1, j - 1)] + f.u[f._idx(i + 1, j)]); const v = f.v[f._idx(i, j)]; px -= dt * avgU; py -= dt * v; newV[f._idx(i, j)] = sampleField(f, px, py, V_FIELD, f.v); } } } f.u.set(newU); f.v.set(newV); }
@@ -413,11 +415,11 @@
         const game = {
             state: 'INTRO_VELOCITY', flowState: 'Stable', timerValue: 10, timerInterval: null,
             targetVelocity: 0, currentShape: 'square', isBuilding: false, totalGameStartTime: null,
-            stage3TimerValue: 10, stage3TimerInterval: null, currentLang: 'en'
+            level: 1, obstacleTimerValue: 10, obstacleTimerInterval: null
         };
         let offscreenCanvas, offscreenCtx, imageData;
 
-        function setupScene(stage = 1) {
+        function setupScene(level = 1) {
             const rect = container.getBoundingClientRect(); if (rect.width === 0 || rect.height === 0) return;
             canvas.width = rect.width; canvas.height = rect.height;
             const simHeight = 1.0; const cScale = canvas.height / simHeight;
@@ -430,17 +432,44 @@
             f.s.fill(0.0); // All solid by default
             for (let i = 1; i < f.numX - 1; i++) { for (let j = 1; j < f.numY - 1; j++) { f.s[f._idx(i, j)] = 1.0; } } // Fluid in the middle
 
-            if (stage <= 2) {
+            if (level <= 2) {
                 const pipeH = 0.4 * f.numY;
                 f.inletMinJ = Math.floor(0.5 * f.numY - 0.5 * pipeH); f.inletMaxJ = Math.floor(0.5 * f.numY + 0.5 * pipeH);
                 for (let j = f.inletMinJ; j < f.inletMaxJ; j++) { f.s[f._idx(1, j)] = 1.0; } // Inlet
                 for (let j = 1; j < f.numY - 1; j++) { f.s[f._idx(f.numX - 1, j)] = 1.0; } // Outlet
-            } else { // Stage 3
-                const pipeH = 0.2 * f.numY; // 50% smaller inlet
+            } else { // Obstacle levels >= 3
+                const pipeH = 0.2 * f.numY; 
                 f.inletMinJ = Math.floor(0.5 * f.numY - 0.5 * pipeH); f.inletMaxJ = Math.floor(0.5 * f.numY + 0.5 * pipeH);
                 const outletW = 0.2 * f.numX;
-                f.outletMinI = Math.floor(0.5 * f.numX - 0.5 * outletW); f.outletMaxI = Math.floor(0.5 * f.numX + 0.5 * outletW);
-                for(let i = f.outletMinI; i < f.outletMaxI; i++) { f.s[f._idx(i, f.numY - 2)] = 1.0; }
+                const outletH = 0.2 * f.numY;
+                if (level === 3) {
+                    const outletMinI = Math.floor(0.5 * f.numX - 0.5 * outletW);
+                    const outletMaxI = Math.floor(0.5 * f.numX + 0.5 * outletW);
+                    f.outlets.push({ wall: 'bottom', min: outletMinI, max: outletMaxI });
+                    for(let i = outletMinI; i < outletMaxI; i++) { f.s[f._idx(i, f.numY - 2)] = 1.0; }
+                } else if (level === 4) {
+                    const outletMinI = Math.floor(0.5 * f.numX - 0.5 * outletW);
+                    const outletMaxI = Math.floor(0.5 * f.numX + 0.5 * outletW);
+                    f.outlets.push({ wall: 'bottom', min: outletMinI, max: outletMaxI });
+                    f.outlets.push({ wall: 'top', min: outletMinI, max: outletMaxI });
+                    for(let i = outletMinI; i < outletMaxI; i++) { 
+                        f.s[f._idx(i, f.numY - 2)] = 1.0; // bottom
+                        f.s[f._idx(i, 1)] = 1.0; // top
+                    }
+                } else if (level === 5) {
+                    const outletMinI_bt = Math.floor(0.5 * f.numX - 0.5 * outletW);
+                    const outletMaxI_bt = Math.floor(0.5 * f.numX + 0.5 * outletW);
+                    const outletMinJ_r = Math.floor(0.5 * f.numY - 0.5 * outletH);
+                    const outletMaxJ_r = Math.floor(0.5 * f.numY + 0.5 * outletH);
+                    f.outlets.push({ wall: 'bottom', min: outletMinI_bt, max: outletMaxI_bt });
+                    f.outlets.push({ wall: 'top', min: outletMinI_bt, max: outletMaxI_bt });
+                    f.outlets.push({ wall: 'right', min: outletMinJ_r, max: outletMaxJ_r });
+                    for(let i = outletMinI_bt; i < outletMaxI_bt; i++) { 
+                        f.s[f._idx(i, f.numY - 2)] = 1.0; // bottom
+                        f.s[f._idx(i, 1)] = 1.0; // top
+                    }
+                    for(let j = outletMinJ_r; j < outletMaxJ_r; j++) { f.s[f._idx(f.numX-2, j)] = 1.0; } // right
+                }
             }
             
             offscreenCanvas = document.createElement('canvas'); offscreenCanvas.width = f.numX; offscreenCanvas.height = f.numY;
@@ -483,8 +512,19 @@
                         if (i === 1 && j >= f.inletMinJ && j < f.inletMaxJ) {
                              data.set([67, 232, 249, 255], idx); // Inlet: cyan
                         }
-                        if (j === f.numY - 2 && i >= f.outletMinI && i < f.outletMaxI) {
-                            data.set([74, 222, 128, 255], idx); // Outlet: green
+                        let isOutlet = false;
+                        if (f.outlets) {
+                            for (const outlet of f.outlets) {
+                                if ((outlet.wall === 'bottom' && j === f.numY - 2 && i >= outlet.min && i < outlet.max) ||
+                                    (outlet.wall === 'top' && j === 1 && i >= outlet.min && i < outlet.max) ||
+                                    (outlet.wall === 'right' && i === f.numX - 2 && j >= outlet.min && j < outlet.max)) {
+                                    isOutlet = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (isOutlet) {
+                             data.set([74, 222, 128, 255], idx); // Outlet: green
                         }
                     }
                 }
@@ -493,10 +533,8 @@
             ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
             
-            const t = translations[game.currentLang];
-            const flowStateText = t[game.flowState.toLowerCase()] || game.flowState;
             const flowStateClass = `flow-state-${game.flowState.toLowerCase()}`;
-            infoDiv.innerHTML = `<p>${t.peakFlow} <span class="font-semibold">${scene.flowVelocity.toFixed(2)}</span></p><p>${t.flowCharacter} <span class="font-semibold ${flowStateClass}">${flowStateText}</span></p>`;
+            infoDiv.innerHTML = `<p>Peak Flow: <span class="font-semibold">${scene.flowVelocity.toFixed(2)}</span></p><p>Flow Character: <span class="font-semibold ${flowStateClass}">${game.flowState}</span></p>`;
         }
         
         function updateUIForState() {
@@ -504,8 +542,6 @@
             mainControls.style.display = 'none'; buildControls.style.display = 'none';
             timerDiv.style.display = 'none'; infoDiv.style.display = 'block';
             canalDiv.style.display = 'flex'; outflowDiv.style.display = 'block';
-            
-            const t = translations[game.currentLang];
 
             const showMainControls = () => {
                 mainControls.style.display = 'flex';
@@ -540,25 +576,21 @@
                     break;
                 case 'POST_CHALLENGE_PRESSURE': showMainControls(); scene.paused = true; modals.infoPressure.classList.add('visible'); pressureBtn.style.display = 'inline-block'; break;
                 case 'GAME_OVER_PRESSURE_FAIL': scene.paused = true; document.getElementById('your-velocity-display').textContent = scene.flowVelocity.toFixed(2); document.getElementById('target-velocity-display-pressure-fail').textContent = game.targetVelocity.toFixed(2); modals.failPressure.classList.add('visible'); break;
-                case 'INTRO_OBSTACLE': scene.paused = true; modals.obstacleIntro.classList.add('visible'); break;
+                case 'INTRO_OBSTACLE': scene.paused = true; modals[`obstacleIntro${game.level}`].classList.add('visible'); break;
                 case 'BUILD_OBSTACLE': scene.paused = true; buildControls.style.display = 'flex'; canalDiv.style.display = 'none'; outflowDiv.style.display = 'none'; infoDiv.style.display = 'none'; break;
                 case 'SIMULATE_OBSTACLE':
-                    scene.paused = false;
-                    buildControls.style.display = 'none';
+                    scene.paused = false; buildControls.style.display = 'none';
                     mainControls.style.display = 'flex';
                     Array.from(mainControls.children).forEach(btn => btn.style.display = 'none');
                     pressureBtn.style.display = 'inline-block';
-                    canalDiv.style.display = 'none';
-                    outflowDiv.style.display = 'none';
+                    canalDiv.style.display = 'none'; outflowDiv.style.display = 'none';
                     infoDiv.style.display = 'none';
                     break;
-                case 'GAME_OVER_OBSTACLE_FAIL': scene.paused = true; modals.failObstacle.classList.add('visible'); break;
-                case 'GAME_OVER_OBSTACLE_WIN': scene.paused = true; modals.win.classList.add('visible'); calculateEndGameStats(); break;
+                case 'LEVEL_WIN': scene.paused = true; modals.levelWin.classList.add('visible'); break;
+                case 'FINAL_WIN': scene.paused = true; modals.win.classList.add('visible'); calculateEndGameStats(); break;
             }
-            pauseBtn.textContent = scene.paused ? t.play : t.pause;
-            pauseBtn.classList.toggle('active', scene.paused);
-            pressureBtn.textContent = scene.showPressure ? t.showDye : t.showPressure;
-            pressureBtn.classList.toggle('active', scene.showPressure);
+            pauseBtn.textContent = scene.paused ? 'Play' : 'Pause'; pauseBtn.classList.toggle('active', scene.paused);
+            pressureBtn.textContent = scene.showPressure ? 'Show Dye' : 'Show Pressure'; pressureBtn.classList.toggle('active', scene.showPressure);
         }
         function startTimer() {
             timerDiv.style.display = 'block'; game.timerValue = 10; timerDiv.textContent = game.timerValue;
@@ -573,56 +605,60 @@
                 }
             }, 1000);
         }
-        function startStage3Timer() {
+        function handleObstacleLevelEnd() {
+            scene.paused = true;
+            if (game.level < 5) {
+                const ratio = calculateFlowRatio();
+                document.getElementById('level-flow-ratio-display').textContent = ratio;
+                game.state = 'LEVEL_WIN';
+            } else {
+                game.state = 'FINAL_WIN';
+            }
+            updateUIForState();
+        }
+        function startObstacleTimer() {
             timerDiv.style.display = 'block';
-            game.stage3TimerValue = 10;
-            timerDiv.textContent = game.stage3TimerValue;
-            if (game.stage3TimerInterval) clearInterval(game.stage3TimerInterval);
-            game.stage3TimerInterval = setInterval(() => {
-                game.stage3TimerValue--;
-                timerDiv.textContent = game.stage3TimerValue;
-                if (game.stage3TimerValue <= 0) {
-                    clearInterval(game.stage3TimerInterval);
-                    game.stage3TimerInterval = null;
-                    game.state = 'GAME_OVER_OBSTACLE_WIN';
-                    updateUIForState();
+            switch (game.level) {
+                case 3: game.obstacleTimerValue = 7; break;
+                case 4: game.obstacleTimerValue = 15; break;
+                case 5: game.obstacleTimerValue = 20; break;
+                default: game.obstacleTimerValue = 10;
+            }
+            timerDiv.textContent = game.obstacleTimerValue;
+            if (game.obstacleTimerInterval) clearInterval(game.obstacleTimerInterval);
+            game.obstacleTimerInterval = setInterval(() => {
+                game.obstacleTimerValue--;
+                timerDiv.textContent = game.obstacleTimerValue;
+                if (game.obstacleTimerValue <= 0) {
+                    clearInterval(game.obstacleTimerInterval);
+                    game.obstacleTimerInterval = null;
+                    handleObstacleLevelEnd();
                 }
             }, 1000);
         }
-        function checkWinLossStage3() {
-            const f = scene.fluid; if (!f) return;
-            const endGame = (newState) => {
-                if (game.stage3TimerInterval) { clearInterval(game.stage3TimerInterval); game.stage3TimerInterval = null; }
-                game.state = newState; updateUIForState();
-            };
-            for (let i = f.outletMinI; i < f.outletMaxI; i++) {
-                if (f.m[f._idx(i, f.numY - 2)] < 0.5) { endGame('GAME_OVER_OBSTACLE_WIN'); return; }
-            }
-            let lost = false;
-            for (let j = 1; j < f.numY - 1; j++) { if (f.m[f._idx(f.numX - 2, j)] < 0.9) { lost = true; break; } }
-            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
-            for (let i = 1; i < f.numX - 1; i++) { if (f.m[f._idx(i, 1)] < 0.9) { lost = true; break; } }
-            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
-            for (let i = 1; i < f.outletMinI; i++) { if (f.m[f._idx(i, f.numY - 2)] < 0.9) { lost = true; break; } }
-            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
-            for (let i = f.outletMaxI; i < f.numX - 1; i++) { if (f.m[f._idx(i, f.numY - 2)] < 0.9) { lost = true; break; } }
-            if (lost) { endGame('GAME_OVER_OBSTACLE_FAIL'); return; }
-        }
+        
         function mainLoop() {
             if (!scene.fluid) { setupScene(); requestAnimationFrame(mainLoop); return; }
             if (!scene.paused) {
                 scene.fluid.simulate(scene.dt, scene.numIters, scene.overRelaxation, scene.flowVelocity);
-                if (game.state === 'SIMULATE_OBSTACLE') checkWinLossStage3();
             }
             updateFlowCharacter(); draw();
             requestAnimationFrame(mainLoop);
         }
         function resetGame() {
             if (game.timerInterval) clearInterval(game.timerInterval);
-            if (game.stage3TimerInterval) clearInterval(game.stage3TimerInterval);
-            game.stage3TimerInterval = null;
+            if (game.obstacleTimerInterval) clearInterval(game.obstacleTimerInterval);
+            game.obstacleTimerInterval = null;
+            game.level = 1;
             setupScene(1); scene.flowVelocity = 5.0; game.totalGameStartTime = Date.now();
+            game.targetVelocity = 0; // Reset target velocity
             game.state = 'INTRO_VELOCITY'; updateUIForState();
+        }
+        function resetPressureChallenge() {
+            setupScene(2);
+            scene.flowVelocity = 5.0;
+            game.state = 'CHALLENGE_PRESSURE';
+            updateUIForState();
         }
 
         // --- Event Handlers & UI Logic ---
@@ -651,7 +687,7 @@
         function handleClosePressurePopup() {
             modals.infoPressure.classList.remove('visible'); scene.paused = false;
             mainControls.style.display = 'flex'; Array.from(mainControls.children).forEach(btn => btn.style.display = 'none'); pressureBtn.style.display = 'inline-block';
-            setTimeout(() => { game.state = 'INTRO_OBSTACLE'; updateUIForState(); }, 5000);
+            setTimeout(() => { game.level = 3; game.state = 'INTRO_OBSTACLE'; updateUIForState(); }, 5000);
         }
         function setShape(shape) {
             game.currentShape = shape;
@@ -685,62 +721,75 @@
         canvas.addEventListener('mousedown', e => { if (game.state === 'BUILD_OBSTACLE') { game.isBuilding = true; handleCanvasDraw(e); } });
         canvas.addEventListener('mousemove', e => { if (game.state === 'BUILD_OBSTACLE') handleCanvasDraw(e); });
         canvas.addEventListener('mouseup', () => { game.isBuilding = false; });
+        function calculateFlowRatio() {
+            const f = scene.fluid;
+            if (!f) return "N/A";
+
+            let inletVelSum = 0;
+            let outletVelSum = 0;
+            const offset = 3; // "several cells" away from the boundary for a more stable reading
+
+            // Sum of inflow velocity, measured a few cells into the domain
+            const inletSampleI = 1 + offset;
+            if (inletSampleI < f.numX - 1) {
+                for(let j = f.inletMinJ; j < f.inletMaxJ; j++) {
+                    // u[i,j] is the velocity between cell (i-1, j) and (i, j)
+                    inletVelSum += Math.abs(f.u[f._idx(inletSampleI, j)]);
+                }
+            }
+
+            // Sum of outflow velocity, measured a few cells away from the boundary
+            for (const outlet of f.outlets) {
+                 if (outlet.wall === 'bottom') {
+                     // Outlet is at j = f.numY - 2. We sample upwards.
+                     // v[i,j] is velocity between (i, j-1) and (i,j)
+                     // The actual exit velocity is v[i, f.numY-1]. We sample at v[i, f.numY-1-offset]
+                     const sampleJ = f.numY - 1 - offset;
+                     if (sampleJ > 1) {
+                         for (let i = outlet.min; i < outlet.max; i++) {
+                             outletVelSum += Math.abs(f.v[f._idx(i, sampleJ)]);
+                         }
+                     }
+                 }
+                 else if (outlet.wall === 'top') {
+                     // Outlet is at j = 1. We sample downwards.
+                     // The actual exit velocity is v[i, 1]. We sample at v[i, 1+offset]
+                     const sampleJ = 1 + offset;
+                     if (sampleJ < f.numY - 1) {
+                        for (let i = outlet.min; i < outlet.max; i++) {
+                            outletVelSum += Math.abs(f.v[f._idx(i, sampleJ)]);
+                        }
+                     }
+                 }
+                 else if (outlet.wall === 'right') {
+                     // Outlet is at i = f.numX - 2. We sample leftwards.
+                     // The actual exit velocity is u[f.numX-1, j]. We sample at u[f.numX-1-offset, j]
+                     const sampleI = f.numX - 1 - offset;
+                     if (sampleI > 1) {
+                        for (let j = outlet.min; j < outlet.max; j++) {
+                            outletVelSum += Math.abs(f.u[f._idx(sampleI, j)]);
+                        }
+                     }
+                 }
+            }
+
+            return (inletVelSum > 0) ? (outletVelSum / inletVelSum).toFixed(2) : "N/A";
+        }
         function calculateEndGameStats() {
             const totalMs = Date.now() - game.totalGameStartTime;
             const minutes = Math.floor(totalMs / 60000);
             const seconds = ((totalMs % 60000) / 1000).toFixed(0);
             document.getElementById('total-time-display').textContent = `${minutes}:${seconds.padStart(2, '0')}`;
-            const f = scene.fluid;
-            let inletVel = 0, outletVel = 0;
-            for(let j = f.inletMinJ; j < f.inletMaxJ; j++) { inletVel += f.u[f._idx(1, j)]; }
-            for(let i = f.outletMinI; i < f.outletMaxI; i++) { outletVel += Math.abs(f.v[f._idx(i, f.numY-2)]); }
-            const ratio = (inletVel > 0) ? (outletVel / inletVel).toFixed(2) : "N/A";
-            document.getElementById('flow-ratio-display').textContent = ratio;
+            document.getElementById('flow-ratio-display').textContent = calculateFlowRatio();
         }
-
-        // --- I18n Logic ---
-        function setLanguage(lang) {
-            if (!translations[lang]) lang = 'en';
-            game.currentLang = lang;
-            localStorage.setItem('reynolds_lang', lang);
-
-            document.querySelectorAll('[data-lang]').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === lang);
-            });
-
-            const t = translations[lang];
-            document.title = t.title;
-
-            document.querySelectorAll('[data-translate]').forEach(el => {
-                const key = el.dataset.translate;
-                if (t[key]) {
-                    // Use innerHTML since some translations contain HTML tags like <strong>
-                    el.innerHTML = t[key];
-                }
-            });
-            
-            // Re-render dynamic UI elements with new language
-            updateUIForState(); 
-            draw();
-        }
-        
-        document.querySelectorAll('[data-lang]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                setLanguage(e.target.dataset.lang);
-            });
-        });
 
         let resizeTimeout;
-        window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => setupScene(1), 100); });
+        window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => setupScene(game.level), 100); });
         
         // --- Initial Setup ---
-        const savedLang = localStorage.getItem('reynolds_lang');
-        const browserLang = navigator.language.split('-')[0];
-        const initialLang = savedLang || (translations[browserLang] ? browserLang : 'en');
-        
-        setLanguage(initialLang);
         resetGame();
         requestAnimationFrame(mainLoop);
     </script>
 </body>
+
 </html>
