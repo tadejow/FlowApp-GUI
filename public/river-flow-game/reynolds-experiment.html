@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Zittau's Reynolds Challenge</title>
     <style>
@@ -22,9 +22,22 @@
             --concrete-dark: #848b91;
             --obstacle-color: #6b4f3a; /* Brown for obstacles */
         }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+        }
         body { 
             margin: 0; 
-            background-color: var(--gray-900); 
             color: white;
             display: flex; 
             flex-direction: column;
@@ -35,8 +48,11 @@
             overflow: hidden;
             padding: 1rem;
             box-sizing: border-box;
+            background: linear-gradient(-45deg, #111827, #1f2937, #1f3a47, #111827);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
         }
-        .app-container {
+        #game-view, .app-container {
             width: 100%;
             max-width: 64rem;
             margin: auto;
@@ -44,6 +60,9 @@
             flex-direction: column;
             align-items: center;
             gap: 1rem;
+        }
+        #game-view {
+            display: none; /* Initially hidden */
         }
         .simulation-frame {
             display: flex;
@@ -167,6 +186,85 @@
             border-color: var(--gray-700);
         }
 
+        /* --- Welcome Screen --- */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        .welcome-panel {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--gray-700);
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        .welcome-panel h1 {
+            color: var(--cyan-300);
+            margin-top: 0;
+            font-size: 2.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+        }
+        .welcome-panel p {
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .welcome-panel .controls-container {
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            gap: 1rem;
+        }
+        .btn-primary {
+            background-color: var(--cyan-400);
+            color: var(--gray-900);
+            border-color: var(--cyan-300);
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            animation: pulse 2s infinite;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--cyan-300);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.2);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--cyan-300);
+            border: 1px solid var(--gray-600);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: var(--gray-700);
+            border-color: var(--cyan-400);
+            transform: translateY(-3px);
+        }
+        #lang-switcher {
+            margin-top: 1.5rem;
+            padding: 0.5rem;
+            background: rgba(17, 24, 39, 0.5);
+            border-radius: 0.5rem;
+        }
+
         /* --- Modal and UI Styles --- */
         .modal-overlay {
             position: fixed;
@@ -237,6 +335,12 @@
             padding: 0.5rem;
             min-width: 40px;
             background-color: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            transition: all 0.3s ease;
+        }
+        .lang-btn:hover {
+            background-color: var(--gray-700);
+            color: white;
         }
         .lang-btn.active {
             background-color: var(--cyan-400);
@@ -246,38 +350,57 @@
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <main class="simulation-frame">
-            <div class="grass grass-top"></div>
-            <div class="middle-section">
-                <div id="canal-div" class="canal"></div>
-                <div class="canvas-container">
-                    <canvas id="fluid-canvas"></canvas>
-                    <div id="info"></div>
-                    <div id="timer">10</div>
-                </div>
-                <div id="outflow-div" class="canal canal-outflow"></div>
+    <div id="welcome-screen">
+        <div class="welcome-panel">
+            <h1 data-t="welcomeModal.title">Zittau's Reynolds Challenge</h1>
+            <p data-t="welcomeModal.desc">An interactive game about fluid dynamics, inspired by the Mandau river.</p>
+            <div class="controls-container">
+                <button id="start-game-btn" class="btn btn-primary" data-t="welcomeModal.startBtn">Start Game</button>
+                <button id="learn-btn" class="btn btn-secondary" data-t="welcomeModal.learnBtn">Learn How Water Flows</button>
+                <button id="ranking-btn" class="btn btn-secondary" data-t="welcomeModal.rankingBtn">Ranking</button>
             </div>
-            <div class="grass grass-bottom"></div>
-        </main>
-        
-        <footer id="main-controls" class="controls-container">
-            <button id="decrease-flow" class="btn" data-t="mainControls.decreaseFlow">Decrease Flow</button>
-            <button id="increase-flow" class="btn" data-t="mainControls.increaseFlow">Increase Flow</button>
-            <button id="pause-sim" class="btn" data-t="mainControls.pause">Pause</button>
-            <button id="toggle-pressure" class="btn" data-t="mainControls.showPressure">Show Pressure</button>
-            <button id="submit-velocity-btn" class="btn" data-t="mainControls.submitVelocity">Submit Velocity</button>
-        </footer>
+            <div id="lang-switcher" class="controls-container">
+                <button class="btn lang-btn active" data-lang="en">EN</button>
+                <button class="btn lang-btn" data-lang="de">DE</button>
+                <button class="btn lang-btn" data-lang="pl">PL</button>
+                <button class="btn lang-btn" data-lang="cz">CZ</button>
+            </div>
+        </div>
+    </div>
 
-        <div id="build-controls" class="controls-container" style="display: none;">
-            <button id="build-channel-btn" class="btn" data-t="buildControls.buildChannel">Build Channel</button>
-            <button id="clear-obstacles-btn" class="btn" data-t="buildControls.clearObstacles">Clear Obstacles</button>
-            <button id="flow-btn" class="btn" data-t="buildControls.goWithFlow">Go with the Flow!</button>
+    <div id="game-view">
+        <div class="app-container">
+            <main class="simulation-frame">
+                <div class="grass grass-top"></div>
+                <div class="middle-section">
+                    <div id="canal-div" class="canal"></div>
+                    <div class="canvas-container">
+                        <canvas id="fluid-canvas"></canvas>
+                        <div id="info"></div>
+                        <div id="timer">10</div>
+                    </div>
+                    <div id="outflow-div" class="canal canal-outflow"></div>
+                </div>
+                <div class="grass grass-bottom"></div>
+            </main>
+            
+            <footer id="main-controls" class="controls-container">
+                <button id="decrease-flow" class="btn" data-t="mainControls.decreaseFlow">Decrease Flow</button>
+                <button id="increase-flow" class="btn" data-t="mainControls.increaseFlow">Increase Flow</button>
+                <button id="pause-sim" class="btn" data-t="mainControls.pause">Pause</button>
+                <button id="toggle-pressure" class="btn" data-t="mainControls.showPressure">Show Pressure</button>
+                <button id="submit-velocity-btn" class="btn" data-t="mainControls.submitVelocity">Submit Velocity</button>
+            </footer>
+
+            <div id="build-controls" class="controls-container" style="display: none;">
+                <button id="build-channel-btn" class="btn" data-t="buildControls.buildChannel">Build Channel</button>
+                <button id="clear-obstacles-btn" class="btn" data-t="buildControls.clearObstacles">Clear Obstacles</button>
+                <button id="flow-btn" class="btn" data-t="buildControls.goWithFlow">Go with the Flow!</button>
+            </div>
         </div>
     </div>
     
     <!-- MODALS -->
-    <div id="welcome-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="welcomeModal.title">Zittau's Reynolds Challenge</h2><p data-t="welcomeModal.desc">An interactive game about fluid dynamics, inspired by the Mandau river.</p><div class="controls-container"><button id="start-game-btn" class="btn" data-t="welcomeModal.startBtn">Start Game</button><button id="learn-btn" class="btn" data-t="welcomeModal.learnBtn">Learn How Water Flows</button><button id="ranking-btn" class="btn" data-t="welcomeModal.rankingBtn">Ranking</button></div><div id="lang-switcher" class="controls-container" style="margin-top: 1rem; padding: 0.25rem; background: var(--gray-900);"><button class="btn lang-btn active" data-lang="en">EN</button><button class="btn lang-btn" data-lang="de">DE</button><button class="btn lang-btn" data-lang="pl">PL</button><button class="btn lang-btn" data-lang="cz">CZ</button></div></div></div>
     <div id="learn-modal" class="modal-overlay"><div class="modal-content" style="max-width: 700px; text-align: left;"><div id="learn-selection"><h3 data-t="learnModal.title">Learn How Water Flows</h3><p data-t="learnModal.desc">Choose your level of detail to learn about the physics of fluids.</p><div class="controls-container"><button id="learn-beginner-btn" class="btn" data-t="learnModal.beginnerBtn">Beginner</button><button id="learn-advanced-btn" class="btn" data-t="learnModal.advancedBtn">Advanced</button></div></div><div id="learn-content" style="display: none;"><h3 id="learn-title"></h3><div id="learn-text"></div></div><button id="learn-back-btn" class="btn" data-t="learnModal.backBtn" style="margin-top: 1.5rem;">Back</button></div></div>
     
     <div id="intro-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="introModal.title">Welcome to the Reynolds Challenge!</h2><p data-t="introModal.desc1">Your goal is to create turbulence by increasing the water's velocity. Use the "Increase Flow" button to speed up the water.</p><p data-t="introModal.desc2">You have <strong>10 seconds</strong> to reach a velocity of at least <strong>90</strong>.</p><button id="start-btn" class="btn" data-t="introModal.startBtn">Start Experiment</button></div></div>
@@ -358,6 +481,8 @@
         };
 
         // --- DOM Elements ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameView = document.getElementById('game-view');
         const canvas = document.getElementById('fluid-canvas');
         const infoDiv = document.getElementById('info');
         const ctx = canvas.getContext('2d');
@@ -377,7 +502,6 @@
         const flowBtn = document.getElementById('flow-btn');
         // Modals
         const modals = {
-            welcome: document.getElementById('welcome-modal'),
             learn: document.getElementById('learn-modal'),
             intro: document.getElementById('intro-modal'),
             infoVelocity: document.getElementById('info-popup-velocity'),
@@ -670,6 +794,15 @@
         }
         
         function updateUIForState() {
+            // Main view toggle
+            if (game.state === 'WELCOME' || game.state === 'LEARN') {
+                welcomeScreen.style.display = 'flex';
+                gameView.style.display = 'none';
+            } else {
+                welcomeScreen.style.display = 'none';
+                gameView.style.display = 'flex';
+            }
+
             Object.values(modals).forEach(m => m.classList.remove('visible'));
             mainControls.style.display = 'none'; buildControls.style.display = 'none';
             timerDiv.style.display = 'none'; infoDiv.style.display = 'block';
@@ -682,7 +815,9 @@
             };
 
             switch (game.state) {
-                case 'WELCOME': modals.welcome.classList.add('visible'); scene.paused = true; break;
+                case 'WELCOME':
+                    scene.paused = true;
+                    break;
                 case 'LEARN': 
                     modals.learn.classList.add('visible'); 
                     scene.paused = true; 
