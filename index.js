@@ -178,10 +178,10 @@ const translations = {
 };
 
 const GAMES = {
-  1: { url: './public/falling-drop/index.html', name: 'Falling Drop' },
-  2: { url: './public/duck-race-game/index.html', name: 'Duck Race' },
-  4: { url: './public/hex-connect/index.html', name: 'Hex Connect' },
-  5: { url: './public/river-guardian-game/index.html', name: 'River Guardian' }
+  1: { url: './falling-drop/index.html', name: 'Falling Drop' },
+  2: { url: './duck-race-game/index.html', name: 'Duck Race' },
+  4: { url: './hex-connect/index.html', name: 'Hex Connect' },
+  5: { url: './river-guardian-game/index.html', name: 'River Guardian' }
 };
 
 const SkyBlue = '#00A9E0';
