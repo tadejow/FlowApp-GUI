@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -12,16 +13,18 @@ const translations = {
     loginTitle: "Choose your nickname",
     loginPlaceholder: "Your nickname...",
     loginButton: "Start Game",
-    station1Title: "Station I: Bridge over the Mandau",
-    station1Text: "You are standing on the Bridge over the Mandau. This river winds through three countries and holds many stories. Unfortunately, it also holds some trash. Your first task is to help clean this section of the river. Play the game to make a difference!",
+    station1Title: "Station I: Falling Drop",
+    station1Text: "Every journey of water starts with a single drop of rain…\nHigh in the clouds, tiny drops come together until they grow heavy and fall toward the earth.\nBut not every drop has an easy path. Some are caught by birds, leaves, or clouds before they ever touch the Earth.\nYour mission begins up here — guide the drop safely to the ground, and discover how small changes in the sky can lead to big changes below.",
     station2Title: "Station II: Water Flow Simulation",
-    station2Text: "Water is a dynamic force. Below, you can see two simulations of water flow. The first shows a 2D representation, helpful for understanding surface movement. The second is a 3D simulation, which gives a better sense of volume and depth. Observe how water interacts with its environment in both models.",
-    station3Title: "Station III: Falling Drop",
-    station3Text: "Guide the falling drop safely to the ground, avoiding obstacles along the way. Play the game to test your reflexes!",
+    station2Text: "Water can flow smoothly (laminar) or become chaotic (turbulent). This transition is key in river engineering. In the Reynolds Challenge, you'll experiment with fluid dynamics to understand these forces. Play the game to see it in action!",
+    station3Title: "Station III: River Vortex",
+    station3Text: "Vortices are swirling motions in water, often seen behind bridge piers or at river bends. They play a crucial role in mixing nutrients and sediments but can also pose navigational challenges. In this game, navigate the powerful river vortex and test your skills!",
     station4Title: "Station IV: Hex Connect",
     station4Text: "Connect the hexagonal pipes to guide the water from the source to the destination. A puzzle of logic and flow!",
     station5Title: "Station V: Ecosystem Impact",
     station5Text: "The river's ecosystem is a delicate balance. Even fun activities can have an impact. Race your duck down the river to see how objects and flow interact! Play the game to learn more.",
+    station6Title: "Station VI: Bridge over the Mandau",
+    station6Text: "You are standing on the Bridge over the Mandau. This river winds through three countries and holds many stories. Unfortunately, it also holds some trash. Your first task is to help clean this section of the river. Play the game to make a difference!",
     slider1Label: "How far is the source of the water from city?",
     simulationTitle: "Simulation Results",
     nextStationButton: (station) => `Next Station ${station}`,
@@ -39,6 +42,7 @@ const translations = {
     fullscreen: "Fullscreen",
     enterFullscreen: "Enter fullscreen",
     exitFullscreen: "Exit fullscreen",
+    comingSoon: "Coming Soon...",
   },
   pl: {
     splashSubtitle: "Wyjątkowe doświadczenie rzeki Mandau",
@@ -46,16 +50,18 @@ const translations = {
     loginTitle: "Wybierz swój nick",
     loginPlaceholder: "Twój nick...",
     loginButton: "Rozpocznij grę",
-    station1Title: "Stacja I: Most na Mandau",
-    station1Text: "Stoisz na moście nad Mandau. Ta rzeka wije się przez trzy kraje i kryje w sobie wiele historii. Niestety, kryje też trochę śmieci. Twoim pierwszym zadaniem jest pomoc w oczyszczeniu tego odcinka rzeki. Zagraj w grę, aby coś zmienić!",
+    station1Title: "Stacja I: Spadająca Kropla",
+    station1Text: "Każda podróż wody zaczyna się od jednej kropli deszczu…\nWysoko w chmurach małe kropelki łączą się, aż stają się ciężkie i spadają na ziemię.\nAle nie każda kropla ma łatwą drogę. Niektóre są łapane przez ptaki, liście lub chmury, zanim dotkną Ziemi.\nTwoja misja zaczyna się tutaj — poprowadź kroplę bezpiecznie na ziemię i odkryj, jak małe zmiany na niebie mogą prowadzić do wielkich zmian na dole.",
     station2Title: "Stacja II: Symulacja przepływu wody",
-    station2Text: "Woda to dynamiczna siła. Poniżej widać dwie symulacje przepływu wody. Pierwsza pokazuje reprezentację 2D, pomocną w zrozumieniu ruchu powierzchniowego. Druga to symulacja 3D, która daje lepsze poczucie objętości i głębi. Obserwuj, jak woda oddziałuje ze swoim otoczeniem w obu modelach.",
-    station3Title: "Stacja III: Spadająca Kropla",
-    station3Text: "Poprowadź spadającą kroplę bezpiecznie na ziemię, omijając przeszkody po drodze. Zagraj w grę, aby sprawdzić swój refleks!",
+    station2Text: "Woda może płynąć spokojnie (laminarnie) lub chaotycznie (turbulentnie). Ta zmiana jest kluczowa w inżynierii rzecznej. W Wyzwaniu Reynoldsa będziesz eksperymentować z dynamiką płynów, aby zrozumieć te siły. Zagraj w grę, aby zobaczyć to w akcji!",
+    station3Title: "Stacja III: Wir Rzeczny",
+    station3Text: "Wiry to kręcące się ruchy w wodzie, często widoczne za filarami mostów lub na zakrętach rzek. Odgrywają kluczową rolę w mieszaniu składników odżywczych i osadów, ale mogą również stanowić wyzwanie dla nawigacji. W tej grze zmierz się z potężnym wirem rzecznym i przetestuj swoje umiejętności!",
     station4Title: "Stacja IV: Hex Connect",
     station4Text: "Połącz sześciokątne rury, aby poprowadzić wodę od źródła do celu. Logiczna łamigłówka przepływu!",
     station5Title: "Stacja V: Wpływ na ekosystem",
     station5Text: "Ekosystem rzeki to delikatna równowaga. Nawet zabawa może mieć na niego wpływ. Puść swoją kaczkę z prądem rzeki, aby zobaczyć, jak obiekty i przepływ na siebie oddziałują! Zagraj w grę, aby dowiedzieć się więcej.",
+    station6Title: "Stacja VI: Most na Mandau",
+    station6Text: "Stoisz na moście nad Mandau. Ta rzeka wije się przez trzy kraje i kryje w sobie wiele historii. Niestety, kryje też trochę śmieci. Twoim pierwszym úkolem jest pomoc w oczyszczeniu tego odcinka rzeki. Zagraj w grę, aby coś zmienić!",
     slider1Label: "Jak daleko od miasta znajduje się źródło wody?",
     simulationTitle: "Wyniki symulacji",
     nextStationButton: (station) => `Następna stacja ${station}`,
@@ -73,6 +79,7 @@ const translations = {
     fullscreen: "Pełny ekran",
     enterFullscreen: "Włącz pełny ekran",
     exitFullscreen: "Wyłącz pełny ekran",
+    comingSoon: "Wkrótce...",
   },
   de: {
     splashSubtitle: "Das einzigartige Erlebnis des Mandau-Flusses",
@@ -80,16 +87,18 @@ const translations = {
     loginTitle: "Wähle deinen Nickname",
     loginPlaceholder: "Dein Nickname...",
     loginButton: "Spiel starten",
-    station1Title: "Station I: Brücke über die Mandau",
-    station1Text: "Sie stehen auf der Brücke über die Mandau. Dieser Fluss schlängelt sich durch drei Länder und birgt viele Geschichten. Leider birgt er auch etwas Müll. Ihre erste Aufgabe ist es, bei der Reinigung dieses Flussabschnitts zu helfen. Spielen Sie das Spiel, um etwas zu bewirken!",
+    station1Title: "Station I: Fallender Tropfen",
+    station1Text: "Jede Reise des Wassers beginnt mit einem einzigen Regentropfen…\nHoch in den Wolken verbinden sich winzige Tropfen, bis sie schwer werden und zur Erde fallen.\nAber nicht jeder Tropfen hat einen leichten Weg. Einige werden von Vögeln, Blättern oder Wolken aufgefangen, bevor sie die Erde berühren.\nDeine Mission beginnt hier oben – führe den Tropfen sicher zu Boden und entdecke, wie kleine Veränderungen am Himmel zu großen Veränderungen unten führen können.",
     station2Title: "Station II: Wasserflusssimulation",
-    station2Text: "Wasser ist eine dynamische Kraft. Unten sehen Sie zwei Simulationen des Wasserflusses. Die erste zeigt eine 2D-Darstellung, die zum Verständnis der Oberflächenbewegung hilfreich ist. Die zweite ist eine 3D-Simulation, die ein besseres Gefühl für Volumen und Tiefe vermittelt. Beobachten Sie, wie Wasser in beiden Modellen mit seiner Umgebung interagiert.",
-    station3Title: "Station III: Fallender Tropfen",
-    station3Text: "Führe den fallenden Tropfen sicher zum Boden und weiche dabei den Hindernissen aus. Spiele das Spiel, um deine Reflexe zu testen!",
+    station2Text: "Wasser kann ruhig (laminar) oder chaotisch (turbulent) fließen. Dieser Übergang ist in der Flusstechnik entscheidend. In der Reynolds-Herausforderung experimentieren Sie mit der Fluiddynamik, um diese Kräfte zu verstehen. Spielen Sie das Spiel, um es in Aktion zu sehen!",
+    station3Title: "Station III: Flusswirbel",
+    station3Text: "Wirbel sind kreisende Bewegungen im Wasser, die oft hinter Brückenpfeilern oder in Flussbiegungen zu sehen sind. Sie spielen eine entscheidende Rolle bei der Vermischung von Nährstoffen und Sedimenten, können aber auch eine Herausforderung für die Schifffahrt darstellen. Navigieren Sie in diesem Spiel durch den mächtigen Flusswirbel und testen Sie Ihre Fähigkeiten!",
     station4Title: "Station IV: Hex Connect",
     station4Text: "Verbinde die sechseckigen Rohre, um das Wasser von der Quelle zum Ziel zu leiten. Ein Logik- und Fließrätsel!",
     station5Title: "Station V: Auswirkungen auf das Ökosystem",
     station5Text: "Das Ökosystem des Flusses ist ein empfindliches Gleichgewicht. Selbst lustige Aktivitäten können Auswirkungen haben. Lass deine Ente den Fluss hinunterrasen, um zu sehen, wie Objekte und Strömung interagieren! Spiele das Spiel, um mehr zu erfahren.",
+    station6Title: "Station VI: Brücke über die Mandau",
+    station6Text: "Sie stehen auf der Brücke über die Mandau. Dieser Fluss schlängelt sich durch drei Länder und birgt viele Geschichten. Leider birgt er auch etwas Müll. Ihre erste Aufgabe ist es, bei der Reinigung dieses Flussabschnitts zu helfen. Spielen Sie das Spiel, um etwas zu bewirken!",
     slider1Label: "Wie weit ist die Wasserquelle von der Stadt entfernt?",
     simulationTitle: "Simulationsergebnisse",
     nextStationButton: (station) => `Nächste Station ${station}`,
@@ -107,6 +116,7 @@ const translations = {
     fullscreen: "Vollbild",
     enterFullscreen: "Vollbildmodus aktivieren",
     exitFullscreen: "Vollbildmodus beenden",
+    comingSoon: "Bald verfügbar...",
   },
   cs: {
     splashSubtitle: "Jedinečný zážitek z řeky Mandavy",
@@ -114,16 +124,18 @@ const translations = {
     loginTitle: "Zvolte si přezdívku",
     loginPlaceholder: "Vaše přezdívka...",
     loginButton: "Spustit hru",
-    station1Title: "Stanice I: Most přes Mandavu",
-    station1Text: "Stojíte na mostě přes Mandavu. Tato řeka se vine třemi zeměmi a skrývá mnoho příběhů. Bohužel také skrývá nějaké odpadky. Vaším prvním úkolem je pomoci vyčistit tento úsek řeky. Zahrajte si hru, abyste něco změnili!",
+    station1Title: "Stanice I: Padající kapka",
+    station1Text: "Každá cesta vody začíná jedinou kapkou deště…\nVysoko v oblacích se malé kapky spojují, dokud neztěžknou a nespadnou na zem.\nAle ne každá kapka má snadnou cestu. Některé jsou zachyceny ptáky, listy nebo mraky, než se vůbec dotknou Země.\nTvá mise začíná tady nahoře – veď kapku bezpečně na zem a objev, jak malé změny na obloze mohou vést k velkým změnám dole.",
     station2Title: "Stanice II: Simulace proudění vody",
-    station2Text: "Voda je dynamická síla. Níže vidíte dvě simulace proudění vody. První ukazuje 2D znázornění, které pomáhá pochopit pohyb na povrchu. Druhá je 3D simulace, která dává lepší představu o objemu a hloubce. Pozorujte, jak voda v obou modelech interaguje se svým prostředím.",
-    station3Title: "Stanice III: Padající kapka",
-    station3Text: "Proveďte padající kapku bezpečně na zem a vyhýbejte se překážkám na cestě. Zahrajte si hru a otestujte své reflexy!",
+    station2Text: "Voda může proudit hladce (laminárně) nebo se stát chaotickou (turbulentní). Tento přechod je klíčový v říčním inženýrství. V Reynoldsově výzvě budete experimentovat s dynamikou kapalin, abyste pochopili tyto síly. Zahrajte si hru a uvidíte to v akci!",
+    station3Title: "Stanice III: Říční vír",
+    station3Text: "Víry jsou krouživé pohyby ve vodě, často viditelné za mostními pilíři nebo v ohybech řek. Hrají klíčovou roli při míchání živin a sedimentů, ale mohou také představovat navigační výzvu. V této hře proplujte mocným říčním vírem a otestujte své dovednosti!",
     station4Title: "Stanice IV: Hex Connect",
     station4Text: "Spojte šestiúhelníkové trubky a veďte vodu od zdroje k cíli. Logická hádanka o proudění!",
     station5Title: "Stanice V: Vliv na ekosystém",
     station5Text: "Ekosystém řeky je křehká rovnováha. I zábavné aktivity mohou mít dopad. Pusťte svou kachnu po řece, abyste viděli, jak objekty a proudění interagují! Zahrajte si hru a dozvíte se více.",
+    station6Title: "Stanice VI: Most přes Mandavu",
+    station6Text: "Stojíte na mostě přes Mandavu. Tato řeka se vine třemi zeměmi a skrývá mnoho příběhů. Bohužel také skrývá nějaké odpadky. Vaším prvním úkolem je pomoci vyčistit tento úsek řeky. Zahrajte si hru, abyste něco změnili!",
     slider1Label: "Jak daleko je zdroj vody od města?",
     simulationTitle: "Výsledky simulace",
     nextStationButton: (station) => `Další stanice ${station}`,
@@ -141,15 +153,17 @@ const translations = {
     fullscreen: "Celá obrazovka",
     enterFullscreen: "Vstoupit do režimu celé obrazovky",
     exitFullscreen: "Ukončit režim celé obrazovky",
+    comingSoon: "Již brzy...",
   },
 };
 
 const GAMES = {
-  1: { url: './river-guardian-game/index.html', name: 'River Guardian' },
-  2: { url: './river-flow-game/reynolds-experiment.html', name: 'Reynolds Experiment' },
-  3: { url: './falling-drop/index.html', name: 'Falling Drop' },
+  1: { url: './falling-drop/index.html', name: 'Falling Drop' },
+  2: { url: './river-flow-game/reynolds-experiment.html', name: 'Reynolds Challenge' },
+  3: { url: './vortex-game/index.html', name: 'Vortex Game' },
   4: { url: './hex-connect/index.html', name: 'Hex Connect' },
-  5: { url: './duck-race-game/index.html', name: 'Duck Race Game' }
+  5: { url: './duck-race-game/index.html', name: 'Duck Race' },
+  6: { url: './river-guardian-game/index.html', name: 'River Guardian' }
 };
 
 const SkyBlue = '#00A9E0';
@@ -211,21 +225,30 @@ const LanguageSwitcher = ({ lang, setLang, theme }) => {
 };
 
 const DropletLogoSVG = ({ size = "80px", theme = "default" }) => {
-    const isSplash = theme === 'splash';
-    const isLogin = theme === 'login';
-    const getFill = () => (isSplash || isLogin) ? LightBackgroundMockup : "url(#dropletGradientSkyBlue)";
-    const getStroke = () => (isSplash || isLogin) ? SkyBlue : LightBackgroundMockup;
+    const isSplashOrLogin = theme === 'splash' || theme === 'login';
+    const dropletFill = isSplashOrLogin ? 'rgba(255, 255, 255, 0.9)' : SkyBlue;
+    const waveStroke = isSplashOrLogin ? SkyBlue : LightBackgroundMockup;
 
-    return React.createElement('svg', { width: size, height: size, viewBox: "0 0 100 125", xmlns: "http://www.w3.org/2000/svg", style: { display: 'block', margin: '0 auto' } },
-        React.createElement('defs', null,
-            React.createElement('linearGradient', { id: "dropletGradientSkyBlue", x1: "50%", y1: "0%", x2: "50%", y2: "100%" },
-                React.createElement('stop', { offset: "0%", style: { stopColor: '#30C9FF', stopOpacity: 1 } }),
-                React.createElement('stop', { offset: "100%", style: { stopColor: SkyBlue, stopOpacity: 1 } })
-            )
-        ),
-        React.createElement('path', { d: "M50 0 C10 31.25, 10 81.25, 50 122.5 C90 81.25, 90 31.25, 50 0 Z", fill: getFill() }),
-        React.createElement('path', { d: "M25 85 C30 72.5, 40 68.75, 48 77.5 S60 90, 75 81.25", stroke: getStroke(), strokeWidth: "5", fill: "none", strokeLinecap: "round", strokeLinejoin: "round" }),
-        React.createElement('path', { d: "M38 43.75 Q42 41.25, 45 43.75 Q40 53.75, 35 50 Q36 46.25, 38 43.75 Z", fill: isSplash ? "rgba(0, 169, 224, 0.5)" : "rgba(255,255,255,0.7)" })
+    return React.createElement('svg', {
+            width: size,
+            height: size,
+            viewBox: "0 0 50 80",
+            xmlns: "http://www.w3.org/2000/svg",
+            style: { display: 'block', margin: '0 auto' }
+        },
+        // Main droplet shape
+        React.createElement('path', {
+            d: "M25,80 C12.3,80 0,68 0,50 C0,25 25,0 25,0 C25,0 50,25 50,50 C50,68 37.7,80 25,80Z",
+            fill: dropletFill
+        }),
+        // S-shaped wave curve inside the droplet, mimicking the splash screen wave
+        React.createElement('path', {
+            d: "M 0, 50 C 12.5, 25, 37.5, 75, 50, 50",
+            fill: "none",
+            stroke: waveStroke,
+            strokeWidth: "1.75",
+            style: { opacity: isSplashOrLogin ? 1 : 0.9 }
+        })
     );
 };
 
@@ -467,6 +490,12 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
                 React.createElement('p', { className: 'splash-subtitle' }, t('splashSubtitle'))
             ),
             React.createElement('button', { className: 'go-button', onClick: handleGoClick, 'aria-label': t('ariaGoToApp') }, t('goButton'))
+        ),
+        React.createElement('div', { className: 'sponsor-bar' },
+            React.createElement('div', { className: 'sponsor-logos-container' },
+                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/6e9aa9e0-5ae5-4e60-8852-b5e989e44088.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
+                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/interreg.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
+            )
         )
     );
 };
@@ -510,7 +539,7 @@ const Header = ({ onLogoClick, lang, setLang, t, onFullscreenToggle, isFullscree
 const StationSelector = ({ currentStation, onSelect, stationButtonRefs, pillStyle, t }) => (
     React.createElement('nav', { className: 'station-selector-container', 'aria-label': t('ariaStationSelection') },
         React.createElement('div', { className: 'station-pill', style: pillStyle }),
-        [1, 2, 3, 4, 5].map(num =>
+        [1, 2, 3, 4, 5, 6].map(num =>
             React.createElement('button', {
                 key: num,
                 ref: el => stationButtonRefs.current[num - 1] = el,
@@ -533,19 +562,19 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
     return React.createElement(React.Fragment, null,
         React.createElement('div', { className: 'content-area' },
             React.createElement('h2', { className: 'content-title', id: `station-title-${currentStation}` }, stationData.title),
-            React.createElement('p', { className: 'content-text', 'aria-labelledby': `station-title-${currentStation}` }, stationData.text),
+            React.createElement('p', { className: 'content-text', 'aria-labelledby': `station-title-${currentStation}`, style: { whiteSpace: 'pre-wrap' } }, stationData.text),
             gameInfo && React.createElement('div', { className: 'game-section' },
                 React.createElement('button', { className: 'game-button', onClick: () => onPlayGame(gameInfo.url, currentStation) }, t('playGameButton', gameInfo.name)),
                 scores[currentStation] !== undefined && React.createElement('p', { className: 'score-text' }, `${t('yourScore')} ${scores[currentStation]}`)
             )
         ),
-        currentStation !== 2 && React.createElement('section', { className: 'simulation-results-container', 'aria-labelledby': 'simulation-results-heading' },
+        currentStation !== 1 && React.createElement('section', { className: 'simulation-results-container', 'aria-labelledby': 'simulation-results-heading' },
             React.createElement('h3', { className: 'simulation-title', id: 'simulation-results-heading' }, t('simulationTitle')),
             (() => {
                 return React.createElement('div', { className: 'gif-image', style: { backgroundColor: '#f0f4f7' }, role: 'img', 'aria-label': 'Brak symulacji dla tej stacji' });
             })()
         ),
-        React.createElement('button', { className: 'navigation-button', onClick: onNextStation }, currentStation < 5 ? t('nextStationButton', currentStation + 1) : t('viewSummaryButton'))
+        React.createElement('button', { className: 'navigation-button', onClick: onNextStation }, currentStation < 6 ? t('nextStationButton', currentStation + 1) : t('viewSummaryButton'))
     );
 };
 
@@ -588,6 +617,11 @@ const App = () => {
 
   const stationButtonRefs = useRef([]);
   const [pillStyle, setPillStyle] = useState({});
+  
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
 
   const t = (key, ...args) => {
     const value = translations[lang][key] || translations['en'][key];
@@ -718,7 +752,7 @@ const App = () => {
 
   const nextStation = () => {
     changeContent(() => {
-        if (currentStation < 5) {
+        if (currentStation < 6) {
             setCurrentStation(prev => prev + 1);
         } else {
             setCurrentView('summary');
@@ -756,6 +790,39 @@ const App = () => {
     }
   };
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+  };
+
+  const handleTouchEnd = () => {
+    if (currentView !== 'main') return;
+
+    const horizontalDiff = touchStartX.current - touchEndX.current;
+    const verticalDiff = touchStartY.current - touchEndY.current;
+    const swipeThreshold = 50;
+
+    // Only trigger if horizontal swipe is dominant
+    if (Math.abs(horizontalDiff) > swipeThreshold && Math.abs(horizontalDiff) > Math.abs(verticalDiff)) {
+      if (horizontalDiff > 0) { // Swiped left
+        if (currentStation < 6) {
+          selectStation(currentStation + 1);
+        }
+      } else { // Swiped right
+        if (currentStation > 1) {
+          selectStation(currentStation - 1);
+        }
+      }
+    }
+  };
+
   if (currentView === 'splash') {
     return React.createElement(SplashScreen, { onStart: handleStart, lang, setLang, t });
   }
@@ -777,7 +844,12 @@ const App = () => {
         t 
     }),
     
-    React.createElement('div', { className: `scrollable-content ${isFading ? 'is-fading' : ''}` },
+    React.createElement('div', { 
+        className: `scrollable-content ${isFading ? 'is-fading' : ''}`,
+        onTouchStart: handleTouchStart,
+        onTouchMove: handleTouchMove,
+        onTouchEnd: handleTouchEnd
+    },
         currentView === 'main' && React.createElement(MainView, { 
             currentStation, 
             onNextStation: nextStation, 
