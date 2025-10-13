@@ -16,6 +16,7 @@
             --yellow-400: #facc15;
             --green-400: #4ade80;
             --red-400: #f87171;
+            --blue-400: #60a5fa;
             --grass-dark: #3a7d44;
             --grass-light: #4a9d56;
             --concrete-light: #aab2b8;
@@ -160,6 +161,8 @@
             border-radius: 0.5rem;
             border: 1px solid var(--gray-700);
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
         }
         .btn {
             background-color: var(--gray-700);
@@ -308,6 +311,8 @@
         }
         .modal-content .btn {
             margin-top: 1rem;
+        }
+        .modal-content .btn-primary, .modal-content .btn:not(.btn-secondary) {
             background-color: var(--cyan-400);
             color: var(--gray-900);
             border-color: var(--cyan-300);
@@ -400,6 +405,17 @@
                 <button id="clear-obstacles-btn" class="btn" data-t="buildControls.clearObstacles">Clear Obstacles</button>
                 <button id="flow-btn" class="btn" data-t="buildControls.goWithFlow">Go with the Flow!</button>
             </div>
+
+            <div id="pressure-legend" class="controls-container" style="display: none; justify-content: flex-end; font-size: 0.8rem; padding: 0.5rem 1rem; background: var(--gray-900); border: 1px solid var(--gray-700);">
+                <span style="display: flex; align-items: center; margin-right: 1rem;">
+                    <span style="width: 12px; height: 12px; background-color: var(--red-400); border-radius: 50%; margin-right: 0.5rem;"></span>
+                    <span data-t="legend.highPressure">High Pressure</span>
+                </span>
+                <span style="display: flex; align-items: center;">
+                    <span style="width: 12px; height: 12px; background-color: var(--blue-400); border-radius: 50%; margin-right: 0.5rem;"></span>
+                    <span data-t="legend.lowPressure">Low Pressure</span>
+                </span>
+            </div>
         </div>
     </div>
     
@@ -412,10 +428,11 @@
     <div id="info-popup-pressure" class="modal-overlay"><div class="modal-content"><h3 data-t="pressureInfoModal.title">The 'Engine' of Turbulence</h3><p class="instruction-text" data-t="pressureInfoModal.desc">You're now seeing the <strong>pressure field</strong>. Red areas have high pressure, and blue areas have low pressure.</p><p class="instruction-text" data-t="pressureInfoModal.desc2">Think of it like hills and valleys. Water rushes from the high-pressure 'hills' to the low-pressure 'valleys'. In a turbulent flow, these hills and valleys form and disappear chaotically, creating the swirling eddies you saw with the dye. This constant, unstable pressure difference is the true engine driving turbulence.</p><p class="instruction-text" data-t="pressureInfoModal.desc3">Well done! Observe this for 5 seconds before the final challenge.</p><button id="close-pressure-popup-btn" class="btn" data-t="pressureInfoModal.nextBtn">Final Challenge</button></div></div>
     <div id="fail-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="failModal.title">Challenge Failed</h2><p data-t="failModal.velocityDesc">You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of 200 or more is required.</p><button id="try-again-btn" class="btn" data-t="failModal.tryAgainBtn">Try Again</button></div></div>
     <div id="fail-modal-pressure" class="modal-overlay"><div class="modal-content"><h2 data-t="failModal.title">Challenge Failed</h2><p data-t="failModal.pressureDesc">You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.</p><p><span data-t="failModal.yourVelocity">Your Velocity:</span> <strong style="color: var(--red-400);"><span id="your-velocity-display"></span></strong> | <span data-t="failModal.target">Target:</span> <strong style="color: var(--green-400);"><span id="target-velocity-display-pressure-fail"></span></strong></p><button id="try-again-pressure-btn" class="btn" data-t="failModal.tryAgainBtn">Try Again</button></div></div>
+    <div id="obstacle-fail-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="obstacleFailModal.title">Channel Blocked!</h2><p class="instruction-text" data-t="obstacleFailModal.desc">It looks like your channel is blocking the inlet or outlet, preventing water from flowing through. An open path is needed for a successful design!</p><button id="try-again-obstacle-btn" class="btn" data-t="obstacleFailModal.tryAgainBtn">Try Building Again</button></div></div>
     <div id="obstacle-intro-modal-3" class="modal-overlay"><div class="modal-content"><h2 data-t="obstacleModals.title3">Challenge 3: Build a River Bank</h2><p class="instruction-text" data-t="obstacleModals.desc3">Your task is to build an efficient channel to guide the water from the inlet on the left to the outlet at the bottom. Aim for the highest possible outlet-to-inlet velocity ratio!</p><button id="start-building-3-btn" class="btn" data-t="obstacleModals.startBtn">Start Building</button></div></div>
     <div id="obstacle-intro-modal-4" class="modal-overlay"><div class="modal-content"><h2 data-t="obstacleModals.title4">Challenge 4: Split the Flow</h2><p class="instruction-text" data-t="obstacleModals.desc4">Now, build a channel that splits the flow to outlets at both the top and bottom. Maximize the combined flow ratio!</p><button id="start-building-4-btn" class="btn" data-t="obstacleModals.startBtn">Start Building</button></div></div>
     <div id="obstacle-intro-modal-5" class="modal-overlay"><div class="modal-content"><h2 data-t="obstacleModals.title5">Final Challenge: Triple Threat</h2><p class="instruction-text" data-t="obstacleModals.desc5">The ultimate test: Channel the water to three outlets (top, bottom, and right). Design the most efficient system to maximize the flow ratio.</p><button id="start-building-5-btn" class="btn" data-t="obstacleModals.startBtn">Start Building</button></div></div>
-    <div id="level-win-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="winModal.levelComplete">Level Complete!</h2><p><span data-t="winModal.flowRatio">Your Flow Ratio:</span> <strong id="level-flow-ratio-display"></strong></p><button id="next-level-btn" class="btn" data-t="winModal.nextLevelBtn">Next Level</button></div></div>
+    <div id="level-win-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="winModal.levelComplete">Level Complete!</h2><p><span data-t="winModal.flowRatio">Your Flow Ratio:</span> <strong id="level-flow-ratio-display"></strong></p><div class="controls-container"><button id="retry-level-btn" class="btn btn-secondary" data-t="winModal.retryBtn">Try Again</button><button id="next-level-btn" class="btn" data-t="winModal.nextLevelBtn">Next Level</button></div></div></div>
     <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2 data-t="winModal.congrats">Congratulations!</h2><div><p><span data-t="winModal.totalTime">Total Time:</span> <strong id="total-time-display"></strong></p><p><span data-t="winModal.finalFlowRatio">Final Flow Ratio:</span> <strong id="flow-ratio-display"></strong></p></div><button id="play-again-btn" class="btn" data-t="winModal.playAgainBtn">Play Again</button></div></div>
 
 
@@ -433,12 +450,14 @@
                 pressureIntroModal: { title: "The Role of Pressure", desc1: "Turbulence isn't just about velocity; it's driven by chaotic pressure changes. High-pressure zones push fluid into low-pressure zones, creating the swirls you saw.", desc2: "Your next task: Recreate the turbulent flow from memory. Set the velocity back to <strong style='font-size: 1.2rem;'><span id='target-velocity-display'></span></strong> and press 'Submit'.", startBtn: "Start Pressure Challenge" },
                 pressureInfoModal: { title: "The 'Engine' of Turbulence", desc: "You're now seeing the <strong>pressure field</strong>. Red areas have high pressure, and blue areas have low pressure.", desc2: "Think of it like hills and valleys. Water rushes from the high-pressure 'hills' to the low-pressure 'valleys'. In a turbulent flow, these hills and valleys form and disappear chaotically, creating the swirling eddies you saw with the dye. This constant, unstable pressure difference is the true engine driving turbulence.", desc3: "Well done! Observe this for 5 seconds before the final challenge.", nextBtn: "Final Challenge" },
                 failModal: { title: "Challenge Failed", velocityDesc: "You didn't increase the velocity enough in 10 seconds to create strong turbulence! A velocity of 200 or more is required.", pressureDesc: "You didn't match the target velocity closely enough. The goal is to develop an intuitive feel for the flow's speed and appearance.", yourVelocity: "Your Velocity:", target: "Target:", tryAgainBtn: "Try Again" },
-                obstacleModals: { title3: "Challenge 3: Build a River Bank", desc3: "Use your cursor to draw the channel walls. Your task is to build an efficient channel to guide the water from the <strong style='color: var(--cyan-300)'>inlet on the left</strong> to the <strong style='color: var(--green-400)'>outlet at the bottom</strong>. Aim for the highest possible outlet-to-inlet velocity ratio!", startBtn: "Start Building", title4: "Challenge 4: Split the Flow", desc4: "Use your cursor to draw the channel walls. Now, build a channel that splits the flow from the <strong style='color: var(--cyan-300)'>inlet</strong> to the <strong style='color: var(--green-400)'>outlets at both the top and bottom</strong>. Maximize the combined flow ratio!", title5: "Final Challenge: Triple Threat", desc5: "Use your cursor to draw the channel walls. The ultimate test: Channel the water from the <strong style='color: var(--cyan-300)'>inlet</strong> to three <strong style='color: var(--green-400)'>outlets (top, bottom, and right)</strong>. Design the most efficient system to maximize the flow ratio." },
-                winModal: { levelComplete: "Level Complete!", flowRatio: "Your Flow Ratio:", nextLevelBtn: "Next Level", congrats: "Congratulations!", totalTime: "Total Time:", finalFlowRatio: "Final Flow Ratio:", playAgainBtn: "Play Again" },
+                obstacleFailModal: { title: "Channel Blocked!", desc: "It looks like your channel is blocking the inlet or outlet, preventing water from flowing through. An open path is needed for a successful design!", tryAgainBtn: "Try Building Again" },
+                obstacleModals: { title3: "Challenge 3: Build a River Bank", desc3: "Use your cursor to draw channel walls. Your task is to build an efficient channel to guide water from the <strong style='color: var(--cyan-300)'>inlet on the left</strong> to the <strong style='color: var(--green-400)'>outlet at the bottom</strong>. Aim for the highest possible flow ratio (a higher number is better)!", startBtn: "Start Building", title4: "Challenge 4: Split the Flow", desc4: "Use your cursor to draw channel walls. Now, build a channel that splits the flow from the <strong style='color: var(--cyan-300)'>inlet</strong> to outlets at both the <strong style='color: var(--green-400)'>top and bottom</strong>. Maximize the combined flow ratio!", title5: "Final Challenge: Triple Threat", desc5: "Use your cursor to draw channel walls. The ultimate test: Channel water from the <strong style='color: var(--cyan-300)'>inlet</strong> to three outlets (<strong style='color: var(--green-400)'>top, bottom, and right</strong>). Design the most efficient system to maximize the flow ratio." },
+                winModal: { levelComplete: "Level Complete!", flowRatio: "Your Flow Ratio:", nextLevelBtn: "Next Level", retryBtn: "Try Again", congrats: "Congratulations!", totalTime: "Total Time:", finalFlowRatio: "Final Flow Ratio:", playAgainBtn: "Play Again" },
                 mainControls: { decreaseFlow: "Decrease Flow", increaseFlow: "Increase Flow", pause: "Pause", play: "Play", showPressure: "Show Pressure", showDye: "Show Dye", submitVelocity: "Submit Velocity" },
                 buildControls: { buildChannel: "Build Channel", stopBuilding: "Stop Building", clearObstacles: "Clear Obstacles", goWithFlow: "Go with the Flow!" },
                 info: { peakFlow: "Peak Flow:", flowCharacter: "Flow Character:", stable: "Stable", unstable: "Unstable", chaotic: "Chaotic" },
-                canvasLabels: { inlet: 'INLET', outlet: 'OUTLET' }
+                canvasLabels: { inlet: 'INLET', outlet: 'OUTLET' },
+                legend: { highPressure: "High Pressure", lowPressure: "Low Pressure" }
             },
             de: {
                 welcomeModal: { title: "Zittaus Reynolds-Herausforderung", desc: "Ein interaktives Spiel über Strömungsdynamik, inspiriert vom Fluss Mandau.", startBtn: "Spiel starten", learnBtn: "Wie Wasser fließt", rankingBtn: "Rangliste" },
@@ -448,12 +467,14 @@
                 pressureIntroModal: { title: "Die Rolle des Drucks", desc1: "Bei Turbulenzen geht es nicht nur um Geschwindigkeit; sie werden durch chaotische Druckänderungen angetrieben. Hochdruckzonen drücken Flüssigkeit in Niederdruckzonen und erzeugen so die Wirbel, die du gesehen hast.", desc2: "Deine nächste Aufgabe: Stelle die turbulente Strömung aus dem Gedächtnis wieder her. Setze die Geschwindigkeit auf <strong style='font-size: 1.2rem;'><span id='target-velocity-display'></span></strong> zurück und drücke 'Senden'.", startBtn: "Druck-Herausforderung starten" },
                 pressureInfoModal: { title: "Der 'Motor' der Turbulenz", desc: "Du siehst jetzt das <strong>Druckfeld</strong>. Rote Bereiche haben hohen Druck, blaue Bereiche haben niedrigen Druck.", desc2: "Stell es dir wie Hügel und Täler vor. Wasser strömt von den Hochdruck-'Hügeln' zu den Niederdruck-'Tälern'. In einer turbulenten Strömung entstehen und verschwinden diese Hügel und Täler chaotisch und erzeugen die wirbelnden Strudel, die du mit der Farbe gesehen hast. Dieser ständige, instabile Druckunterschied ist der wahre Motor der Turbulenz.", desc3: "Gut gemacht! Beobachte dies für 5 Sekunden vor der letzten Herausforderung.", nextBtn: "Letzte Herausforderung" },
                 failModal: { title: "Herausforderung gescheitert", velocityDesc: "Du hast die Geschwindigkeit in 10 Sekunden nicht genug erhöht, um starke Turbulenzen zu erzeugen! Eine Geschwindigkeit von 200 oder mehr ist erforderlich.", pressureDesc: "Du hast die Zielgeschwindigkeit nicht genau genug getroffen. Das Ziel ist, ein intuitives Gefühl für die Geschwindigkeit und das Aussehen der Strömung zu entwickeln.", yourVelocity: "Deine Geschwindigkeit:", target: "Ziel:", tryAgainBtn: "Erneut versuchen" },
-                obstacleModals: { title3: "Herausforderung 3: Baue ein Flussufer", desc3: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Deine Aufgabe ist es, einen effizienten Kanal zu bauen, um das Wasser vom <strong style='color: var(--cyan-300)'>Einlass links</strong> zum <strong style='color: var(--green-400)'>Auslass unten</strong> zu leiten. Ziele auf das höchstmögliche Verhältnis von Auslass- zu Einlassgeschwindigkeit!", startBtn: "Bauen beginnen", title4: "Herausforderung 4: Teile die Strömung", desc4: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Baue nun einen Kanal, der die Strömung vom <strong style='color: var(--cyan-300)'>Einlass</strong> zu den <strong style='color: var(--green-400)'>Auslässen oben und unten</strong> aufteilt. Maximiere das kombinierte Durchflussverhältnis!", title5: "Letzte Herausforderung: Dreifache Bedrohung", desc5: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Der ultimative Test: Leite das Wasser vom <strong style='color: var(--cyan-300)'>Einlass</strong> zu drei <strong style='color: var(--green-400)'>Auslässen (oben, unten und rechts)</strong>. Entwerfe das effizienteste System, um das Durchflussverhältnis zu maximieren." },
-                winModal: { levelComplete: "Level abgeschlossen!", flowRatio: "Dein Durchflussverhältnis:", nextLevelBtn: "Nächstes Level", congrats: "Herzlichen Glückwunsch!", totalTime: "Gesamtzeit:", finalFlowRatio: "Endgültiges Durchflussverhältnis:", playAgainBtn: "Erneut spielen" },
+                obstacleFailModal: { title: "Kanal blockiert!", desc: "Es scheint, als ob dein Kanal den Ein- oder Auslass blockiert und den Wasserfluss verhindert. Für ein erfolgreiches Design ist ein offener Weg erforderlich!", tryAgainBtn: "Erneut bauen" },
+                obstacleModals: { title3: "Herausforderung 3: Baue ein Flussufer", desc3: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Deine Aufgabe ist es, einen effizienten Kanal zu bauen, um das Wasser vom <strong style='color: var(--cyan-300)'>Einlass links</strong> zum <strong style='color: var(--green-400)'>Auslass unten</strong> zu leiten. Ziele auf das höchstmögliche Durchflussverhältnis (eine höhere Zahl ist besser)!", startBtn: "Bauen beginnen", title4: "Herausforderung 4: Teile die Strömung", desc4: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Baue nun einen Kanal, der die Strömung vom <strong style='color: var(--cyan-300)'>Einlass</strong> zu den <strong style='color: var(--green-400)'>Auslässen oben und unten</strong> aufteilt. Maximiere das kombinierte Durchflussverhältnis!", title5: "Letzte Herausforderung: Dreifache Bedrohung", desc5: "Benutze deinen Cursor, um die Kanalwände zu zeichnen. Der ultimative Test: Leite das Wasser vom <strong style='color: var(--cyan-300)'>Einlass</strong> zu drei <strong style='color: var(--green-400)'>Auslässen (oben, unten und rechts)</strong>. Entwerfe das effizienteste System, um das Durchflussverhältnis zu maximieren." },
+                winModal: { levelComplete: "Level abgeschlossen!", flowRatio: "Dein Durchflussverhältnis:", nextLevelBtn: "Nächstes Level", retryBtn: "Erneut versuchen", congrats: "Herzlichen Glückwunsch!", totalTime: "Gesamtzeit:", finalFlowRatio: "Endgültiges Durchflussverhältnis:", playAgainBtn: "Erneut spielen" },
                 mainControls: { decreaseFlow: "Fluss verringern", increaseFlow: "Fluss erhöhen", pause: "Pause", play: "Start", showPressure: "Druck zeigen", showDye: "Farbe zeigen", submitVelocity: "Geschwindigkeit senden" },
                 buildControls: { buildChannel: "Kanal bauen", stopBuilding: "Bauen stoppen", clearObstacles: "Hindernisse entfernen", goWithFlow: "Los geht's!" },
                 info: { peakFlow: "Spitzenfluss:", flowCharacter: "Strömungsart:", stable: "Stabil", unstable: "Instabil", chaotic: "Chaotisch" },
-                canvasLabels: { inlet: 'EINLASS', outlet: 'AUSLASS' }
+                canvasLabels: { inlet: 'EINLASS', outlet: 'AUSLASS' },
+                legend: { highPressure: "Hoher Druck", lowPressure: "Niedriger Druck" }
             },
             pl: {
                 welcomeModal: { title: "Wyzwanie Reynoldsa w Zittau", desc: "Interaktywna gra o dynamice płynów, inspirowana rzeką Mandau.", startBtn: "Rozpocznij grę", learnBtn: "Dowiedz się, jak płynie woda", rankingBtn: "Ranking" },
@@ -463,12 +484,14 @@
                 pressureIntroModal: { title: "Rola ciśnienia", desc1: "Turbulencja to nie tylko prędkość; jest napędzana chaotycznymi zmianami ciśnienia. Strefy wysokiego ciśnienia pchają płyn do stref niskiego ciśnienia, tworząc wiry, które widziałeś.", desc2: "Twoje następne zadanie: Odtwórz przepływ turbulentny z pamięci. Ustaw prędkość z powrotem na <strong style='font-size: 1.2rem;'><span id='target-velocity-display'></span></strong> i naciśnij 'Zatwierdź'.", startBtn: "Rozpocznij wyzwanie ciśnieniowe" },
                 pressureInfoModal: { title: "'Silnik' turbulencji", desc: "Teraz widzisz <strong>pole ciśnienia</strong>. Czerwone obszary mają wysokie ciśnienie, a niebieskie niskie ciśnienie.", desc2: "Pomyśl o tym jak o wzgórzach i dolinach. Woda pędzi z 'wzgórz' wysokiego ciśnienia do 'dolin' niskiego ciśnienia. W przepływie turbulentnym te wzgórza i doliny tworzą się i znikają chaotycznie, tworząc wirujące prądy, które widziałeś z barwnikiem. Ta stała, niestabilna różnica ciśnień jest prawdziwym silnikiem napędzającym turbulencje.", desc3: "Dobra robota! Obserwuj to przez 5 sekund przed ostatnim wyzwaniem.", nextBtn: "Ostatnie wyzwanie" },
                 failModal: { title: "Wyzwanie nieudane", velocityDesc: "Nie zwiększyłeś prędkości wystarczająco w 10 sekund, aby stworzyć silną turbulencję! Wymagana jest prędkość 200 lub więcej.", pressureDesc: "Nie dopasowałeś docelowej prędkości wystarczająco dokładnie. Celem jest rozwinięcie intuicyjnego wyczucia prędkości i wyglądu przepływu.", yourVelocity: "Twoja prędkość:", target: "Cel:", tryAgainBtn: "Spróbuj ponownie" },
-                obstacleModals: { title3: "Wyzwanie 3: Zbuduj brzeg rzeki", desc3: "Użyj kursora, aby narysować ściany kanału. Twoim zadaniem jest zbudowanie wydajnego kanału do prowadzenia wody od <strong style='color: var(--cyan-300)'>wlotu po lewej stronie</strong> do <strong style='color: var(--green-400)'>wylotu na dole</strong>. Dąż do jak najwyższego stosunku prędkości wylotowej do wlotowej!", startBtn: "Rozpocznij budowę", title4: "Wyzwanie 4: Podziel przepływ", desc4: "Użyj kursora, aby narysować ściany kanału. Teraz zbuduj kanał, który dzieli przepływ od <strong style='color: var(--cyan-300)'>wlotu</strong> do <strong style='color: var(--green-400)'>wylotów na górze i na dole</strong>. Zmaksymalizuj połączony stosunek przepływu!", title5: "Ostatnie wyzwanie: Potrójne zagrożenie", desc5: "Użyj kursora, aby narysować ściany kanału. Ostateczny test: Skieruj wodę od <strong style='color: var(--cyan-300)'>wlotu</strong> do trzech <strong style='color: var(--green-400)'>wylotów (góra, dół i prawo)</strong>. Zaprojektuj najbardziej wydajny system, aby zmaksymalizować stosunek przepływu." },
-                winModal: { levelComplete: "Poziom ukończony!", flowRatio: "Twój stosunek przepływu:", nextLevelBtn: "Następny poziom", congrats: "Gratulacje!", totalTime: "Całkowity czas:", finalFlowRatio: "Końcowy stosunek przepływu:", playAgainBtn: "Zagraj ponownie" },
+                obstacleFailModal: { title: "Kanał zablokowany!", desc: "Wygląda na to, że twój kanał blokuje wlot lub wylot, uniemożliwiając przepływ wody. Otwarta ścieżka jest potrzebna do udanego projektu!", tryAgainBtn: "Spróbuj zbudować ponownie" },
+                obstacleModals: { title3: "Wyzwanie 3: Zbuduj brzeg rzeki", desc3: "Użyj kursora, aby narysować ściany kanału. Twoim zadaniem jest zbudowanie wydajnego kanału do prowadzenia wody od <strong style='color: var(--cyan-300)'>wlotu po lewej stronie</strong> do <strong style='color: var(--green-400)'>wylotu na dole</strong>. Dąż do jak najwyższego stosunku przepływu (wyższa liczba jest lepsza)!", startBtn: "Rozpocznij budowę", title4: "Wyzwanie 4: Podziel przepływ", desc4: "Użyj kursora, aby narysować ściany kanału. Teraz zbuduj kanał, który dzieli przepływ od <strong style='color: var(--cyan-300)'>wlotu</strong> do <strong style='color: var(--green-400)'>wylotów na górze i na dole</strong>. Zmaksymalizuj połączony stosunek przepływu!", title5: "Ostatnie wyzwanie: Potrójne zagrożenie", desc5: "Użyj kursora, aby narysować ściany kanału. Ostateczny test: Skieruj wodę od <strong style='color: var(--cyan-300)'>wlotu</strong> do trzech <strong style='color: var(--green-400)'>wylotów (góra, dół i prawo)</strong>. Zaprojektuj najbardziej wydajny system, aby zmaksymalizować stosunek przepływu." },
+                winModal: { levelComplete: "Poziom ukończony!", flowRatio: "Twój stosunek przepływu:", nextLevelBtn: "Następny poziom", retryBtn: "Spróbuj ponownie", congrats: "Gratulacje!", totalTime: "Całkowity czas:", finalFlowRatio: "Końcowy stosunek przepływu:", playAgainBtn: "Zagraj ponownie" },
                 mainControls: { decreaseFlow: "Zmniejsz przepływ", increaseFlow: "Zwiększ przepływ", pause: "Pauza", play: "Wznów", showPressure: "Pokaż ciśnienie", showDye: "Pokaż barwnik", submitVelocity: "Zatwierdź prędkość" },
                 buildControls: { buildChannel: "Buduj kanał", stopBuilding: "Zatrzymaj budowę", clearObstacles: "Wyczyść przeszkody", goWithFlow: "Płyń z prądem!" },
                 info: { peakFlow: "Szczytowy przepływ:", flowCharacter: "Charakter przepływu:", stable: "Stabilny", unstable: "Niestabilny", chaotic: "Chaotyczny" },
-                canvasLabels: { inlet: 'WLOT', outlet: 'WYLOT' }
+                canvasLabels: { inlet: 'WLOT', outlet: 'WYLOT' },
+                legend: { highPressure: "Wysokie ciśnienie", lowPressure: "Niskie ciśnienie" }
             },
             cz: {
                 welcomeModal: { title: "Reynoldsova výzva v Žitavě", desc: "Interaktivní hra o dynamice kapalin, inspirovaná řekou Mandavou.", startBtn: "Spustit hru", learnBtn: "Jak teče voda", rankingBtn: "Žebříček" },
@@ -478,12 +501,14 @@
                 pressureIntroModal: { title: "Role tlaku", desc1: "Turbulence není jen o rychlosti; je poháněna chaotickými změnami tlaku. Zóny vysokého tlaku tlačí kapalinu do zón nízkého tlaku, čímž vytvářejí víry, které jste viděli.", desc2: "Váš další úkol: Znovu vytvořte turbulentní proudění z paměti. Nastavte rychlost zpět na <strong style='font-size: 1.2rem;'><span id='target-velocity-display'></span></strong> a stiskněte 'Odeslat'.", startBtn: "Spustit tlakovou výzvu" },
                 pressureInfoModal: { title: "'Motor' turbulence", desc: "Nyní vidíte <strong>tlakové pole</strong>. Červené oblasti mají vysoký tlak a modré oblasti nízký tlak.", desc2: "Představte si to jako kopce a údolí. Voda se řítí z vysokotlakých 'kopců' do nízkotlakých 'údolí'. V turbulentním proudění se tyto kopce a údolí chaoticky tvoří a mizí, čímž vytvářejí vířící proudy, které jste viděli s barvivem. Tento neustálý, nestabilní tlakový rozdíl je skutečným motorem pohánějícím turbulenci.", desc3: "Výborně! Pozorujte to po dobu 5 sekund před finální výzvou.", nextBtn: "Finální výzva" },
                 failModal: { title: "Výzva neúspěšná", velocityDesc: "Nezvýšili jste rychlost dostatečně za 10 sekund, abyste vytvořili silnou turbulenci! Je vyžadována rychlost 200 nebo více.", pressureDesc: "Nedosáhli jste cílové rychlosti dostatečně přesně. Cílem je vyvinout intuitivní cit pro rychlost a vzhled proudění.", yourVelocity: "Vaše rychlost:", target: "Cíl:", tryAgainBtn: "Zkusit znovu" },
-                obstacleModals: { title3: "Výzva 3: Postavte břeh řeky", desc3: "Pomocí kurzoru nakreslete stěny kanálu. Vaším úkolem je postavit efektivní kanál pro vedení vody od <strong style='color: var(--cyan-300)'>vtoku vlevo</strong> k <strong style='color: var(--green-400)'>výtoku dole</strong>. Cílem je dosáhnout co nejvyššího poměru rychlosti výtoku k vtoku!", startBtn: "Začít stavět", title4: "Výzva 4: Rozdělte proud", desc4: "Pomocí kurzoru nakreslete stěny kanálu. Nyní postavte kanál, který rozděluje proud od <strong style='color: var(--cyan-300)'>vtoku</strong> k <strong style='color: var(--green-400)'>výtokům nahoře i dole</strong>. Maximalizujte kombinovaný poměr průtoku!", title5: "Finální výzva: Trojitá hrozba", desc5: "Pomocí kurzoru nakreslete stěny kanálu. Ultimátní test: Nasměrujte vodu od <strong style='color: var(--cyan-300)'>vtoku</strong> ke třem <strong style='color: var(--green-400)'>výtokům (nahoře, dole a vpravo)</strong>. Navrhněte nejúčinnější systém pro maximalizaci poměru průtoku." },
-                winModal: { levelComplete: "Úroveň dokončena!", flowRatio: "Váš poměr průtoku:", nextLevelBtn: "Další úroveň", congrats: "Gratulujeme!", totalTime: "Celkový čas:", finalFlowRatio: "Konečný poměr průtoku:", playAgainBtn: "Hrát znovu" },
+                obstacleFailModal: { title: "Kanál zablokován!", desc: "Zdá se, že váš kanál blokuje vtok nebo výtok a brání průtoku vody. Pro úspěšný návrh je nutná otevřená cesta!", tryAgainBtn: "Zkusit stavět znovu" },
+                obstacleModals: { title3: "Výzva 3: Postavte břeh řeky", desc3: "Pomocí kurzoru nakreslete stěny kanálu. Vaším úkolem je postavit efektivní kanál pro vedení vody od <strong style='color: var(--cyan-300)'>vtoku vlevo</strong> k <strong style='color: var(--green-400)'>výtoku dole</strong>. Cílem je dosáhnout co nejvyššího poměru průtoku (vyšší číslo je lepší)!", startBtn: "Začít stavět", title4: "Výzva 4: Rozdělte proud", desc4: "Pomocí kurzoru nakreslete stěny kanálu. Nyní postavte kanál, který rozděluje proud od <strong style='color: var(--cyan-300)'>vtoku</strong> k <strong style='color: var(--green-400)'>výtokům nahoře i dole</strong>. Maximalizujte kombinovaný poměr průtoku!", title5: "Finální výzva: Trojitá hrozba", desc5: "Pomocí kurzoru nakreslete stěny kanálu. Ultimátní test: Nasměrujte vodu od <strong style='color: var(--cyan-300)'>vtoku</strong> ke třem <strong style='color: var(--green-400)'>výtokům (nahoře, dole a vpravo)</strong>. Navrhněte nejúčinnější systém pro maximalizaci poměru průtoku." },
+                winModal: { levelComplete: "Úroveň dokončena!", flowRatio: "Váš poměr průtoku:", nextLevelBtn: "Další úroveň", retryBtn: "Zkusit znovu", congrats: "Gratulujeme!", totalTime: "Celkový čas:", finalFlowRatio: "Konečný poměr průtoku:", playAgainBtn: "Hrát znovu" },
                 mainControls: { decreaseFlow: "Snížit průtok", increaseFlow: "Zvýšit průtok", pause: "Pauza", play: "Spustit", showPressure: "Zobrazit tlak", showDye: "Zobrazit barvivo", submitVelocity: "Odeslat rychlost" },
                 buildControls: { buildChannel: "Stavět kanál", stopBuilding: "Zastavit stavbu", clearObstacles: "Odstranit překážky", goWithFlow: "Do toho!" },
                 info: { peakFlow: "Špičkový průtok:", flowCharacter: "Charakter proudění:", stable: "Stabilní", unstable: "Nestabilní", chaotic: "Chaotické" },
-                canvasLabels: { inlet: 'VTOK', outlet: 'VÝTOK' }
+                canvasLabels: { inlet: 'VTOK', outlet: 'VÝTOK' },
+                legend: { highPressure: "Vysoký tlak", lowPressure: "Nízký tlak" }
             }
         };
 
@@ -507,6 +532,7 @@
         const buildChannelBtn = document.getElementById('build-channel-btn');
         const clearObstaclesBtn = document.getElementById('clear-obstacles-btn');
         const flowBtn = document.getElementById('flow-btn');
+        const pressureLegend = document.getElementById('pressure-legend');
         // Modals
         const modals = {
             learn: document.getElementById('learn-modal'),
@@ -516,6 +542,7 @@
             infoPressure: document.getElementById('info-popup-pressure'),
             failVelocity: document.getElementById('fail-modal'),
             failPressure: document.getElementById('fail-modal-pressure'),
+            obstacleFail: document.getElementById('obstacle-fail-modal'),
             obstacleIntro3: document.getElementById('obstacle-intro-modal-3'),
             obstacleIntro4: document.getElementById('obstacle-intro-modal-4'),
             obstacleIntro5: document.getElementById('obstacle-intro-modal-5'),
@@ -544,8 +571,10 @@
         document.getElementById('start-building-4-btn').addEventListener('click', startBuilding);
         document.getElementById('start-building-5-btn').addEventListener('click', startBuilding);
         document.getElementById('next-level-btn').addEventListener('click', () => { game.level++; game.state = 'INTRO_OBSTACLE'; updateUIForState(); });
-        document.getElementById('try-again-btn').addEventListener('click', () => { game.state = 'INTRO_VELOCITY'; updateUIForState(); });
+        document.getElementById('retry-level-btn').addEventListener('click', () => { game.state = 'INTRO_OBSTACLE'; updateUIForState(); });
+        document.getElementById('try-again-btn').addEventListener('click', () => { scene.flowVelocity = 5.0; setupScene(1); game.state = 'INTRO_VELOCITY'; updateUIForState(); });
         document.getElementById('try-again-pressure-btn').addEventListener('click', resetPressureChallenge);
+        document.getElementById('try-again-obstacle-btn').addEventListener('click', () => { game.state = 'INTRO_OBSTACLE'; updateUIForState(); });
         document.getElementById('play-again-btn').addEventListener('click', resetGame);
         
         // Build Controls
@@ -795,8 +824,9 @@
                     } else if (scene.showPressure) {
                         const p = f.p[f._idx(i, j)];
                         const normP = (maxP - minP === 0) ? 0.5 : (p - minP) / (maxP - minP);
-                        const r = Math.max(0, 255 * normP); const b = Math.max(0, 255 * (1.0 - normP));
-                        data.set([r, 50, b, 255], idx);
+                        const r = Math.max(0, 255 * normP); 
+                        const b = Math.max(0, 255 * (1.0 - normP));
+                        data.set([r, 80, b, 255], idx);
                     } else {
                         if (game.state === 'BUILD_OBSTACLE') {
                             data.set([0, 0, 0, 255], idx);
@@ -889,12 +919,15 @@
             timerDiv.style.display = 'none'; 
             infoDiv.style.display = (game.level >= 3) ? 'none' : 'block';
             canalDiv.style.display = 'flex'; outflowDiv.style.display = 'block';
+            pressureLegend.style.display = 'none';
 
             const showMainControls = () => {
                 mainControls.style.display = 'flex';
                 Array.from(mainControls.children).forEach(btn => btn.style.display = 'none');
                 increaseBtn.disabled = true; decreaseBtn.disabled = true;
             };
+            
+            if(scene.showPressure) pressureLegend.style.display = 'flex';
 
             switch (game.state) {
                 case 'WELCOME':
@@ -934,6 +967,7 @@
                     showMainControls(); 
                     scene.paused = true; 
                     modals.infoPressure.classList.add('visible'); 
+                    pressureLegend.style.display = 'flex';
                     break;
                 case 'GAME_OVER_PRESSURE_FAIL': scene.paused = true; document.getElementById('your-velocity-display').textContent = scene.flowVelocity.toFixed(2); document.getElementById('target-velocity-display-pressure-fail').textContent = game.targetVelocity.toFixed(2); modals.failPressure.classList.add('visible'); break;
                 case 'INTRO_OBSTACLE': scene.paused = true; modals[`obstacleIntro${game.level}`].classList.add('visible'); break;
@@ -951,6 +985,7 @@
                     pressureBtn.style.display = 'inline-block';
                     canalDiv.style.display = 'none'; outflowDiv.style.display = 'none';
                     break;
+                case 'GAME_OVER_OBSTACLE_FAIL': scene.paused = true; modals.obstacleFail.classList.add('visible'); break;
                 case 'LEVEL_WIN': scene.paused = true; modals.levelWin.classList.add('visible'); break;
                 case 'FINAL_WIN': scene.paused = true; modals.win.classList.add('visible'); calculateEndGameStats(); break;
             }
@@ -974,13 +1009,16 @@
         function handleObstacleLevelEnd() {
             scene.paused = true;
             const ratio = calculateFlowRatio();
-            if (game.level < 5) {
-                const ratioTextEl = document.querySelector('#level-win-modal [data-t="winModal.flowRatio"]');
-                ratioTextEl.innerHTML = `${t('winModal.flowRatio')} <strong id="level-flow-ratio-display">${ratio}</strong>`;
-                game.state = 'LEVEL_WIN';
+            if (ratio === "N/A") {
+                game.state = 'GAME_OVER_OBSTACLE_FAIL';
             } else {
-                game.flowRatio = ratio; // Store for final screen
-                game.state = 'FINAL_WIN';
+                if (game.level < 5) {
+                    document.getElementById('level-flow-ratio-display').textContent = ratio;
+                    game.state = 'LEVEL_WIN';
+                } else {
+                    game.flowRatio = ratio; // Store for final screen
+                    game.state = 'FINAL_WIN';
+                }
             }
             updateUIForState();
         }
@@ -1020,6 +1058,7 @@
             game.level = 1;
             setupScene(1); scene.flowVelocity = 5.0; game.totalGameStartTime = Date.now();
             game.targetVelocity = 0;
+            scene.showPressure = false;
             game.state = 'WELCOME'; 
             updateTexts();
         }
@@ -1090,7 +1129,7 @@
         }
 
         canvas.addEventListener('mousemove', e => { 
-            if (game.state === 'BUILD_OBSTACLE' && game.buildModeActive) {
+            if (game.state === 'BUILD_OBSTACLE' && game.buildModeActive && e.buttons === 1) {
                 handleCanvasDraw(e);
             }
         });
@@ -1132,7 +1171,7 @@
                      if (sampleI > 1) { for (let j = outlet.min; j < outlet.max; j++) { outletVelSum += Math.abs(f.u[f._idx(sampleI, j)]); } }
                  }
             }
-            return (inletVelSum > 0) ? (outletVelSum / inletVelSum).toFixed(2) : "N/A";
+            return (inletVelSum > 0.1) ? (outletVelSum / inletVelSum).toFixed(2) : "N/A";
         }
         function calculateEndGameStats() {
             const totalMs = Date.now() - game.totalGameStartTime;
