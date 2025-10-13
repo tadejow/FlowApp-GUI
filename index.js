@@ -15,21 +15,16 @@ const translations = {
     loginButton: "Start Game",
     station1Title: "Station I: Falling Drop",
     station1Text: "Every journey of water starts with a single drop of rain…\nHigh in the clouds, tiny drops come together until they grow heavy and fall toward the earth.\nBut not every drop has an easy path. Some are caught by birds, leaves, or clouds before they ever touch the Earth.\nYour mission begins up here — guide the drop safely to the ground, and discover how small changes in the sky can lead to big changes below.",
-    fact1_1: "Back in 1880 the rains didnt stop, and within days, over 300 houses were destroyed. One of the worst floods in Mandau’s history.",
-    fact1_2: "But not only a heavy rain can cause floods, but also melting snow, river overflow, coastal storms, or dam failures.",
-    fact1_3: "Many rivers rely on seasonal floods to refresh ecosystems.",
-    fact1_4: "The fastest river floods can reach speeds of several meters per second, strong enough to move cars, trees, or large debris.",
-    fact1_5: "Under normal conditions, the velocity of Mandau is around 0.2-0.5 m/s, and around 1-3 m/s in flood conditions. But it also depends on the river shape and depth….",
-    station2Title: "Station II: Ecosystem Impact",
-    station2Text: "The river's ecosystem is a delicate balance. Even fun activities can have an impact. Race your duck down the river to see how objects and flow interact! Play the game to learn more.",
-    station3Title: "Station III: Water Flow Simulation",
-    station3Text: "Water is a dynamic force. Below, you can see two simulations of water flow. The first shows a 2D representation, helpful for understanding surface movement. The second is a 3D simulation, which gives a better sense of volume and depth. Observe how water interacts with its environment in both models.",
+    station2Title: "Station II: Water Flow Simulation",
+    station2Text: "Water can flow smoothly (laminar) or become chaotic (turbulent). This transition is key in river engineering. In the Reynolds Challenge, you'll experiment with fluid dynamics to understand these forces. Play the game to see it in action!",
+    station3Title: "Station III: River Vortex",
+    station3Text: "Vortices are swirling motions in water, often seen behind bridge piers or at river bends. They play a crucial role in mixing nutrients and sediments but can also pose navigational challenges. In this game, navigate the powerful river vortex and test your skills!",
     station4Title: "Station IV: Hex Connect",
     station4Text: "Connect the hexagonal pipes to guide the water from the source to the destination. A puzzle of logic and flow!",
-    station5Title: "Station V: Bridge over the Mandau",
-    station5Text: "You are standing on the Bridge over the Mandau. This river winds through three countries and holds many stories. Unfortunately, it also holds some trash. Your first task is to help clean this section of the river. Play the game to make a difference!",
-    station6Title: "Station VI: The Future of the River",
-    station6Text: "This is a space for future challenges and simulations. New activities will be available here soon!",
+    station5Title: "Station V: Ecosystem Impact",
+    station5Text: "The river's ecosystem is a delicate balance. Even fun activities can have an impact. Race your duck down the river to see how objects and flow interact! Play the game to learn more.",
+    station6Title: "Station VI: Bridge over the Mandau",
+    station6Text: "You are standing on the Bridge over the Mandau. This river winds through three countries and holds many stories. Unfortunately, it also holds some trash. Your first task is to help clean this section of the river. Play the game to make a difference!",
     slider1Label: "How far is the source of the water from city?",
     simulationTitle: "Simulation Results",
     nextStationButton: (station) => `Next Station ${station}`,
@@ -57,21 +52,16 @@ const translations = {
     loginButton: "Rozpocznij grę",
     station1Title: "Stacja I: Spadająca Kropla",
     station1Text: "Każda podróż wody zaczyna się od jednej kropli deszczu…\nWysoko w chmurach małe kropelki łączą się, aż stają się ciężkie i spadają na ziemię.\nAle nie każda kropla ma łatwą drogę. Niektóre są łapane przez ptaki, liście lub chmury, zanim dotkną Ziemi.\nTwoja misja zaczyna się tutaj — poprowadź kroplę bezpiecznie na ziemię i odkryj, jak małe zmiany na niebie mogą prowadzić do wielkich zmian na dole.",
-    fact1_1: "W 1880 roku deszcze nie ustawały, a w ciągu kilku dni zniszczonych zostało ponad 300 domów. Była to jedna z najgorszych powodzi w historii Mandau.",
-    fact1_2: "Ale nie tylko ulewny deszcz może powodować powodzie, ale także topniejący śnieg, wylewy rzek, sztormy przybrzeżne czy awarie zapór.",
-    fact1_3: "Wiele rzek polega na sezonowych powodziach, aby odświeżyć ekosystemy.",
-    fact1_4: "Najszybsze powodzie rzeczne mogą osiągać prędkości kilku metrów na sekundę, wystarczająco silne, aby przesuwać samochody, drzewa czy duże zanieczyszczenia.",
-    fact1_5: "W normalnych warunkach prędkość Mandau wynosi około 0,2-0,5 m/s, a w warunkach powodziowych około 1-3 m/s. Ale zależy to również od kształtu i głębokości rzeki….",
-    station2Title: "Stacja II: Wpływ na ekosystem",
-    station2Text: "Ekosystem rzeki to delikatna równowaga. Nawet zabawa może mieć na niego wpływ. Puść swoją kaczkę z prądem rzeki, aby zobaczyć, jak obiekty i przepływ na siebie oddziałują! Zagraj w grę, aby dowiedzieć się więcej.",
-    station3Title: "Stacja III: Symulacja przepływu wody",
-    station3Text: "Woda to dynamiczna siła. Poniżej widać dwie symulacje przepływu wody. Pierwsza pokazuje reprezentację 2D, pomocną w zrozumieniu ruchu powierzchniowego. Druga to symulacja 3D, która daje lepsze poczucie objętości i głębi. Obserwuj, jak woda oddziałuje ze swoim otoczeniem w obu modelach.",
+    station2Title: "Stacja II: Symulacja przepływu wody",
+    station2Text: "Woda może płynąć spokojnie (laminarnie) lub chaotycznie (turbulentnie). Ta zmiana jest kluczowa w inżynierii rzecznej. W Wyzwaniu Reynoldsa będziesz eksperymentować z dynamiką płynów, aby zrozumieć te siły. Zagraj w grę, aby zobaczyć to w akcji!",
+    station3Title: "Stacja III: Wir Rzeczny",
+    station3Text: "Wiry to kręcące się ruchy w wodzie, często widoczne za filarami mostów lub na zakrętach rzek. Odgrywają kluczową rolę w mieszaniu składników odżywczych i osadów, ale mogą również stanowić wyzwanie dla nawigacji. W tej grze zmierz się z potężnym wirem rzecznym i przetestuj swoje umiejętności!",
     station4Title: "Stacja IV: Hex Connect",
     station4Text: "Połącz sześciokątne rury, aby poprowadzić wodę od źródła do celu. Logiczna łamigłówka przepływu!",
-    station5Title: "Stacja V: Most na Mandau",
-    station5Text: "Stoisz na moście nad Mandau. Ta rzeka wije się przez trzy kraje i kryje w sobie wiele historii. Niestety, kryje też trochę śmieci. Twoim pierwszym úkolem jest pomoc w oczyszczeniu tego odcinka rzeki. Zagraj w grę, aby coś zmienić!",
-    station6Title: "Stacja VI: Przyszłość Rzeki",
-    station6Text: "To miejsce na przyszłe wyzwania i symulacje. Nowe aktywności pojawią się tu wkrótce!",
+    station5Title: "Stacja V: Wpływ na ekosystem",
+    station5Text: "Ekosystem rzeki to delikatna równowaga. Nawet zabawa może mieć na niego wpływ. Puść swoją kaczkę z prądem rzeki, aby zobaczyć, jak obiekty i przepływ na siebie oddziałują! Zagraj w grę, aby dowiedzieć się więcej.",
+    station6Title: "Stacja VI: Most na Mandau",
+    station6Text: "Stoisz na moście nad Mandau. Ta rzeka wije się przez trzy kraje i kryje w sobie wiele historii. Niestety, kryje też trochę śmieci. Twoim pierwszym úkolem jest pomoc w oczyszczeniu tego odcinka rzeki. Zagraj w grę, aby coś zmienić!",
     slider1Label: "Jak daleko od miasta znajduje się źródło wody?",
     simulationTitle: "Wyniki symulacji",
     nextStationButton: (station) => `Następna stacja ${station}`,
@@ -99,21 +89,16 @@ const translations = {
     loginButton: "Spiel starten",
     station1Title: "Station I: Fallender Tropfen",
     station1Text: "Jede Reise des Wassers beginnt mit einem einzigen Regentropfen…\nHoch in den Wolken verbinden sich winzige Tropfen, bis sie schwer werden und zur Erde fallen.\nAber nicht jeder Tropfen hat einen leichten Weg. Einige werden von Vögeln, Blättern oder Wolken aufgefangen, bevor sie die Erde berühren.\nDeine Mission beginnt hier oben – führe den Tropfen sicher zu Boden und entdecke, wie kleine Veränderungen am Himmel zu großen Veränderungen unten führen können.",
-    fact1_1: "Im Jahr 1880 hörten die Regenfälle nicht auf, und innerhalb weniger Tage wurden über 300 Häuser zerstört. Eine der schlimmsten Überschwemmungen in der Geschichte der Mandau.",
-    fact1_2: "Aber nicht nur starker Regen kann Überschwemmungen verursachen, sondern auch schmelzender Schnee, Flussüberläufe, Küstenstürme oder Dammbrüche.",
-    fact1_3: "Viele Flüsse sind auf saisonale Überschwemmungen angewiesen, um Ökosysteme aufzufrischen.",
-    fact1_4: "Die schnellsten Flussüberschwemmungen können Geschwindigkeiten von mehreren Metern pro Sekunde erreichen, stark genug, um Autos, Bäume oder große Trümmer zu bewegen.",
-    fact1_5: "Unter normalen Bedingungen beträgt die Geschwindigkeit der Mandau etwa 0,2-0,5 m/s und bei Hochwasser etwa 1-3 m/s. Aber es hängt auch von der Form und Tiefe des Flusses ab….",
-    station2Title: "Station II: Auswirkungen auf das Ökosystem",
-    station2Text: "Das Ökosystem des Flusses ist ein empfindliches Gleichgewicht. Selbst lustige Aktivitäten können Auswirkungen haben. Lass deine Ente den Fluss hinunterrasen, um zu sehen, wie Objekte und Strömung interagieren! Spiele das Spiel, um mehr zu erfahren.",
-    station3Title: "Station III: Wasserflusssimulation",
-    station3Text: "Wasser ist eine dynamische Kraft. Unten sehen Sie zwei Simulationen des Wasserflusses. Die erste zeigt eine 2D-Darstellung, die zum Verständnis der Oberflächenbewegung hilfreich ist. Die zweite ist eine 3D-Simulation, die ein besseres Gefühl für Volumen und Tiefe vermittelt. Beobachten Sie, wie Wasser in beiden Modellen mit seiner Umgebung interagiert.",
+    station2Title: "Station II: Wasserflusssimulation",
+    station2Text: "Wasser kann ruhig (laminar) oder chaotisch (turbulent) fließen. Dieser Übergang ist in der Flusstechnik entscheidend. In der Reynolds-Herausforderung experimentieren Sie mit der Fluiddynamik, um diese Kräfte zu verstehen. Spielen Sie das Spiel, um es in Aktion zu sehen!",
+    station3Title: "Station III: Flusswirbel",
+    station3Text: "Wirbel sind kreisende Bewegungen im Wasser, die oft hinter Brückenpfeilern oder in Flussbiegungen zu sehen sind. Sie spielen eine entscheidende Rolle bei der Vermischung von Nährstoffen und Sedimenten, können aber auch eine Herausforderung für die Schifffahrt darstellen. Navigieren Sie in diesem Spiel durch den mächtigen Flusswirbel und testen Sie Ihre Fähigkeiten!",
     station4Title: "Station IV: Hex Connect",
     station4Text: "Verbinde die sechseckigen Rohre, um das Wasser von der Quelle zum Ziel zu leiten. Ein Logik- und Fließrätsel!",
-    station5Title: "Station V: Brücke über die Mandau",
-    station5Text: "Sie stehen auf der Brücke über die Mandau. Dieser Fluss schlängelt sich durch drei Länder und birgt viele Geschichten. Leider birgt er auch etwas Müll. Ihre erste Aufgabe ist es, bei der Reinigung dieses Flussabschnitts zu helfen. Spielen Sie das Spiel, um etwas zu bewirken!",
-    station6Title: "Station VI: Zukunft des Flusses",
-    station6Text: "Dies ist ein Platz für zukünftige Herausforderungen und Simulationen. Neue Aktivitäten werden hier bald verfügbar sein!",
+    station5Title: "Station V: Auswirkungen auf das Ökosystem",
+    station5Text: "Das Ökosystem des Flusses ist ein empfindliches Gleichgewicht. Selbst lustige Aktivitäten können Auswirkungen haben. Lass deine Ente den Fluss hinunterrasen, um zu sehen, wie Objekte und Strömung interagieren! Spiele das Spiel, um mehr zu erfahren.",
+    station6Title: "Station VI: Brücke über die Mandau",
+    station6Text: "Sie stehen auf der Brücke über die Mandau. Dieser Fluss schlängelt sich durch drei Länder und birgt viele Geschichten. Leider birgt er auch etwas Müll. Ihre erste Aufgabe ist es, bei der Reinigung dieses Flussabschnitts zu helfen. Spielen Sie das Spiel, um etwas zu bewirken!",
     slider1Label: "Wie weit ist die Wasserquelle von der Stadt entfernt?",
     simulationTitle: "Simulationsergebnisse",
     nextStationButton: (station) => `Nächste Station ${station}`,
@@ -141,21 +126,16 @@ const translations = {
     loginButton: "Spustit hru",
     station1Title: "Stanice I: Padající kapka",
     station1Text: "Každá cesta vody začíná jedinou kapkou deště…\nVysoko v oblacích se malé kapky spojují, dokud neztěžknou a nespadnou na zem.\nAle ne každá kapka má snadnou cestu. Některé jsou zachyceny ptáky, listy nebo mraky, než se vůbec dotknou Země.\nTvá mise začíná tady nahoře – veď kapku bezpečně na zem a objev, jak malé změny na obloze mohou vést k velkým změnám dole.",
-    fact1_1: "V roce 1880 deště neustávaly a během několika dní bylo zničeno přes 300 domů. Byla to jedna z nejhorších povodní v historii Mandavy.",
-    fact1_2: "Ale nejen silný déšť může způsobit povodně, ale také tání sněhu, přelévání řek, pobřežní bouře nebo selhání přehrad.",
-    fact1_3: "Mnoho řek spoléhá na sezónní povodně k obnově ekosystémů.",
-    fact1_4: "Nejrychlejší říční povodně mohou dosáhnout rychlosti několika metrů za sekundu, dostatečně silné na to, aby pohnuly auty, stromy nebo velkými troskami.",
-    fact1_5: "Za normálních podmínek je rychlost Mandavy kolem 0,2-0,5 m/s a při povodňových podmínkách kolem 1-3 m/s. Ale záleží také na tvaru a hloubce řeky….",
-    station2Title: "Stanice II: Vliv na ekosystém",
-    station2Text: "Ekosystém řeky je křehká rovnováha. I zábavné aktivity mohou mít dopad. Pusťte svou kachnu po řece, abyste viděli, jak objekty a proudění interagují! Zahrajte si hru a dozvíte se více.",
-    station3Title: "Stanice III: Simulace proudění vody",
-    station3Text: "Voda je dynamická síla. Níže vidíte dvě simulace proudění vody. První ukazuje 2D znázornění, které pomáhá pochopit pohyb na povrchu. Druhá je 3D simulace, která dává lepší představu o objemu a hloubce. Pozorujte, jak voda v obou modelech interaguje se svým prostředím.",
+    station2Title: "Stanice II: Simulace proudění vody",
+    station2Text: "Voda může proudit hladce (laminárně) nebo se stát chaotickou (turbulentní). Tento přechod je klíčový v říčním inženýrství. V Reynoldsově výzvě budete experimentovat s dynamikou kapalin, abyste pochopili tyto síly. Zahrajte si hru a uvidíte to v akci!",
+    station3Title: "Stanice III: Říční vír",
+    station3Text: "Víry jsou krouživé pohyby ve vodě, často viditelné za mostními pilíři nebo v ohybech řek. Hrají klíčovou roli při míchání živin a sedimentů, ale mohou také představovat navigační výzvu. V této hře proplujte mocným říčním vírem a otestujte své dovednosti!",
     station4Title: "Stanice IV: Hex Connect",
     station4Text: "Spojte šestiúhelníkové trubky a veďte vodu od zdroje k cíli. Logická hádanka o proudění!",
-    station5Title: "Stanice V: Most přes Mandavu",
-    station5Text: "Stojíte na mostě přes Mandavu. Tato řeka se vine třemi zeměmi a skrývá mnoho příběhů. Bohužel také skrývá nějaké odpadky. Vaším prvním úkolem je pomoci vyčistit tento úsek řeky. Zahrajte si hru, abyste něco změnili!",
-    station6Title: "Stanice VI: Budoucnost řeky",
-    station6Text: "Toto je prostor pro budoucí výzvy a simulace. Nové aktivity zde budou brzy k dispozici!",
+    station5Title: "Stanice V: Vliv na ekosystém",
+    station5Text: "Ekosystém řeky je křehká rovnováha. I zábavné aktivity mohou mít dopad. Pusťte svou kachnu po řece, abyste viděli, jak objekty a proudění interagují! Zahrajte si hru a dozvíte se více.",
+    station6Title: "Stanice VI: Most přes Mandavu",
+    station6Text: "Stojíte na mostě přes Mandavu. Tato řeka se vine třemi zeměmi a skrývá mnoho příběhů. Bohužel také skrývá nějaké odpadky. Vaším prvním úkolem je pomoci vyčistit tento úsek řeky. Zahrajte si hru, abyste něco změnili!",
     slider1Label: "Jak daleko je zdroj vody od města?",
     simulationTitle: "Výsledky simulace",
     nextStationButton: (station) => `Další stanice ${station}`,
@@ -178,10 +158,12 @@ const translations = {
 };
 
 const GAMES = {
-  1: { url: './falling-drop/index.html', name: 'Falling Drop' },
-  2: { url: './duck-race-game/index.html', name: 'Duck Race' },
-  4: { url: './hex-connect/index.html', name: 'Hex Connect' },
-  5: { url: './river-guardian-game/index.html', name: 'River Guardian' }
+  1: { url: './public/falling-drop/index.html', name: 'Falling Drop' },
+  2: { url: './public/river-flow-game/reynolds-experiment.html', name: 'Reynolds Challenge' },
+  3: { url: './public/vortex-game/index.html', name: 'Vortex Game' },
+  4: { url: './public/hex-connect/index.html', name: 'Hex Connect' },
+  5: { url: './public/duck-race-game/index.html', name: 'Duck Race' },
+  6: { url: './public/river-guardian-game/index.html', name: 'River Guardian' }
 };
 
 const SkyBlue = '#00A9E0';
@@ -265,7 +247,6 @@ const DropletLogoSVG = ({ size = "80px", theme = "default" }) => {
             fill: "none",
             stroke: waveStroke,
             strokeWidth: "1.75",
-            strokeLinecap: "round",
             style: { opacity: isSplashOrLogin ? 1 : 0.9 }
         })
     );
@@ -511,7 +492,10 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
             React.createElement('button', { className: 'go-button', onClick: handleGoClick, 'aria-label': t('ariaGoToApp') }, t('goButton'))
         ),
         React.createElement('div', { className: 'sponsor-bar' },
-            React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/6e9aa9e0-5ae5-4e60-8852-b5e989e44088.png', alt: 'Sponsor Logo', className: 'sponsor-logo' })
+            React.createElement('div', { className: 'sponsor-logos-container' },
+                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/6e9aa9e0-5ae5-4e60-8852-b5e989e44088.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
+                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/interreg.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
+            )
         )
     );
 };
@@ -575,16 +559,6 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
     };
     const gameInfo = GAMES[currentStation];
 
-    const station1Facts = currentStation === 1 && React.createElement('div', { style: { marginTop: '20px', paddingTop: '20px', borderTop: `1px solid ${SubtleBorderMockup}` } },
-        React.createElement('ul', { style: { listStyleType: 'decimal', paddingLeft: '20px', margin: '0', color: DarkTextMockup } },
-            [1, 2, 3, 4, 5].map(i =>
-                React.createElement('li', { key: i, style: { marginBottom: '12px', fontSize: '14px', lineHeight: '1.6' } },
-                    t(`fact1_${i}`)
-                )
-            )
-        )
-    );
-
     return React.createElement(React.Fragment, null,
         React.createElement('div', { className: 'content-area' },
             React.createElement('h2', { className: 'content-title', id: `station-title-${currentStation}` }, stationData.title),
@@ -592,10 +566,6 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
             gameInfo && React.createElement('div', { className: 'game-section' },
                 React.createElement('button', { className: 'game-button', onClick: () => onPlayGame(gameInfo.url, currentStation) }, t('playGameButton', gameInfo.name)),
                 scores[currentStation] !== undefined && React.createElement('p', { className: 'score-text' }, `${t('yourScore')} ${scores[currentStation]}`)
-            ),
-            station1Facts,
-             currentStation === 6 && React.createElement('div', { className: 'game-section' },
-                React.createElement('button', { className: 'game-button', disabled: true, style: { background: '#ccc', cursor: 'not-allowed', boxShadow: 'none' } }, t('comingSoon'))
             )
         ),
         currentStation !== 1 && React.createElement('section', { className: 'simulation-results-container', 'aria-labelledby': 'simulation-results-heading' },

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vortex Game</title>
+<style>
+  html,body{height:100%;margin:0;background:#06131b;color:#e6f1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+
+  /* HUD */
+  #ui{position:fixed;top:10px;left:10px;background:rgba(0,0,0,.35);padding:10px 12px;border-radius:10px;backdrop-filter:blur(2px);box-shadow:0 6px 24px rgba(0,0,0,.35);user-select:none;line-height:1.25;font-size:14px;z-index:10;min-width:260px}
+  #ui .title{font-weight:700;margin-bottom:6px}
+  .hpWrap{display:flex;gap:8px;align-items:center;margin-top:6px}
+  .bar{flex:1;height:10px;background:#1b3a50;border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);width:100%}
+  .bar.enemy>i{background:linear-gradient(90deg,#f87171,#ef4444)}
+  .dim{color:#9db3c5}
+
+  #centerMsg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;color:#e6f1ff;opacity:0;transition:opacity .35s ease;pointer-events:none;font-size:clamp(18px,3vw,28px);z-index:20}
+
+  /* Overlays */
+  .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:30}
+  .card{background:#0b2131;border:1px solid #12364e;padding:16px 18px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:520px;text-align:center}
+  .btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  button{padding:8px 14px;border-radius:10px;border:1px solid #12364e;background:#102e44;color:#e6f1ff;cursor:pointer}
+  button.primary{background:#134b6f}
+
+  /* On-screen controls */
+  .controls{position:fixed;bottom:14px;z-index:12;display:flex;gap:10px}
+  #controlsLeft{left:14px}
+  #controlsRight{right:14px}
+  .ctrlBtn{
+    min-width:64px; min-height:64px; padding:8px 12px;
+    background:rgba(10,26,40,.55); border:1px solid #12364e; color:#e6f1ff;
+    border-radius:14px; box-shadow:0 8px 18px rgba(0,0,0,.35);
+    backdrop-filter:blur(3px); user-select:none; font-weight:700; letter-spacing:.5px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .ctrlBtn:active{transform:translateY(1px); background:rgba(15,34,52,.65)}
+  @media (max-width: 640px){ .ctrlBtn{min-width:58px;min-height:58px} #ui{transform:scale(.92); transform-origin:top left} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- HUD -->
+<div id="ui" style="display:none;">
+  <div class="title">Vortex Game</div>
+  <div class="hpWrap">
+    <div>HP:</div>
+    <div class="bar"><i id="hpPlayer" style="width:100%"></i></div>
+    <div id="hpPlayerLbl" class="dim">100</div>
+  </div>
+  <div class="hpWrap">
+    <div>Enemy A:</div>
+    <div class="bar enemy"><i id="hpEnemyA" style="width:100%"></i></div>
+    <div id="hpEnemyALbl" class="dim">—</div>
+  </div>
+  <div class="hpWrap" id="enemyBRow" style="display:none;">
+    <div>Enemy B:</div>
+    <div class="bar enemy"><i id="hpEnemyB" style="width:100%"></i></div>
+    <div id="hpEnemyBLbl" class="dim">—</div>
+  </div>
+  <div class="dim" id="levelLbl" style="margin-top:6px;">Level 1</div>
+</div>
+
+<!-- Touch controls -->
+<div id="controlsLeft" class="controls" style="display:none;">
+  <div class="ctrlBtn" id="btnShootOut"  title="Fire outward (X)">⤴︎</div>
+  <div class="ctrlBtn" id="btnShootIn"   title="Fire inward (Z)">⤵︎</div>
+</div>
+<div id="controlsRight" class="controls" style="display:none;">
+  <div class="ctrlBtn" id="btnIn"  title="Move inward (←)">⇩</div>
+  <div class="ctrlBtn" id="btnOut" title="Move outward (→)">⇧</div>
+</div>
+
+<!-- Center messages -->
+<div id="centerMsg"></div>
+
+<!-- End screen -->
+<div id="replay" class="overlay">
+  <div class="card">
+    <div id="endTitle" style="font-weight:600;margin-bottom:6px;">Play again?</div>
+    <div class="btns">
+      <button id="btnPrimary" class="primary">Yes</button>
+      <button id="btnNo">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial step modal -->
+<div id="tutor" class="overlay">
+  <div class="card">
+    <div id="tutTitle" style="font-weight:700;margin-bottom:6px">Tutorial</div>
+    <div id="tutMsg" class="dim" style="margin:6px 0 2px"></div>
+    <div class="btns">
+      <button id="tutOk" class="primary">OK, let me try</button>
+    </div>
+  </div>
+</div>
+
+<!-- Intro ask modal -->
+<div id="intro" class="overlay" style="display:flex;">
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:6px">Welcome</div>
+    <div class="dim">Do you want to play the tutorial first?</div>
+    <div class="btns">
+      <button id="introPlay" class="primary">Play tutorial</button>
+      <button id="introSkip">Skip, start game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+try{
+/* ========= Canvas & water ========= */
+const canvas=document.getElementById('c'); const ctx=canvas.getContext('2d'); const dpr=Math.max(1,window.devicePixelRatio||1);
+let noiseCanvas,noiseCtx,noiseSize=256,noiseA,noiseB; let bgStatic,glowCan,glowCtx;
+function createOffscreen(w,h){const can=document.createElement('canvas');can.width=w;can.height=h;return{can,cx:can.getContext('2d')}} 
+function makeValueNoise(size,oct=4){const base=new Float32Array(size*size);const smooth=t=>t*t*(3-2*t);const lerp=(a,b,t)=>a+(b-a)*t;const hash=(x,y)=>{const t=Math.sin((x*374761393 ^ y*668265263)>>>0)*43758.5453;return t-Math.floor(t)};for(let o=0;o<oct;o++){const step=size/(1<<o),amp=1/Math.pow(2,o+1);for(let y=0;y<size;y++){const gy=Math.floor(y/step),ty=smooth(y/step-gy);for(let x=0;x<size;x++){const gx=Math.floor(x/step),tx=smooth(x/step-gx);const a=hash(gx,gy),b=hash(gx+1,gy),c=hash(gx,gy+1),d=hash(gx+1,gy+1);base[y*size+x]+=lerp(lerp(a,b,tx),lerp(c,d,tx),ty)*amp}}}let mn=1e9,mx=-1e9;for(const v of base){if(v<mn)mn=v;if(v>mx)mx=v}const inv=(mx-mn)||1;for(let i=0;i<base.length;i++)base[i]=(base[i]-mn)/inv;return base}
+function initWaterLayers(){noiseCanvas=document.createElement('canvas');noiseCanvas.width=noiseCanvas.height=noiseSize;noiseCtx=noiseCanvas.getContext('2d');noiseA=makeValueNoise(noiseSize,5);noiseB=makeValueNoise(noiseSize,5);const {can,cx}=createOffscreen(canvas.width,canvas.height);const c={x:canvas.width*0.5,y:canvas.height*0.5};const R_MIN=28*dpr,R_MAX=Math.min(canvas.width,canvas.height)*0.45;const deep=cx.createRadialGradient(c.x,c.y,R_MIN*0.2,c.x,c.y,R_MAX*1.25);deep.addColorStop(0,'#05233a');deep.addColorStop(0.45,'#07395e');deep.addColorStop(1,'#031420');cx.fillStyle=deep;cx.fillRect(0,0,can.width,can.height);cx.globalAlpha=0.18;cx.strokeStyle='rgba(210,240,255,0.9)';cx.lineWidth=0.8*dpr;for(let i=0;i<24;i++){const t=i/23,r=R_MIN*0.8+(R_MAX*1.08-R_MIN*0.8)*t;cx.beginPath();cx.arc(c.x,c.y,r,0,Math.PI*2);cx.stroke()}cx.globalAlpha=1;bgStatic=can;glowCan=document.createElement('canvas');glowCan.width=canvas.width;glowCan.height=canvas.height;glowCtx=glowCan.getContext('2d')}
+function resize(){canvas.width=Math.floor(innerWidth*dpr);canvas.height=Math.floor(innerHeight*dpr);initWaterLayers()} addEventListener('resize',resize);resize();
+
+/* ========= Game state ========= */
+let gameStarted=false; // campaign active
+const uiEl=document.getElementById('ui'); const ctrlL=document.getElementById('controlsLeft'); const ctrlR=document.getElementById('controlsRight');
+
+/* ========= World constants ========= */
+const center=()=>({x:canvas.width*0.5,y:canvas.height*0.5});
+const R_MIN=28*dpr,R_MAX=Math.min(canvas.width,canvas.height)*0.45;
+const vortex={k:180,eps:60,inwardPull:10,radialDrag:1.1};
+const TAU=Math.PI*2, omegaOf=r=>vortex.k/(r+vortex.eps);
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+const SHIP_COLLISION_R=20*dpr, HIT_R_SHIP=SHIP_COLLISION_R*0.95;
+
+/* ========= Entities ========= */
+function makeShip(isEnemy=false){return{isEnemy,r:isEnemy?Math.min(300*dpr,R_MAX*0.75):Math.min(260*dpr,R_MAX*0.6),theta:isEnemy?Math.PI*0.35:0,vr:0,thrust:45,hp:100,alive:true,sinking:false,sinkT:0,fireCD:0,wake:[]}}
+const player=makeShip(false); let enemies=[], debris=[];
+const drops=[], DROP_RADIUS=10*dpr; let gameTime=0; const boostExpiries=[]; const BOOST_PER_STACK=0.10; const DROP_SPAWN_RATE=0.12; const DROP_MAX=3;
+function currentBoostMultiplier(now){for(let i=boostExpiries.length-1;i>=0;i--) if(boostExpiries[i]<=now) boostExpiries.splice(i,1); return 1+BOOST_PER_STACK*boostExpiries.length;}
+function spawnDrop(){ if(drops.length>=DROP_MAX) return; const r=Math.max(R_MAX-2*dpr,R_MIN), t=Math.random()*TAU; drops.push({r,theta:t,bob:Math.random()*TAU}); }
+function updateDrops(dt){ if(Math.random()<DROP_SPAWN_RATE*dt && gameStarted) spawnDrop(); for(let i=drops.length-1;i>=0;i--){const d=drops[i]; d.theta=(d.theta+omegaOf(d.r)*dt)%TAU; d.r-=8*dt; if(d.r<R_MIN*0.95){drops.splice(i,1);continue;} const c=center(), x=c.x+Math.cos(d.theta)*d.r, y=c.y+Math.sin(d.theta)*d.r, px=c.x+Math.cos(player.theta)*player.r, py=c.y+Math.sin(player.theta)*player.r; if(Math.hypot(px-x,py-y)<SHIP_COLLISION_R+DROP_RADIUS*0.8){boostExpiries.push(gameTime+5); drops.splice(i,1); spawnFoam(x,y); playPickup();}}}
+function drawDrops(){const c=center(); for(const d of drops){const x=c.x+Math.cos(d.theta)*d.r, y=c.y+Math.sin(d.theta)*d.r+Math.sin(gameTime*2.5+d.bob)*2*dpr; ctx.save(); ctx.translate(x,y); ctx.rotate(-Math.PI/12); ctx.beginPath(); ctx.moveTo(0,-DROP_RADIUS*0.9); ctx.quadraticCurveTo(DROP_RADIUS*0.6,-DROP_RADIUS*0.2,0,DROP_RADIUS); ctx.quadraticCurveTo(-DROP_RADIUS*0.6,-DROP_RADIUS*0.2,0,-DROP_RADIUS*0.9); ctx.closePath(); ctx.fillStyle='rgba(120,200,255,0.9)'; ctx.fill(); ctx.beginPath(); ctx.ellipse(-DROP_RADIUS*0.15,-DROP_RADIUS*0.25,DROP_RADIUS*0.18,DROP_RADIUS*0.12,0,0,TAU); ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fill(); ctx.restore(); glowCtx.beginPath(); glowCtx.arc(x,y, DROP_RADIUS*1.1,0,TAU); glowCtx.fillStyle='rgba(140,220,255,0.18)'; glowCtx.fill(); }}
+
+/* Bullets */
+const bullets=[], splashes=[], foams=[], hits=[]; const BULLET_Z0=120, BULLET_G=220, BULLET_SIZE=3.5, MUZZLE=340;
+
+/* Debris */
+let debrisSpawnAcc=0; const debrisSpawnRate=0.35, debrisMax=18;
+function randomDebrisType(){const t=['barrel','raft','mast','rowboat','chest']; return t[(Math.random()*t.length)|0];}
+function createDebris(type,r,theta,stronger=false){const base={theta,r,vr:(Math.random()*20-10),spin:(Math.random()*2-1)*0.6,ang:Math.random()*TAU,drift:(stronger?26:16)+Math.random()*28,damage:10,size:12*dpr,life:Infinity,type}; if(type==='barrel'){base.size=8*dpr;base.damage=8;} if(type==='raft'){base.size=16*dpr;base.damage=12;} if(type==='mast'){base.size=14*dpr;base.damage=14;} if(type==='rowboat'){base.size=15*dpr;base.damage=16;} if(type==='chest'){base.size=10*dpr;base.damage=10;} return base;}
+function spawnDebrisFromEdge(){const r=Math.max(R_MAX-2*dpr,R_MIN); const t=Math.random()*TAU; debris.push(createDebris(randomDebrisType(),r,t,true));}
+function spawnDebrisField(n){for(let i=0;i<n;i++){const t=(i/n)*TAU+Math.random()*0.5, r=lerp(R_MIN*1.3,R_MAX*0.95,Math.random()); debris.push(createDebris(randomDebrisType(),r,t,false));}}
+function updateDebris(dt){const c=center(); for(const d of debris){d.ang+=d.spin*dt; d.r+=(-d.drift-0.6*d.vr)*dt; if(d.r<R_MIN*0.9){d.r=R_MIN*0.9; d.life=0;} d.theta=(d.theta+omegaOf(d.r)*dt)%TAU;} function collideShip(s){const sx=c.x+Math.cos(s.theta)*s.r, sy=c.y+Math.sin(s.theta)*s.r; for(const d of debris){if(d.life<=0) continue; const dx=(c.x+Math.cos(d.theta)*d.r)-sx,dy=(c.y+Math.sin(d.theta)*d.r)-sy,dist=Math.hypot(dx,dy),rad=d.size+SHIP_COLLISION_R*0.9; if(dist<rad){damageShip(s,d.damage); const nx=dx/(dist||1),ny=dy/(dist||1); s.r-=8*dpr*nx; s.vr-=20*nx; spawnSplash(sx+nx*10*dpr, sy+ny*10*dpr, 80); d.life=0;}}} if(gameStarted){collideShip(player); for(const e of enemies) if(e.alive) collideShip(e);} for(let i=debris.length-1;i>=0;i--) if(debris[i].life<=0) debris.splice(i,1);}
+function drawDebris(){
+  const c=center();
+  for(const d of debris){
+    const x=c.x+Math.cos(d.theta)*d.r, y=c.y+Math.sin(d.theta)*d.r;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(d.ang);
+    switch(d.type){
+      case 'barrel': drawBarrel(); break;
+      case 'raft': drawRaft(); break;
+      case 'mast': drawMast(); break;
+      case 'rowboat': drawRowboat(); break;
+      case 'chest': drawChest(); break;
+    }
+    ctx.restore();
+    glowCtx.beginPath(); glowCtx.arc(x,y, d.size*0.8, 0, TAU); glowCtx.fillStyle='rgba(255,255,255,0.12)'; glowCtx.fill();
+  }
+  function drawBarrel(){ const r=8*dpr; ctx.beginPath(); ctx.ellipse(0,0,r*0.9,r*0.7,0,0,TAU); ctx.fillStyle='#5a3b1e'; ctx.fill(); ctx.strokeStyle='#23160c'; ctx.lineWidth=1.5*dpr; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-r*0.8,0); ctx.lineTo(r*0.8,0); ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.stroke(); }
+  function drawRaft(){ const w=26*dpr,h=12*dpr; ctx.fillStyle='#6b4a25'; ctx.strokeStyle='#2b1b0d'; ctx.lineWidth=1.5*dpr; for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.roundRect(-w/2 + i*5*dpr, -h/2, 8*dpr, h, 2*dpr); ctx.fill(); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(-w/2,-h/3); ctx.lineTo(w/2,-h/3); ctx.moveTo(-w/2,h/3); ctx.lineTo(w/2,h/3); ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.stroke(); }
+  function drawMast(){ const h=24*dpr; ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(0,-h/2); ctx.strokeStyle='#4b3520'; ctx.lineWidth=3*dpr; ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,-h/3); ctx.lineTo(10*dpr,-h/4); ctx.lineWidth=2*dpr; ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.stroke(); }
+  function drawRowboat(){ ctx.beginPath(); ctx.moveTo(-14*dpr,6*dpr); ctx.quadraticCurveTo(0,12*dpr,16*dpr,6*dpr); ctx.lineTo(16*dpr,-4*dpr); ctx.quadraticCurveTo(0,-12*dpr,-14*dpr,-4*dpr); ctx.closePath(); ctx.fillStyle='#3e2a18'; ctx.fill(); ctx.strokeStyle='#23160c'; ctx.lineWidth=1.5*dpr; ctx.stroke(); }
+  function drawChest(){ const w=12*dpr,h=9*dpr; ctx.beginPath(); ctx.roundRect(-w/2,-h/2,w,h,2*dpr); ctx.fillStyle='#5a3b1e'; ctx.fill(); ctx.strokeStyle='#23160c'; ctx.lineWidth=1.5*dpr; ctx.stroke(); ctx.beginPath(); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.stroke(); }
+}
+
+/* ========= Input ========= */
+const input={left:false,right:false,shoot:false,shootIn:false,shootOut:false};
+let radialShootDir=1, shootCooldown=0, lastShotDir=0;
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')input.left=true;if(e.code==='ArrowRight')input.right=true;if(e.code==='Space'){input.shoot=true;e.preventDefault();}if(e.code==='KeyZ'){input.shootIn=true;e.preventDefault();}if(e.code==='KeyX'){input.shootOut=true;e.preventDefault();}});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft')input.left=false;if(e.code==='ArrowRight')input.right=false;if(e.code==='Space')input.shoot=false;if(e.code==='KeyZ')input.shootIn=false;if(e.code==='KeyX')input.shootOut=false;});
+function bindHold(btn,onDown,onUp){let pressed=false;const down=e=>{e.preventDefault();e.stopPropagation();if(pressed)return;pressed=true;onDown();};const up=e=>{e.preventDefault();e.stopPropagation();if(!pressed)return;pressed=false;onUp();};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',up);btn.addEventListener('pointercancel',up);btn.addEventListener('pointerleave',up);btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();});}
+bindHold(document.getElementById('btnIn'),()=>input.left=true,()=>input.left=false);
+bindHold(document.getElementById('btnOut'),()=>input.right=true,()=>input.right=false);
+bindHold(document.getElementById('btnShootIn'),()=>input.shootIn=true,()=>input.shootIn=false);
+bindHold(document.getElementById('btnShootOut'),()=>input.shootOut=true,()=>input.shootOut=false);
+
+/* Prevent restart while overlays visible */
+const replayEl=document.getElementById('replay');
+canvas.addEventListener('click',e=>{if(replayEl.style.display==='flex'||document.getElementById('tutor').style.display==='flex'||document.getElementById('intro').style.display==='flex')return; if(e.target!==canvas)return; if(!gameStarted)return; setupLevel(level);flashCenterMsg('Level restarted');});
+
+/* ========= Level flow ========= */
+let level=1, gameOver=false; const levelLbl=document.getElementById('levelLbl');
+function setupLevel(n){gameStarted=true; uiEl.style.display=''; ctrlL.style.display=''; ctrlR.style.display=''; level=n;levelLbl.textContent='Level '+level;Object.assign(player,makeShip(false));bullets.length=splashes.length=foams.length=hits.length=0;player.wake.length=0;enemies=[];debris=[];drops.length=0;boostExpiries.length=0;radialShootDir=1;shootCooldown=0;lastShotDir=0;gameOver=false;document.getElementById('centerMsg').style.opacity='0';debrisSpawnAcc=0;gameTime=0;const e1=makeShip(true);enemies.push(e1);if(level>=3){const e2=makeShip(true);e2.theta=Math.PI*1.1;e2.r=Math.min(320*dpr,R_MAX*0.7);enemies.push(e2);document.getElementById('enemyBRow').style.display='';}else document.getElementById('enemyBRow').style.display='none';if(level>=2){spawnDebrisField(10);} }
+function nextLevelOrEnd(){if(level<3)showEndScreen('Victory!','Continue');else showEndScreen('Campaign complete!','Play again');}
+
+/* ========= Physics ========= */
+function resolveShipCollision(a,b){const c=center();const ax=c.x+Math.cos(a.theta)*a.r,ay=c.y+Math.sin(a.theta)*a.r;const bx=c.x+Math.cos(b.theta)*b.r,by=c.y+Math.sin(b.theta)*b.r;const dx=bx-ax,dy=by-ay,dist=Math.hypot(dx,dy),minDist=SHIP_COLLISION_R*2;if(dist===0||dist>=minDist)return;const pen=minDist-dist,nx=dx/dist,ny=dy/dist,push=pen*0.5;const axN=ax-nx*push,ayN=ay-ny*push,bxN=bx+nx*push,byN=by+ny*push;a.r=Math.min(Math.max(Math.hypot(axN-c.x,ayN-c.y),R_MIN+SHIP_COLLISION_R),R_MAX-SHIP_COLLISION_R);b.r=Math.min(Math.max(Math.hypot(bxN-c.x,byN-c.y),R_MIN+SHIP_COLLISION_R),R_MAX-SHIP_COLLISION_R);a.theta=Math.atan2(ayN-c.y,axN-c.x);b.theta=Math.atan2(byN-c.y,bxN-c.x);const rel=b.vr-a.vr;if(rel<0){const imp=-rel*0.8;a.vr-=imp*0.5;b.vr+=imp*0.5;}}
+function fireBullet(owner,dir){const c=center(),r=owner.r,th=owner.theta; if(dir!==-1&&dir!==1)dir=radialShootDir; else radialShootDir=dir; const sx=c.x+Math.cos(th)*r, sy=c.y+Math.sin(th)*r; const theta0=Math.atan2(sy-c.y,sx-c.x), r0=Math.hypot(sx-c.x,sy-c.y); bullets.push({r:r0+dir*14*dpr,theta0,dir,speed:MUZZLE,owner:owner.isEnemy?'enemy':'player',x:sx,y:sy,z:BULLET_Z0,vz:0,life:2.5}); lastShotDir=dir; playCannon(sx,sy);}
+function damageShip(s,d){if(!s.alive||s.sinking)return; s.hp-=d; playHit(); if(s.hp<=0) startSinking(s,s.isEnemy);}
+function startSinking(s,isEnemy){if(s.sinking||!s.alive)return; s.sinking=true; flashCenterMsg(isEnemy?'Enemy is sinking!':'We are sinking!');}
+function concludeIfNeeded(){if(gameOver)return; if(!player.alive){gameOver=true;showEndScreen('Defeat','Play again');return;} if(enemies.filter(e=>e.alive).length===0){gameOver=true;nextLevelOrEnd();}}
+
+/* Wake & particles */
+function spawnWake(ship,c){const speed=Math.abs(ship.vr);if(speed<8)return;const x=c.x+Math.cos(ship.theta)*ship.r,y=c.y+Math.sin(ship.theta)*ship.r;const bx=x-Math.cos(ship.theta)*10*dpr,by=y-Math.sin(ship.theta)*10*dpr;ship.wake.push({x:bx+(Math.random()-0.5)*3*dpr,y:by+(Math.random()-0.5)*3*dpr,r:Math.max(0.5*dpr,2*dpr+Math.random()*2*dpr),vr:Math.max(10*dpr,22*dpr+60*dpr*(speed/60)),life:0.9,maxLife:0.9});if(ship.wake.length>160)ship.wake.splice(0,ship.wake.length-160);}
+function updateWake(ship,dt){for(let i=ship.wake.length-1;i>=0;i--){const w=ship.wake[i];w.r=Math.max(0,w.r+Math.max(0,w.vr)*dt);w.life-=dt;if(!isFinite(w.r)||w.r<=0||w.life<=0)ship.wake.splice(i,1);}}
+function renderWake(ship){for(const w of ship.wake){const rad=Math.max(0.1*dpr,w.r);if(!isFinite(rad)||rad<=0)continue;ctx.beginPath();ctx.arc(w.x,w.y,rad,0,TAU);ctx.strokeStyle=`rgba(230,245,255,${(w.life/w.maxLife)*0.25})`;ctx.lineWidth=2*dpr;ctx.stroke();}}
+function spawnSplash(x,y,str){const c=center(),ang=Math.atan2(y-c.y,x-c.x),dirx=-Math.cos(ang),diry=-Math.sin(ang),sp=30+Math.min(120,str*3);splashes.push({x:x+(Math.random()-0.5)*6*dpr,y:y+(Math.random()-0.5)*6*dpr,vx:dirx*(sp*(0.6+0.5*Math.random())),vy:diry*(sp*(0.6+0.5*Math.random())),r:1.5*dpr+Math.random()*1.5*dpr,life:0.6+Math.random()*0.4,maxLife:1.0}); playSplash();}
+function spawnFoam(x,y){foams.push({x,y,r:2*dpr,vr:120*dpr,life:0.35,maxLife:0.35});}
+function spawnHit(x,y){hits.push({x,y,t:0});for(let i=0;i<6;i++)spawnSplash(x+(Math.random()-0.5)*4*dpr,y+(Math.random()-0.5)*4*dpr,80);}
+
+/* ========= Game loop ========= */
+let last=performance.now(); function tick(now){const dt=Math.min(0.033,(now-last)/1000); last=now; gameTime+=dt; update(dt); render(now*0.001); requestAnimationFrame(tick);} requestAnimationFrame(tick);
+
+function update(dt){
+  const c=center(); const speedMul=currentBoostMultiplier(gameTime);
+  const playing = gameStarted || tutorial.active;
+
+  if(playing && !gameOver){
+    let ar=0; if(input.left)ar-=player.thrust; if(input.right)ar+=player.thrust; ar*=speedMul; ar+=-vortex.inwardPull-vortex.radialDrag*player.vr;
+    player.vr+=ar*dt; player.r+=player.vr*dt; if(player.r<R_MIN) startSinking(player,false); if(player.r>R_MAX){player.r=R_MAX;player.vr=Math.min(player.vr,0);} player.theta=(player.theta+omegaOf(player.r)*dt)%TAU;
+
+    if(shootCooldown>0) shootCooldown-=dt;
+    if(player.alive && shootCooldown<=0){
+      if(input.shootIn){fireBullet(player,-1);shootCooldown=1.0;}
+      else if(input.shootOut){fireBullet(player,1);shootCooldown=1.0;}
+      else if(input.shoot){fireBullet(player,radialShootDir);shootCooldown=1.0;}
+    }
+
+    for(const e of enemies){e.fireCD=Math.max(0,e.fireCD-dt); if(!e.alive)continue; const desiredR=player.r+20*dpr*(player.r>e.r?1:-1); let e_ar=0; if(e.r<desiredR)e_ar+=e.thrust*0.7; else e_ar-=e.thrust*0.7; e_ar+=-vortex.inwardPull-vortex.radialDrag*e.vr; e.vr+=e_ar*dt; e.r+=e.vr*dt; if(e.r<R_MIN) startSinking(e,true); if(e.r>R_MAX){e.r=R_MAX;e.vr=Math.min(e.vr,0);} e.theta=(e.theta+omegaOf(e.r)*dt)%TAU; if(gameStarted && e.fireCD<=0){const dir=(player.r>e.r)?1:-1; fireBullet(e,dir); e.fireCD=1.0+Math.random()*0.4;}}
+
+    for(let i=0;i<enemies.length;i++){const ei=enemies[i]; if(!ei.alive)continue; resolveShipCollision(player,ei); for(let j=i+1;j<enemies.length;j++){const ej=enemies[j]; if(!ej.alive)continue; resolveShipCollision(ei,ej); } }
+
+    for(let i=bullets.length-1;i>=0;i--){const b=bullets[i]; b.r+=(b.dir===-1?-1:1)*b.speed*dt; const c0=center(); b.x=c0.x+Math.cos(b.theta0)*b.r; b.y=c0.y+Math.sin(b.theta0)*b.r; b.vz-=BULLET_G*dt; b.z+=b.vz*dt; b.life-=dt;
+      if(b.z<=0){spawnSplash(b.x,b.y,70); bullets.splice(i,1); continue;}
+      if(player.alive && b.owner!=='player'){const px=c.x+Math.cos(player.theta)*player.r,py=c.y+Math.sin(player.theta)*player.r; if(Math.hypot(px-b.x,py-b.y)<HIT_R_SHIP){bullets.splice(i,1); damageShip(player,12); spawnFoam(b.x,b.y); spawnHit(b.x,b.y); continue;}}
+      let hit=false; for(const e of enemies){if(!e.alive)continue; if(b.owner==='player'){const ex=c.x+Math.cos(e.theta)*e.r,ey=c.y+Math.sin(e.theta)*e.r; if(Math.hypot(ex-b.x,ey-b.y)<HIT_R_SHIP){bullets.splice(i,1); damageShip(e,12); spawnFoam(b.x,b.y); spawnHit(b.x,b.y); hit=true; break;}}}
+      if(hit)continue; if(b.life<=0){spawnSplash(b.x,b.y,60); bullets.splice(i,1);}
+    }
+  }
+
+  updateDebris(dt); spawnWake(player,c); for(const e of enemies) render && spawnWake(e,c);
+  updateDrops(dt);
+
+  for(const s of [player,...enemies]){if(s.sinking){s.sinkT+=dt/1.4; if(s.sinkT>=1){s.alive=false;s.sinking=false;s.sinkT=1; concludeIfNeeded();}}}
+  for(let i=splashes.length-1;i>=0;i--){const p=splashes[i]; p.vx+=-p.vx*0.5*dt; p.vy+=-p.vy*0.5*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt; if(p.life<=0) splashes.splice(i,1);}
+  for(let i=foams.length-1;i>=0;i--){const f=foams[i]; f.r+=f.vr*dt; f.life-=dt; if(f.life<=0) foams.splice(i,1);}
+  for(let i=hits.length-1;i>=0;i--){const h=hits[i]; h.t+=dt; if(h.t>0.45) hits.splice(i,1);}
+  updateWake(player,dt); for(const e of enemies) updateWake(e,dt);
+
+  if(gameStarted){ document.getElementById('hpPlayer').style.width=(100*Math.max(0,player.hp)/100)+'%';
+    document.getElementById('hpPlayerLbl').textContent=Math.max(0,player.hp|0);
+    const eA=enemies[0]; document.getElementById('hpEnemyA').style.width=(100*Math.max(0,(eA?eA.hp:0))/100)+'%'; document.getElementById('hpEnemyALbl').textContent=eA?Math.max(0,eA.hp|0):'—';
+    const eB=enemies[1]; if(eB){document.getElementById('hpEnemyB').style.width=(100*Math.max(0,eB.hp)/100)+'%'; document.getElementById('hpEnemyBLbl').textContent=Math.max(0,eB.hp|0);}
+  }
+
+  tickTutorial(dt);
+}
+
+/* ========= Rendering ========= */
+function render(time){
+  const c=center(); ctx.clearRect(0,0,canvas.width,canvas.height); if(bgStatic) ctx.drawImage(bgStatic,0,0);
+  glowCtx.clearRect(0,0,glowCan.width,glowCan.height); renderSpiralFlow(c,time,R_MIN,R_MAX,true); renderEyeFoamToGlow(c,R_MIN);
+  renderSpiralFlow(c,time,R_MIN,R_MAX,false); renderCaustics(c,time);
+  ctx.beginPath(); ctx.arc(c.x,c.y,R_MIN,0,TAU); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=2*dpr; ctx.stroke();
+
+  if(gameStarted || tutorial.active){
+    if(gameStarted && level>=2) drawDebris();
+    if(tutorial.active) drawDebris();
+
+    drawDrops();
+
+    for(const b of bullets){const h=Math.max(0,b.z)/BULLET_Z0; if(h>0.85){const halo=4*dpr*h; glowCtx.beginPath(); glowCtx.arc(b.x,b.y,halo,0,TAU); glowCtx.fillStyle='rgba(200,220,255,0.08)'; glowCtx.fill();}
+      const rPix=(BULLET_SIZE*dpr)*(0.9+0.4*h); ctx.beginPath(); ctx.arc(b.x,b.y,rPix,0,TAU); ctx.fillStyle='#2a2a2a'; ctx.fill(); ctx.strokeStyle='rgba(0,0,0,0.6)'; ctx.lineWidth=1*dpr; ctx.stroke();
+      ctx.beginPath(); ctx.arc(b.x,b.y,rPix*0.98,Math.PI*0.15,Math.PI*0.6); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1.2*dpr; ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(b.x-rPix*0.25,b.y-rPix*0.3,rPix*0.22,rPix*0.16,-0.6,0,TAU); ctx.fillStyle='rgba(255,255,255,0.12)'; ctx.fill();}
+    for(const p of splashes){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fillStyle=`rgba(200,230,255,${p.life/p.maxLife})`;ctx.fill();}
+    for(const f of foams){ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,TAU);ctx.strokeStyle=`rgba(230,245,255,${(f.life/f.maxLife)*0.8})`;ctx.lineWidth=2*dpr;ctx.stroke();}
+    for(const h of hits){const k=h.t/0.45, R=6*dpr+28*dpr*k; ctx.beginPath(); ctx.arc(h.x,h.y,R,0,TAU); ctx.strokeStyle=`rgba(230,245,255,${(1-k)*0.4})`; ctx.lineWidth=2*dpr; ctx.stroke();
+      for(let i=0;i<6;i++){const a=i*(TAU/6)+k*4,len=6*dpr+18*dpr*(1-k); ctx.beginPath(); ctx.moveTo(h.x+Math.cos(a)*R*0.4,h.y+Math.sin(a)*R*0.4); ctx.lineTo(h.x+Math.cos(a)*(R*0.4+len), h.y+Math.sin(a)*(R*0.4+len)); ctx.strokeStyle=`rgba(255,230,160,${(1-k)*0.6})`; ctx.lineWidth=1.2*dpr; ctx.stroke();}}
+    renderWake(player); for(const e of enemies) renderWake(e);
+    drawShip(player,c); for(const e of enemies) drawShip(e,c);
+  }
+
+  compositeBloom();
+}
+
+/* Water helpers */
+function renderCaustics(c,time){function layer(data,scale,alpha,rot,dx,dy){const img=noiseCtx.createImageData(noiseSize,noiseSize);for(let i=0;i<data.length;i++){const g=Math.pow(data[i],1.25),b=(g*255)|0;img.data[i*4+0]=140+(b*0.28)|0;img.data[i*4+1]=190+(b*0.26)|0;img.data[i*4+2]=255;img.data[i*4+3]=(alpha*255)|0;}noiseCtx.putImageData(img,0,0);ctx.save();ctx.translate(c.x,c.y);ctx.rotate(rot);ctx.globalCompositeOperation='screen';const w=canvas.width*scale,h=canvas.height*scale;const offx=Math.cos(dx)*noiseSize*0.35,offy=Math.sin(dy)*noiseSize*0.35;for(let oy=-h;oy<h;oy+=noiseSize)for(let ox=-w;ox<w;ox+=noiseSize)ctx.drawImage(noiseCanvas,ox+offx-w*0.5,oy+offy-h*0.5);ctx.restore();ctx.globalCompositeOperation='source-over';}layer(noiseA,1.15,0.10,time*0.06,time*0.55,time*0.35);layer(noiseB,0.95,0.08,-time*0.04,-time*0.25,time*0.20);}
+function renderSpiralFlow(c,time,RMIN,RMAX,glow=false){const g=glow?glowCtx:ctx;g.save();const arms=8,baseAlpha=0.35;g.lineCap='round';for(let a=0;a<arms;a++){const hue=200+a*2;g.strokeStyle=`hsla(${hue},70%,70%,${baseAlpha})`;for(let r=RMIN;r<=RMAX;r+=8*dpr){const omega=180/(r+60);const th=a*(TAU/arms)+omega+0.15*Math.sin(0.05*r+time*2.0);const len=Math.max(1.5*dpr,6*dpr*(1-(r-RMIN)/(RMAX-RMIN)));const x=c.x+Math.cos(th)*r,y=c.y+Math.sin(th)*r;const tx=Math.cos(th+Math.PI/2),ty=Math.sin(th+Math.PI/2);g.beginPath();g.moveTo(x-tx*len*0.5,y-ty*len*0.5);g.lineTo(x+tx*len*0.5,y+ty*len*0.5);g.lineWidth=1.2*dpr+0.8*dpr*(1-(r-RMIN)/(RMAX-RMIN));g.stroke();}}g.restore();}
+function renderEyeFoamToGlow(c,RMIN){glowCtx.beginPath();glowCtx.arc(c.x,c.y,RMIN,0,TAU);glowCtx.strokeStyle='rgba(255,255,255,0.9)';glowCtx.lineWidth=3.5*dpr;glowCtx.stroke();const ring=glowCtx.createRadialGradient(c.x,c.y,RMIN*0.8,c.x,c.y,RMIN*1.3);ring.addColorStop(0,'rgba(255,255,255,0.55)');ring.addColorStop(1,'rgba(255,255,255,0)');glowCtx.fillStyle=ring;glowCtx.beginPath();glowCtx.arc(c.x,c.y,RMIN*1.3,0,TAU);glowCtx.fill();}
+function compositeBloom(){if(!glowCtx)return;const tmp=document.createElement('canvas');tmp.width=glowCan.width;tmp.height=glowCan.height;const t=tmp.getContext('2d');t.filter='blur(6px)';t.drawImage(glowCan,0,0);ctx.globalCompositeOperation='screen';ctx.globalAlpha=0.65;ctx.drawImage(tmp,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';glowCtx.clearRect(0,0,glowCan.width,glowCan.height);}
+
+/* Ship drawing */
+function drawShip(s,c){const x=c.x+Math.cos(s.theta)*s.r,y=c.y+Math.sin(s.theta)*s.r,ang=s.theta+Math.PI/2,S=dpr;ctx.save();ctx.translate(x,y);if(s.sinking){const k=s.sinkT,dx=c.x-x,dy=c.y-y;ctx.translate(dx*k*0.8,dy*k*0.8);ctx.scale(1-0.3*k,1-0.3*k);ctx.globalAlpha=1-0.7*k;}ctx.rotate(ang);ctx.beginPath();ctx.moveTo(-18*S,14*S);ctx.quadraticCurveTo(0,22*S,24*S,14*S);ctx.lineTo(24*S,-6*S);ctx.quadraticCurveTo(0,-20*S,-18*S,-6*S);ctx.closePath();ctx.fillStyle=s.isEnemy?'#3a2320':'#3a2f20';ctx.strokeStyle='#1c130e';ctx.lineWidth=2*S;ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(-18*S,6*S);ctx.quadraticCurveTo(0,14*S,24*S,6*S);ctx.lineTo(24*S,0*S);ctx.quadraticCurveTo(0,-10*S,-18*S,0*S);ctx.closePath();ctx.fillStyle=s.isEnemy?'#2b1715':'#2b2315';ctx.fill();ctx.fillStyle='#161515';for(let i=-12;i<=16;i+=7){ctx.fillRect(i*S,1*S,3*S,2*S);ctx.fillRect(i*S,-5*S,3*S,2*S);}ctx.beginPath();ctx.roundRect(-6*S,-2*S,12*S,8*S,2*S);ctx.fillStyle=s.isEnemy?'#5b2e2a':'#4e3a28';ctx.fill();const mx=[-8*S,0,9*S],mh=[22*S,28*S,20*S];for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(mx[i],10*S);ctx.lineTo(mx[i],-mh[i]);ctx.strokeStyle=s.isEnemy?'#5a2a2a':'#4a3727';ctx.lineWidth=3*S;ctx.stroke();ctx.beginPath();ctx.moveTo(mx[i]-10*S,-mh[i]+8*S);ctx.lineTo(mx[i]+10*S,-mh[i]+8*S);ctx.moveTo(mx[i]-8*S,-mh[i]+16*S);ctx.lineTo(mx[i]+8*S,-mh[i]+16*S);ctx.lineWidth=2*S;ctx.stroke();}ctx.fillStyle='#efe9d8';ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=1*S;ctx.beginPath();ctx.moveTo(mx[2],-mh[2]+16*S);ctx.lineTo(mx[2]+12*S,-mh[2]+22*S);ctx.lineTo(mx[2],-mh[2]+22*S);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(mx[1],-mh[1]+16*S);ctx.lineTo(mx[1]+14*S,-mh[1]+26*S);ctx.lineTo(mx[1],-mh[1]+26*S);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(mx[1],-mh[1]+8*S);ctx.lineTo(mx[1]+16*S,-mh[1]+14*S);ctx.lineTo(mx[1],-mh[1]+14*S);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(mx[0],-mh[0]+12*S);ctx.lineTo(mx[0]+10*S,-mh[0]+18*S);ctx.lineTo(mx[0],-mh[0]+18*S);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(0,-9*S);ctx.lineTo(0,-13*S);ctx.moveTo(0,9*S);ctx.lineTo(0,13*S);ctx.lineWidth=3.5*S;ctx.strokeStyle='#211f1f';ctx.stroke();const t=performance.now()*0.003,flap=Math.sin(t)*3*S;ctx.save();ctx.translate(mx[1],-mh[1]);ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(7*S+flap,-2*S,12*S+flap,2*S,16*S+flap*0.6,0);ctx.lineTo(0,0);ctx.closePath();ctx.fillStyle=s.isEnemy?'#300':'#111';ctx.fill();ctx.beginPath();ctx.arc(7*S,-1*S,2*S,0,TAU);ctx.fillStyle='#eee';ctx.fill();ctx.restore();if(Math.abs(s.vr)>5){ctx.save();ctx.rotate(Math.PI);ctx.beginPath();ctx.moveTo(0,12*S);ctx.quadraticCurveTo(0,20*S,8*S,26*S);ctx.strokeStyle='rgba(120,180,255,0.35)';ctx.lineWidth=2*S;ctx.stroke();ctx.restore();}ctx.restore();}
+
+/* UI helpers */
+let msgTimer=0; function flashCenterMsg(text){const el=document.getElementById('centerMsg'); el.textContent=text; el.style.opacity='1'; clearTimeout(msgTimer); msgTimer=setTimeout(()=>{el.style.opacity='0'},1200);}
+const btnPrimary=document.getElementById('btnPrimary'), btnNo=document.getElementById('btnNo'), endTitle=document.getElementById('endTitle');
+function showEndScreen(title,primary){endTitle.textContent=title;btnPrimary.textContent=primary;replayEl.style.display='flex';}
+function hideEndScreen(){replayEl.style.display='none';}
+btnPrimary.addEventListener('click',()=>{hideEndScreen(); if(!player.alive){setupLevel(1);return;} if(level<3)setupLevel(level+1); else setupLevel(1);});
+btnNo.addEventListener('click',hideEndScreen);
+
+/* ========= Tutorial ========= */
+const tutorEl=document.getElementById('tutor'), tutTitle=document.getElementById('tutTitle'), tutMsg=document.getElementById('tutMsg'), tutOk=document.getElementById('tutOk');
+const introEl=document.getElementById('intro'), introPlay=document.getElementById('introPlay'), introSkip=document.getElementById('introSkip');
+
+let tutRefR=0, tutPrevHP=100;
+const tutorial={
+  active:false, step:0, waiting:true, armed:false, holdTimer:0,
+  steps:[
+    { key:'in', title:'Tutorial — Movement', text:'Hold ← or tap the ⇩ button to move <b>inward</b>. Press OK, then try it.',
+      pre:()=>{tutRefR=player.r}, done:()=> player.r < tutRefR - 10*dpr },
+    { key:'out', title:'Tutorial — Movement', text:'Hold → or tap the ⇧ button to move <b>outward</b>.',
+      pre:()=>{tutRefR=player.r}, done:()=> player.r > tutRefR + 10*dpr },
+    { key:'fireIn', title:'Tutorial — Firing inward', text:'Press <b>Z</b> or tap ⤵︎ to fire toward the eye.',
+      pre:()=>{}, done:()=> lastShotDir===-1 },
+    { key:'fireOut', title:'Tutorial — Firing outward', text:'Press <b>X</b> or tap ⤴︎ to fire outward along the radius.',
+      pre:()=>{}, done:()=> lastShotDir===1 },
+    { key:'drop', title:'Tutorial — Boost drops', text:'Collect a glowing <b>water drop</b> to gain +10% speed for 5s.',
+      pre:()=>{drops.length=0; spawnDrop();}, done:()=> boostExpiries.length>0 },
+    { key:'debris', title:'Tutorial — Debris', text:'Avoid floating debris. Survive <b>10 seconds</b> without taking damage.',
+      pre:()=>{enemies.length=0; debris.length=0; spawnDebrisField(14); tutPrevHP=player.hp;},
+      timed:true, seconds:10 },
+    { key:'end', title:'Tutorial complete', text:'You are ready. Click OK to start the campaign.', finale:true }
+  ]
+};
+
+function showTutStep(){ const s=tutorial.steps[tutorial.step]; tutTitle.innerHTML=s.title; tutMsg.innerHTML=s.text; tutorEl.style.display='flex'; tutorial.waiting=true; tutorial.armed=false; tutorial.holdTimer=0; lastShotDir=0; }
+function beginTry(){ const s=tutorial.steps[tutorial.step]; tutorEl.style.display='none'; tutorial.waiting=false; tutorial.armed=true; tutorial.holdTimer=0; lastShotDir=0; if(s.pre) s.pre(); }
+function nextStep(){ tutorial.step=Math.min(tutorial.step+1, tutorial.steps.length-1); showTutStep(); }
+tutOk.addEventListener('click', ()=>{ if(!tutorial.active) return; const s=tutorial.steps[tutorial.step]; if(s.finale){ tutorEl.style.display='none'; tutorial.active=false; setupLevel(1); return; } beginTry(); });
+
+introPlay.addEventListener('click', ()=>{
+  introEl.style.display='none';
+  gameStarted=false; uiEl.style.display=''; ctrlL.style.display=''; ctrlR.style.display='';
+  Object.assign(player, makeShip(false));
+  enemies.length=debris.length=drops.length=0; boostExpiries.length=0; bullets.length=splashes.length=foams.length=hits.length=0;
+  radialShootDir=1; shootCooldown=0; lastShotDir=0; gameTime=0; debrisSpawnAcc=0;
+  tutorial.active=true; tutorial.step=0; showTutStep();
+});
+introSkip.addEventListener('click', ()=>{ introEl.style.display='none'; setupLevel(1); });
+
+function tickTutorial(dt){
+  if(!tutorial.active) return;
+  const s=tutorial.steps[tutorial.step];
+  if(tutorial.waiting) return;
+  if(s.finale){ tutorEl.style.display='flex'; return; }
+
+  let satisfied=false;
+  if(s.key==='debris'){
+    // mierzymy 10 s bez obrażeń
+    if(player.hp < tutPrevHP){ tutorial.holdTimer = 0; tutPrevHP = player.hp; }
+    else tutorial.holdTimer += dt;
+    satisfied = tutorial.holdTimer >= (s.seconds||10);
+  } else if(s.timed){
+    tutorial.holdTimer += dt;
+    satisfied = tutorial.holdTimer >= (s.seconds||1);
+  } else {
+    satisfied = s.done();
+    tutorial.holdTimer = satisfied ? (tutorial.holdTimer + dt) : 0;
+    satisfied = tutorial.holdTimer >= 1.0;
+  }
+
+  if(satisfied) nextStep();
+}
+
+/* ========= Audio ========= */
+let audioCtx=null, masterGain=null;
+function ensureAudio(){ if(audioCtx) return; audioCtx=new (window.AudioContext||window.webkitAudioContext)(); masterGain=audioCtx.createGain(); masterGain.gain.value=0.9; masterGain.connect(audioCtx.destination); }
+addEventListener('pointerdown', ensureAudio, {once:true}); addEventListener('keydown', ensureAudio, {once:true});
+function envNode(time,g1,g2,g3){const g=audioCtx.createGain(); g.gain.setValueAtTime(0,time); g.gain.linearRampToValueAtTime(g1,time+0.01); g.gain.exponentialRampToValueAtTime(g2,time+0.25); g.gain.exponentialRampToValueAtTime(g3,time+1.2); return g;}
+function playCannon(){ if(!audioCtx) return; const t=audioCtx.currentTime; const out=audioCtx.createGain(); out.gain.value=0.6; out.connect(masterGain);
+  const nBuf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.6,audioCtx.sampleRate); const ch=nBuf.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2.0);
+  const nSrc=audioCtx.createBufferSource(); nSrc.buffer=nBuf; const nEnv=envNode(t,1.0,0.2,0.0001); nSrc.connect(nEnv); nEnv.connect(out); nSrc.start(t);
+  const o=audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(55,t+0.35);
+  const oEnv=envNode(t,0.9,0.12,0.0001); o.connect(oEnv); oEnv.connect(out); o.start(t); o.stop(t+0.6);
+  const n2=audioCtx.createBufferSource(); n2.buffer=nBuf; const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.setValueAtTime(2200,t); bp.Q.value=0.6;
+  const n2Env=envNode(t,0.7,0.15,0.0001); n2.connect(bp); bp.connect(n2Env); n2Env.connect(out); n2.start(t); n2.stop(t+0.4);
+}
+function playSplash(){ if(!audioCtx) return; const t=audioCtx.currentTime; const out=audioCtx.createGain(); out.gain.value=0.3; out.connect(masterGain);
+  const n=audioCtx.createBuffer(1,audioCtx.sampleRate*0.25,audioCtx.sampleRate), d=n.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+  const s=audioCtx.createBufferSource(); s.buffer=n; const f=audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1200; f.Q.value=0.8;
+  const g=audioCtx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.6,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t+0.35);
+}
+function playHit(){ if(!audioCtx) return; const t=audioCtx.currentTime; const out=audioCtx.createGain(); out.gain.value=0.35; out.connect(masterGain);
+  const o=audioCtx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(90,t+0.15);
+  const g=audioCtx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.8,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+  o.connect(g); g.connect(out); o.start(t); o.stop(t+0.3);
+}
+function playPickup(){ if(!audioCtx) return; const t=audioCtx.currentTime; const o=audioCtx.createOscillator(); o.type='triangle'; const g=audioCtx.createGain(); g.gain.value=0.25; o.frequency.setValueAtTime(660,t); o.frequency.linearRampToValueAtTime(990,t+0.15); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.6,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+0.36);}
+
+/* ========= Start: only water + intro overlay ========= */
+
+/* Small loop to keep tutorial step timing responsive */
+let _lastTS=performance.now(); (function tutorialLoop(){const now=performance.now(); const dt=Math.min(0.033,(now-_lastTS)/1000); _lastTS=now; tickTutorial(dt); requestAnimationFrame(tutorialLoop);})();
+
+}catch(err){console.error(err); const el=document.getElementById('centerMsg'); if(el){el.textContent='Error: '+err.message; el.style.opacity='1';}}
+});
+</script>
+</body>
+</html>
