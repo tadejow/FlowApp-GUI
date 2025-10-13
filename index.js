@@ -158,12 +158,12 @@ const translations = {
 };
 
 const GAMES = {
-  1: { url: './public/falling-drop/index.html', name: 'Falling Drop' },
-  2: { url: './public/river-flow-game/reynolds-experiment.html', name: 'Reynolds Challenge' },
-  3: { url: './public/vortex-game/index.html', name: 'Vortex Game' },
-  4: { url: './public/hex-connect/index.html', name: 'Hex Connect' },
-  5: { url: './public/duck-race-game/index.html', name: 'Duck Race' },
-  6: { url: './public/river-guardian-game/index.html', name: 'River Guardian' }
+  1: { url: '/public/falling-drop/index.html', name: 'Falling Drop' },
+  2: { url: '/public/river-flow-game/reynolds-experiment.html', name: 'Reynolds Challenge' },
+  3: { url: '/public/vortex-game/index.html', name: 'Vortex Game' },
+  4: { url: '/public/hex-connect/index.html', name: 'Hex Connect' },
+  5: { url: '/public/duck-race-game/index.html', name: 'Duck Race' },
+  6: { url: '/public/river-guardian-game/index.html', name: 'River Guardian' }
 };
 
 const SkyBlue = '#00A9E0';
