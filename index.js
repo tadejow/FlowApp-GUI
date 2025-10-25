@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// !!! WAŻNE !!!
-// ZASTĄP PONIŻSZY ADRES URL ADRESEM SWOJEGO WORKERA CLOUDFLARE
-const API_URL = 'https://flowapp-api.maciej-tadej.workers.dev/api/scores';
+// !!! POPRAWKA 1: Zaktualizowano URL do nowego endpointu API !!!
+const API_URL = 'https://flowapp-api.maciej-tadej.workers.dev/api/duck-race';
 
 const translations = {
   en: {
@@ -236,12 +234,10 @@ const DropletLogoSVG = ({ size = "80px", theme = "default" }) => {
             xmlns: "http://www.w3.org/2000/svg",
             style: { display: 'block', margin: '0 auto' }
         },
-        // Main droplet shape
         React.createElement('path', {
             d: "M25,80 C12.3,80 0,68 0,50 C0,25 25,0 25,0 C25,0 50,25 50,50 C50,68 37.7,80 25,80Z",
             fill: dropletFill
         }),
-        // S-shaped wave curve inside the droplet, mimicking the splash screen wave
         React.createElement('path', {
             d: "M 0, 50 C 12.5, 25, 37.5, 75, 50, 50",
             fill: "none",
@@ -358,7 +354,6 @@ const FullscreenButton = ({ onClick, isFullscreen, t }) => {
     }, isFullscreen ? React.createElement(FullscreenExitIcon) : React.createElement(FullscreenEnterIcon));
 };
 
-
 const GameModal = ({ url, onClose, t }) => {
     if (!url) return null;
     const iframeRef = useRef(null);
@@ -411,25 +406,18 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
     const handleOrientation = useCallback((event) => {
         const { beta, gamma } = event;
         if (beta === null || gamma === null) return;
-
         const transSensFg = 1.2;
         const transSensBg = 0.6;
         const rotSens = 0.2;
-
         const clampedBeta = Math.max(-90, Math.min(90, beta));
         const clampedGamma = Math.max(-90, Math.min(90, gamma));
-        
         const neutralBetaOffset = 25;
-
         const rotateX = (clampedBeta - neutralBetaOffset) * rotSens;
         const rotateY = clampedGamma * -rotSens;
-        
         const translateX_fg = clampedGamma * -transSensFg;
         const translateY_fg = (clampedBeta - neutralBetaOffset) * transSensFg;
-
         const translateX_bg = clampedGamma * -transSensBg;
         const translateY_bg = (clampedBeta - neutralBetaOffset) * transSensBg;
-
         setParallax({
             container: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
             wave1: `translateX(${translateX_fg}px) translateY(${translateY_fg}px)`,
@@ -461,11 +449,9 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
     
     useEffect(() => {
         const timer = setTimeout(() => setSplashVisible(true), 10);
-
         if (typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission !== 'function') {
             addOrientationListener();
         }
-
         return () => {
             clearTimeout(timer);
             if (motionListenerRef.current) {
@@ -502,12 +488,7 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
 
 const LoginScreen = ({ onLogin, lang, setLang, t }) => {
     const [nickname, setNickname] = useState('');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onLogin(nickname);
-    };
-
+    const handleSubmit = (e) => { e.preventDefault(); onLogin(nickname); };
     return React.createElement('div', { className: 'splash-screen' },
         React.createElement(LanguageSwitcher, { lang: lang, setLang: setLang, theme: 'login' }),
         React.createElement('div', { className: 'splash-background' }),
@@ -553,12 +534,8 @@ const StationSelector = ({ currentStation, onSelect, stationButtonRefs, pillStyl
 );
 
 const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
-    const stationData = {
-        title: t(`station${currentStation}Title`),
-        text: t(`station${currentStation}Text`)
-    };
+    const stationData = { title: t(`station${currentStation}Title`), text: t(`station${currentStation}Text`) };
     const gameInfo = GAMES[currentStation];
-
     return React.createElement(React.Fragment, null,
         React.createElement('div', { className: 'content-area' },
             React.createElement('h2', { className: 'content-title', id: `station-title-${currentStation}` }, stationData.title),
@@ -570,9 +547,7 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
         ),
         currentStation !== 1 && React.createElement('section', { className: 'simulation-results-container', 'aria-labelledby': 'simulation-results-heading' },
             React.createElement('h3', { className: 'simulation-title', id: 'simulation-results-heading' }, t('simulationTitle')),
-            (() => {
-                return React.createElement('div', { className: 'gif-image', style: { backgroundColor: '#f0f4f7' }, role: 'img', 'aria-label': 'Brak symulacji dla tej stacji' });
-            })()
+            React.createElement('div', { className: 'gif-image', style: { backgroundColor: '#f0f4f7' }, role: 'img', 'aria-label': 'Brak symulacji dla tej stacji' })
         ),
         React.createElement('button', { className: 'navigation-button', onClick: onNextStation }, currentStation < 6 ? t('nextStationButton', currentStation + 1) : t('viewSummaryButton'))
     );
@@ -581,18 +556,13 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
 const SummaryView = ({ userNickname, scores, t }) => {
     const dummyGraphData = [0.8, 0.5, 0.9, 0.6, 1.0];
     const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
-
     return React.createElement('div', { className: 'summary-content' },
         React.createElement(TrophyIconSVG, { color: SkyBlue }),
         React.createElement('p', { className: 'points-scored-text' }, t('pointsScored')),
         React.createElement('div', { className: 'points-value' }, React.createElement(AnimatedCounter, { end: 120 + totalScore })),
         React.createElement('div', { className: 'graph-container' },
             dummyGraphData.map((value, index) =>
-                React.createElement('div', {
-                    key: index,
-                    className: 'graph-bar bar-grow-animation',
-                    style: { height: `${value * 100}%`, animationDelay: `${index * 100}ms` }
-                })
+                React.createElement('div', { key: index, className: 'graph-bar bar-grow-animation', style: { height: `${value * 100}%`, animationDelay: `${index * 100}ms` } })
             )
         ),
         React.createElement('div', { className: 'feedback-box' },
@@ -601,87 +571,48 @@ const SummaryView = ({ userNickname, scores, t }) => {
     );
 };
 
-
 // --- Main App Component ---
-
 const App = () => {
-  const [currentView, setCurrentView] = useState('splash'); // splash, login, main, summary
+  const [currentView, setCurrentView] = useState('splash');
   const [currentStation, setCurrentStation] = useState(1);
   const [isFading, setIsFading] = useState(false);
-  const [nickname, setNickname] = useState('');
   const [userNickname, setUserNickname] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem('flowapp_lang') || 'en');
   const [scores, setScores] = useState({});
   const [gameModal, setGameModal] = useState({ isOpen: false, url: null });
   const [isFullscreen, setIsFullscreen] = useState(false);
-
   const stationButtonRefs = useRef([]);
   const [pillStyle, setPillStyle] = useState({});
+  const touchStartX = useRef(0), touchStartY = useRef(0), touchEndX = useRef(0), touchEndY = useRef(0);
+
+  const t = (key, ...args) => { const value = translations[lang][key] || translations['en'][key]; return typeof value === 'function' ? value(...args) : value || key; };
   
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-
-  const t = (key, ...args) => {
-    const value = translations[lang][key] || translations['en'][key];
-    return typeof value === 'function' ? value(...args) : value || key;
-  };
-
-  const sendGameTimeToServer = async (timeInMs) => {
-    if (!userNickname) {
-      console.error("Cannot send time without a user nickname.");
-      return;
-    }
-    console.log(`Sending time to server: Nickname: ${userNickname}, Time: ${timeInMs}ms`);
-
+  const sendGameTimeToServer = async (timeInMs, language) => {
+    if (!userNickname) { console.error("Cannot send time without a user nickname."); return; }
+    console.log(`Sending data to server: Nickname: ${userNickname}, Time: ${timeInMs}ms, Language: ${language}`);
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          player_name: userNickname,
-          completion_time_ms: timeInMs
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ player_name: userNickname, completion_time_ms: timeInMs, language: language }),
       });
-
-      if (response.ok) {
-        console.log("Time successfully sent to the server!");
-      } else {
-        console.error("Failed to send time to the server:", await response.text());
-      }
-    } catch (error) {
-      console.error("Error sending time to the server:", error);
-    }
+      if (response.ok) { console.log("Data successfully sent to the server!"); } 
+      else { const errorText = await response.text(); console.error("Failed to send data to the server:", errorText); }
+    } catch (error) { console.error("Error sending data to the server:", error); }
   };
 
   useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
   useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
-
-  useEffect(() => {
-    const storedNickname = localStorage.getItem('userNickname');
-    if (storedNickname) setUserNickname(storedNickname);
-    const storedScores = localStorage.getItem('flowapp_scores');
-    if (storedScores) setScores(JSON.parse(storedScores));
-  }, []);
+  useEffect(() => { const storedNickname = localStorage.getItem('userNickname'); if (storedNickname) setUserNickname(storedNickname); const storedScores = localStorage.getItem('flowapp_scores'); if (storedScores) setScores(JSON.parse(storedScores)); }, []);
   
   useEffect(() => {
     const handleGameMessage = (event) => {
       if (event.data && event.data.type === 'gameScore') {
         const { station, score } = event.data;
-        if (station && typeof score === 'number') {
-          setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
-          setGameModal({ isOpen: false, url: null });
-        }
-      }
-      else if (event.data && event.data.type === 'gameTime') {
-        const { completion_time_ms } = event.data;
-        if (typeof completion_time_ms === 'number') {
-          sendGameTimeToServer(completion_time_ms);
-          setGameModal({ isOpen: false, url: null });
-        }
+        if (station && typeof score === 'number') { setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) })); setGameModal({ isOpen: false, url: null }); }
+      } else if (event.data && event.data.type === 'gameTime') {
+        const { completion_time_ms, language } = event.data;
+        if (typeof completion_time_ms === 'number') { sendGameTimeToServer(completion_time_ms, language); setGameModal({ isOpen: false, url: null }); }
       }
     };
     window.addEventListener('message', handleGameMessage);
@@ -689,174 +620,37 @@ const App = () => {
   }, [userNickname]);
 
   useEffect(() => {
-    const onFullscreenChange = () => {
-        setIsFullscreen(!!document.fullscreenElement);
-    };
+    const onFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
     document.addEventListener('fullscreenchange', onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-    document.addEventListener('mozfullscreenchange', onFullscreenChange);
-    document.addEventListener('msfullscreenchange', onFullscreenChange);
-    return () => {
-        document.removeEventListener('fullscreenchange', onFullscreenChange);
-        document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
-        document.removeEventListener('mozfullscreenchange', onFullscreenChange);
-        document.removeEventListener('msfullscreenchange', onFullscreenChange);
-    };
+    return () => { document.removeEventListener('fullscreenchange', onFullscreenChange); };
   }, []);
 
   useLayoutEffect(() => {
     const activeButton = stationButtonRefs.current[currentStation - 1];
-    if (activeButton) {
-        setPillStyle({ left: `${activeButton.offsetLeft}px`, width: `${activeButton.offsetWidth}px` });
-    }
+    if (activeButton) { setPillStyle({ left: `${activeButton.offsetLeft}px`, width: `${activeButton.offsetWidth}px` }); }
   }, [currentStation, currentView]);
 
-  const changeContent = (action) => {
-      setIsFading(true);
-      setTimeout(() => {
-          action();
-          setIsFading(false);
-      }, 250);
-  };
+  const changeContent = (action) => { setIsFading(true); setTimeout(() => { action(); setIsFading(false); }, 250); };
+  const handleStart = () => { const elem = document.documentElement; if (!document.fullscreenElement && elem.requestFullscreen) { elem.requestFullscreen().catch(err => console.error(err)); } setCurrentView(userNickname ? 'main' : 'login'); };
+  const handleLogin = (submittedNickname) => { const trimmedNickname = submittedNickname.trim(); if (trimmedNickname) { localStorage.setItem('userNickname', trimmedNickname); setUserNickname(trimmedNickname); setCurrentView('main'); } };
+  const selectStation = (stationNumber) => { if (stationNumber === currentStation && currentView === 'main') return; changeContent(() => { setCurrentStation(stationNumber); if (currentView !== 'main') setCurrentView('main'); }); };
+  const nextStation = () => { changeContent(() => { if (currentStation < 6) { setCurrentStation(prev => prev + 1); } else { setCurrentView('summary'); } }); };
+  const navigateToSplash = () => { setCurrentStation(1); setCurrentView('splash'); };
+  const handlePlayGame = (url, station) => { setGameModal({ isOpen: true, url: `${url}?station=${station}` }); };
+  const handleFullscreenToggle = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.error(err)); } else { if (document.exitFullscreen) { document.exitFullscreen(); } } };
+  const handleTouchStart = (e) => { touchStartX.current = e.targetTouches[0].clientX; touchStartY.current = e.targetTouches[0].clientY; touchEndX.current = e.targetTouches[0].clientX; touchEndY.current = e.targetTouches[0].clientY; };
+  const handleTouchMove = (e) => { touchEndX.current = e.targetTouches[0].clientX; touchEndY.current = e.targetTouches[0].clientY; };
+  const handleTouchEnd = () => { if (currentView !== 'main') return; const horizontalDiff = touchStartX.current - touchEndX.current; const verticalDiff = touchStartY.current - touchEndY.current; const swipeThreshold = 50; if (Math.abs(horizontalDiff) > swipeThreshold && Math.abs(horizontalDiff) > Math.abs(verticalDiff)) { if (horizontalDiff > 0) { if (currentStation < 6) { selectStation(currentStation + 1); } } else { if (currentStation > 1) { selectStation(currentStation - 1); } } } };
 
-  const handleStart = () => {
-    const elem = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
-        }
-    }
-    setCurrentView(userNickname ? 'main' : 'login');
-  };
-
-  const handleLogin = (submittedNickname) => {
-    const trimmedNickname = submittedNickname.trim();
-    if (trimmedNickname) {
-      localStorage.setItem('userNickname', trimmedNickname);
-      setUserNickname(trimmedNickname);
-      setCurrentView('main');
-    }
-  };
-
-  const selectStation = (stationNumber) => {
-    if (stationNumber === currentStation && currentView === 'main') return;
-    changeContent(() => {
-        setCurrentStation(stationNumber);
-        if (currentView !== 'main') setCurrentView('main');
-    });
-  };
-
-  const nextStation = () => {
-    changeContent(() => {
-        if (currentStation < 6) {
-            setCurrentStation(prev => prev + 1);
-        } else {
-            setCurrentView('summary');
-        }
-    });
-  };
-
-  const navigateToSplash = () => {
-    setCurrentStation(1);
-    setCurrentView('splash');
-  };
-  
-  const handlePlayGame = (url, station) => {
-    setGameModal({ isOpen: true, url: `${url}?station=${station}` });
-  };
-  
-  const handleFullscreenToggle = () => {
-    const elem = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE11 */
-            elem.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) { /* Safari */
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { /* IE11 */
-            document.msExitFullscreen();
-        }
-    }
-  };
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.targetTouches[0].clientX;
-    touchStartY.current = e.targetTouches[0].clientY;
-    touchEndX.current = e.targetTouches[0].clientX;
-    touchEndY.current = e.targetTouches[0].clientY;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-    touchEndY.current = e.targetTouches[0].clientY;
-  };
-
-  const handleTouchEnd = () => {
-    if (currentView !== 'main') return;
-
-    const horizontalDiff = touchStartX.current - touchEndX.current;
-    const verticalDiff = touchStartY.current - touchEndY.current;
-    const swipeThreshold = 50;
-
-    // Only trigger if horizontal swipe is dominant
-    if (Math.abs(horizontalDiff) > swipeThreshold && Math.abs(horizontalDiff) > Math.abs(verticalDiff)) {
-      if (horizontalDiff > 0) { // Swiped left
-        if (currentStation < 6) {
-          selectStation(currentStation + 1);
-        }
-      } else { // Swiped right
-        if (currentStation > 1) {
-          selectStation(currentStation - 1);
-        }
-      }
-    }
-  };
-
-  if (currentView === 'splash') {
-    return React.createElement(SplashScreen, { onStart: handleStart, lang, setLang, t });
-  }
-  
-  if (currentView === 'login') {
-    return React.createElement(LoginScreen, { onLogin: handleLogin, lang, setLang, t });
-  }
+  if (currentView === 'splash') { return React.createElement(SplashScreen, { onStart: handleStart, lang, setLang, t }); }
+  if (currentView === 'login') { return React.createElement(LoginScreen, { onLogin: handleLogin, lang, setLang, t }); }
 
   return React.createElement('div', { className: 'app-container', role: 'application' },
     gameModal.isOpen && React.createElement(GameModal, { url: gameModal.url, onClose: () => setGameModal({ isOpen: false, url: null }), t }),
-    
-    React.createElement(Header, { onLogoClick: navigateToSplash, lang, setLang, t, onFullscreenToggle: handleFullscreenToggle, isFullscreen: isFullscreen }),
-    
-    React.createElement(StationSelector, { 
-        currentStation: currentView === 'summary' ? -1 : currentStation, // Deselect on summary
-        onSelect: selectStation, 
-        stationButtonRefs, 
-        pillStyle, 
-        t 
-    }),
-    
-    React.createElement('div', { 
-        className: `scrollable-content ${isFading ? 'is-fading' : ''}`,
-        onTouchStart: handleTouchStart,
-        onTouchMove: handleTouchMove,
-        onTouchEnd: handleTouchEnd
-    },
-        currentView === 'main' && React.createElement(MainView, { 
-            currentStation, 
-            onNextStation: nextStation, 
-            scores, 
-            t, 
-            onPlayGame: handlePlayGame 
-        }),
+    React.createElement(Header, { onLogoClick: navigateToSplash, lang, setLang, t, onFullscreenToggle: handleFullscreenToggle, isFullscreen }),
+    React.createElement(StationSelector, { currentStation: currentView === 'summary' ? -1 : currentStation, onSelect: selectStation, stationButtonRefs, pillStyle, t }),
+    React.createElement('div', { className: `scrollable-content ${isFading ? 'is-fading' : ''}`, onTouchStart: handleTouchStart, onTouchMove: handleTouchMove, onTouchEnd: handleTouchEnd },
+        currentView === 'main' && React.createElement(MainView, { currentStation, onNextStation: nextStation, scores, t, onPlayGame: handlePlayGame }),
         currentView === 'summary' && React.createElement(SummaryView, { userNickname, scores, t })
     )
   );
