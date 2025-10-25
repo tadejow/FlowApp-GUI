@@ -636,7 +636,7 @@ const App = () => {
   const selectStation = (stationNumber) => { if (stationNumber === currentStation && currentView === 'main') return; changeContent(() => { setCurrentStation(stationNumber); if (currentView !== 'main') setCurrentView('main'); }); };
   const nextStation = () => { changeContent(() => { if (currentStation < 6) { setCurrentStation(prev => prev + 1); } else { setCurrentView('summary'); } }); };
   const navigateToSplash = () => { setCurrentStation(1); setCurrentView('splash'); };
-  const handlePlayGame = (url, station) => { setGameModal({ isOpen: true, url: `${url}?station=${station}` }); };
+  const handlePlayGame = (url, station) => {const gameUrl = `${url}?station=${station}&nickname=${encodeURIComponent(userNickname || 'Guest')}`;setGameModal({ isOpen: true, url: gameUrl });};
   const handleFullscreenToggle = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.error(err)); } else { if (document.exitFullscreen) { document.exitFullscreen(); } } };
   const handleTouchStart = (e) => { touchStartX.current = e.targetTouches[0].clientX; touchStartY.current = e.targetTouches[0].clientY; touchEndX.current = e.targetTouches[0].clientX; touchEndY.current = e.targetTouches[0].clientY; };
   const handleTouchMove = (e) => { touchEndX.current = e.targetTouches[0].clientX; touchEndY.current = e.targetTouches[0].clientY; };
