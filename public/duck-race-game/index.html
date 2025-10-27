@@ -3,60 +3,69 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Duck Race - Pure HTML</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Duck Race - FlowApp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            background-color: #111827;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; background-color: #111827; }
         .hidden { display: none; }
-        
-        /* NEW: Styles inspired by Reynolds Experiment */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
-        }
-        .welcome-panel {
-            background: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid #374151;
-            animation: fadeIn 0.8s ease-out forwards;
-            opacity: 0;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); } 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); } }
+        .panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid #374151; animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
         .btn { transition: all 0.2s ease; }
         .btn:active { transform: scale(0.95); }
         .btn-primary { animation: pulse 2s infinite; }
         .btn-primary:hover { transform: translateY(-3px) scale(1.05); }
         .btn-secondary:hover { background-color: #374151; border-color: #facc15; }
-        .lang-btn.active { background-color: #facc15; color: #111827; border-color: #fde047; }
-        .fact-modal { animation: fadeIn 0.3s ease-out forwards; }
+        .lang-btn.active { background-color: #facc15; color: #111827; border-color: #fde047; font-weight: bold; }
+        #game-canvas-container { width: 100%; max-width: 1200px; aspect-ratio: 4 / 1; }
+        #game-canvas { width: 100%; height: 100%; }
+        
+        @media (orientation: portrait) and (max-width: 768px) {
+            #game-canvas-container {
+                width: 95vw;
+                height: 70vh;
+                aspect-ratio: auto;
+                flex-direction: column;
+            }
+            #game-ui {
+                width: 100%;
+                flex-direction: column;
+                height: auto;
+                padding-bottom: 8px;
+                gap: 4px;
+            }
+            #game-ui > div:last-child {
+                display: none;
+            }
+        }
+
+        /* ZMIANA 1: Scroll w oknie "Learn" na urządzeniach mobilnych */
+        @media (max-width: 768px) {
+            #learn-modal .panel > div:first-of-type {
+                max-height: 60vh;
+                overflow-y: auto;
+                padding-right: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="text-white">
-    <main class="relative w-screen h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('../assets/duck-background.jpg')">
-        <div id="main-overlay" class="absolute inset-0 bg-blue-900 bg-opacity-40 backdrop-blur-sm"></div>
+    <div id="rotation-suggestion-toast" class="hidden absolute top-4 right-4 z-50 panel p-4 rounded-lg max-w-xs w-full">
+        <p class="text-sm mb-2" data-t="rotationSuggestion"></p>
+        <button id="close-rotation-toast" class="w-full btn px-4 py-1 bg-gray-600 text-white text-sm font-bold rounded-lg hover:bg-gray-700" data-t="gotItButton"></button>
+    </div>
 
-        <!-- NEW: Redesigned Start Screen -->
+    <main class="relative w-screen h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('assets/duck-background.jpg')">
+        <div id="main-overlay" class="absolute inset-0 bg-blue-900 bg-opacity-40 backdrop-blur-sm"></div>
         <div id="start-screen" class="relative z-10 text-center p-4">
-             <div class="welcome-panel p-8 md:p-12 rounded-xl shadow-2xl max-w-xl w-full">
-                <h1 class="text-4xl md:text-5xl font-bold text-yellow-300 mb-2" data-t="title">Duck Race</h1>
-                <p class="text-lg text-cyan-200 mb-8" data-t="subtitle">First duck to cross the finish line wins!</p>
+             <div class="panel p-8 md:p-12 rounded-xl shadow-2xl max-w-xl w-full">
+                <h1 class="text-4xl md:text-5xl font-bold text-yellow-300 mb-2" data-t="title"></h1>
+                <p class="text-lg text-cyan-200 mb-8" data-t="subtitle"></p>
                 <div class="flex flex-col items-center gap-4">
-                    <button id="start-button" class="btn btn-primary w-full md:w-auto px-8 py-3 bg-yellow-400 text-gray-900 font-bold rounded-lg shadow-lg" data-t="startButton">
-                        Start Race
-                    </button>
-                    <button id="learn-button" class="btn btn-secondary w-full md:w-auto px-6 py-3 bg-gray-700/50 border border-gray-600 text-yellow-300 font-bold rounded-lg" data-t="learnButton">
-                        Learn about river ecosystems
-                    </button>
+                    <button id="start-button" class="btn btn-primary w-full md:w-auto px-8 py-3 bg-yellow-400 text-gray-900 font-bold rounded-lg shadow-lg" data-t="startButton"></button>
+                    <button id="ranking-button" class="btn btn-secondary w-full md:w-auto px-6 py-3 bg-gray-700/50 border border-gray-600 text-yellow-300 font-bold rounded-lg" data-t="rankingButton"></button>
+                    <button id="learn-button" class="btn btn-secondary w-full md:w-auto px-6 py-3 bg-gray-700/50 border border-gray-600 text-yellow-300 font-bold rounded-lg" data-t="learnButton"></button>
                     <div id="lang-switcher" class="mt-4 p-2 bg-black bg-opacity-50 rounded-lg flex gap-2">
                         <button class="lang-btn px-4 py-1 rounded" data-lang="en">EN</button>
                         <button class="lang-btn px-4 py-1 rounded" data-lang="pl">PL</button>
@@ -66,290 +75,227 @@
                 </div>
             </div>
         </div>
-
-        <!-- Level Complete Screen -->
         <div id="level-complete-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
             <h2 id="level-complete-title" class="text-5xl font-bold text-yellow-300 mb-4"></h2>
-            <p id="level-complete-stats" class="text-xl text-cyan-200 mb-6"></p>
             <p id="level-complete-desc" class="text-2xl text-white mb-6"></p>
             <button id="next-level-button" class="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600"></button>
         </div>
-        
-        <!-- Final Win Screen -->
         <div id="final-win-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
-            <h2 class="text-5xl font-bold text-yellow-300 mb-4" data-t="finalWinTitle">Race Completed!</h2>
-            <p class="text-2xl text-white mb-2" data-t="finalWinCongrats">Congratulations, you beat all 5 levels!</p>
-            <p class="text-xl text-cyan-200 mb-8" data-t="finalWinTimeLabel">Your final time:</p>
+            <h2 class="text-5xl font-bold text-yellow-300 mb-4" data-t="finalWinTitle"></h2>
+            <p class="text-2xl text-white mb-2" data-t="finalWinCongrats"></p>
+            <p class="text-xl text-cyan-200 mb-8" data-t="finalWinTimeLabel"></p>
             <p id="final-time-display" class="text-4xl font-mono text-yellow-300 mb-8"></p>
-            <button id="close-and-save-button" class="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg hover:bg-blue-600" data-t="finalWinButton">
-                Save score and return to app
-            </button>
+            <button id="close-and-save-button" class="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg hover:bg-blue-600" data-t="finalWinButton"></button>
         </div>
-
-        <!-- Game Over Screen -->
         <div id="game-over-screen" class="relative z-10 text-center bg-black bg-opacity-70 p-10 rounded-xl hidden">
-            <h2 class="text-5xl font-bold text-yellow-300 mb-4" data-t="gameOverTitle">Race Over!</h2>
+            <h2 class="text-5xl font-bold text-yellow-300 mb-4" data-t="gameOverTitle"></h2>
             <p id="game-over-text" class="text-3xl text-white mb-6"></p>
-            <p id="game-over-stats" class="text-xl text-cyan-200 mb-6"></p>
-            <button id="restart-button" class="px-8 py-4 bg-yellow-400 text-gray-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500" data-t="restartButton">
-                Race Again
-            </button>
+            <button id="restart-button" class="px-8 py-4 bg-yellow-400 text-gray-900 font-bold rounded-lg shadow-lg hover:bg-yellow-500" data-t="restartButton"></button>
         </div>
-
-        <!-- Game Canvas Area -->
         <div id="game-canvas-container" class="relative z-10 flex flex-col items-center hidden">
             <div id="game-ui" class="text-white bg-black bg-opacity-50 px-4 py-2 rounded-t-lg flex justify-between items-center w-full">
                 <div>
                     <h2 id="level-display" class="text-xl font-bold text-yellow-300"></h2>
-                    <p class="text-sm text-cyan-100" data-t="gameHint">Click water to splash, click garbage for +10 points!</p>
+                    <p class="text-sm text-cyan-100" data-t="gameHint"></p>
                 </div>
-                 <div class="text-center mx-4">
-                    <p class="text-lg font-bold" data-t="scoreLabel">Score: <span id="score-display" class="font-mono">0</span></p>
-                    <p class="text-lg font-bold" data-t="timeLabel">Time: <span id="time-display" class="font-mono">00:00</span></p>
+                <div class="text-center mx-4">
+                    <p class="text-lg font-bold"><span data-t="timeLabel"></span>: <span id="time-display" class="font-mono">00:000</span></p>
+                    <p class="text-sm text-yellow-300" data-t="yourDuckHint"></p> 
                 </div>
                 <div class="w-48"></div>
             </div>
             <canvas id="game-canvas" class="bg-blue-800 bg-opacity-80 border-4 border-yellow-400 rounded-b-lg shadow-2xl"></canvas>
         </div>
-
-        <!-- Learn Modal -->
         <div id="learn-modal" class="absolute inset-0 z-20 bg-black bg-opacity-75 flex items-center justify-center hidden p-4">
-            <div class="bg-gray-800 text-white p-8 rounded-lg max-w-2xl text-center shadow-2xl">
-                <h2 class="text-3xl font-bold text-cyan-300 mb-4" data-t="learnModalTitle">River Ecosystems</h2>
-                <p class="text-lg mb-6" data-t="learnModalText">Rivers are vital lifelines. They create unique habitats for fish, insects, and microorganisms, forming a complex food web. Fish help control insect populations, while microorganisms break down waste, naturally cleaning the water. Rivers also act as corridors, allowing animals to move, breed, and find new territories.</p>
-                <button id="close-learn-modal" class="px-6 py-3 bg-cyan-600 text-white font-bold rounded-lg shadow-lg hover:bg-cyan-700" data-t="closeButton">Close</button>
+            <div class="panel p-8 rounded-lg max-w-3xl text-left shadow-2xl leading-relaxed">
+                <h2 class="text-3xl font-bold text-cyan-300 mb-4" data-t="learnModal.title"></h2>
+                <!-- ZMIANA 1: Dodano `div` wokół treści dla umożliwienia scrollowania -->
+                <div>
+                    <div data-t-html="learnModal.text"></div>
+                </div>
+                <button id="close-learn-modal" class="btn mt-6 w-full px-6 py-3 bg-cyan-600 text-white font-bold rounded-lg shadow-lg hover:bg-cyan-700" data-t="closeButton"></button>
             </div>
         </div>
-        
-        <!-- Fact Modal -->
-        <div id="fact-modal" class="absolute top-5 right-5 z-20 bg-gray-800 text-white p-6 rounded-lg max-w-sm shadow-2xl fact-modal hidden">
-            <h3 class="text-xl font-bold text-yellow-300 mb-3" data-t="factTitle">Did you know?</h3>
-            <p id="fact-text" class="text-md mb-4"></p>
-            <button id="close-fact-modal" class="w-full px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600" data-t="closeButton">Close</button>
+        <div id="fact-modal" class="absolute inset-0 z-30 bg-black bg-opacity-75 flex items-center justify-center hidden p-4">
+            <div class="panel p-6 rounded-lg max-w-sm shadow-2xl w-full">
+                <h3 class="text-xl font-bold text-yellow-300 mb-3" data-t="factTitle"></h3>
+                <p id="fact-text" class="text-md mb-4"></p>
+                <button id="close-fact-modal" class="w-full btn px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600" data-t="closeButton"></button>
+            </div>
+        </div>
+        <div id="leaderboard-modal" class="absolute inset-0 z-20 bg-black bg-opacity-75 flex items-center justify-center hidden p-4">
+            <div class="panel p-8 rounded-lg max-w-lg w-full text-left shadow-2xl">
+                <h2 class="text-3xl font-bold text-yellow-300 mb-6 text-center" data-t="leaderboard.title"></h2>
+                <div id="leaderboard-content" class="max-h-[60vh] overflow-y-auto"></div>
+                <button id="close-leaderboard-modal" class="btn mt-6 w-full px-6 py-3 bg-cyan-600 text-white font-bold rounded-lg shadow-lg hover:bg-cyan-700" data-t="closeButton"></button>
+            </div>
         </div>
     </main>
-
     <script type="module">
-        // --- This entire script block is now wrapped in the DOMContentLoaded listener to fix the bug ---
         document.addEventListener('DOMContentLoaded', () => {
-
-            // --- Types (Enums) ---
             const GameState = { StartScreen: 0, Playing: 1, GameOver: 2, LevelComplete: 3, FinalWin: 4 };
             const PlayerType = { Human: 0, Bot: 1 };
             const ObstacleType = { Log: 0, Garbage: 1 };
 
-            // --- Translations ---
             const translations = {
-                en: {
-                    title: "Duck Race", subtitle: "First duck to cross the finish line wins!", startButton: "Start Race",
-                    learnButton: "Learn about river ecosystems", restartButton: "Race Again",
-                    finalWinTitle: "Race Completed!", finalWinCongrats: "Congratulations, you beat all 5 levels!",
-                    finalWinTimeLabel: "Your final time:", finalWinButton: "Save score and return to app",
-                    gameOverTitle: "Race Over!", gameHint: "Click water to splash, click garbage for +10 points!",
-                    scoreLabel: "Score:", timeLabel: "Time:", learnModalTitle: "River Ecosystems",
-                    learnModalText: "Rivers are vital lifelines. They create unique habitats for fish, insects, and microorganisms, forming a complex food web. Fish help control insect populations, while microorganisms break down waste, naturally cleaning the water. Rivers also act as corridors, allowing animals to move, breed, and find new territories.",
-                    closeButton: "Close", factTitle: "Did you know?",
-                    levelComplete: (level) => `Level ${level} Complete!`,
-                    nextLevelDesc: { 2: "Next: Polluted Pass. Garbage will send you back to the start!", 3: "Next: Tricky Turn. A mix of logs and garbage awaits.", 4: "Next: The Rapids! The current is much faster here!", 5: "Next: The Foggy Finish! Navigate through thick fog to win!" },
-                    nextLevelButton: (level) => `Start Level ${level}`,
-                    gameOverLost: "You lost the race!", gameOverWon: (level) => `You won Level ${level}!`,
-                    gameOverChampion: "🎉 You beat all the levels! You're the champion! 🎉",
-                    gameOverBotWon: (name) => `${name} won the race!`
-                },
-                pl: {
-                    title: "Wyścig Kaczek", subtitle: "Pierwsza kaczka na mecie wygrywa!", startButton: "Rozpocznij Wyścig",
-                    learnButton: "Dowiedz się o ekosystemach rzecznych", restartButton: "Jeszcze Raz",
-                    finalWinTitle: "Wyścig Ukończony!", finalWinCongrats: "Gratulacje, ukończyłeś wszystkie 5 poziomów!",
-                    finalWinTimeLabel: "Twój końcowy czas:", finalWinButton: "Zapisz wynik i wróć do aplikacji",
-                    gameOverTitle: "Koniec Wyścigu!", gameHint: "Kliknij wodę by chlapać, kliknij śmieci by dostać +10 punktów!",
-                    scoreLabel: "Punkty:", timeLabel: "Czas:", learnModalTitle: "Ekosystemy Rzeczne",
-                    learnModalText: "Rzeki to kluczowe arterie życia. Tworzą unikalne siedliska dla ryb, owadów i mikroorganizmów, tworząc złożoną sieć pokarmową. Ryby pomagają kontrolować populacje owadów, a mikroorganizmy rozkładają odpady, naturalnie oczyszczając wodę. Rzeki działają również jak korytarze, umożliwiając zwierzętom przemieszczanie się, rozmnażanie i znajdowanie nowych terytoriów.",
-                    closeButton: "Zamknij", factTitle: "Czy wiesz, że?",
-                    levelComplete: (level) => `Poziom ${level} Ukończony!`,
-                    nextLevelDesc: { 2: "Następny: Zanieczyszczona Przełęcz. Śmieci cofną cię na start!", 3: "Następny: Podstępny Zakręt. Czeka na ciebie mieszanka kłód i śmieci.", 4: "Następny: Bystrza! Prąd jest tu znacznie szybszy!", 5: "Następny: Mglisty Finisz! Przebij się przez gęstą mgłę, aby wygrać!" },
-                    nextLevelButton: (level) => `Rozpocznij Poziom ${level}`,
-                    gameOverLost: "Przegrałeś wyścig!", gameOverWon: (level) => `Wygrałeś Poziom ${level}!`,
-                    gameOverChampion: "🎉 Ukończyłeś wszystkie poziomy! Jesteś mistrzem! 🎉",
-                    gameOverBotWon: (name) => `${name} wygrał wyścig!`
-                },
-                de: {
-                    title: "Entenrennen", subtitle: "Die erste Ente im Ziel gewinnt!", startButton: "Rennen starten",
-                    learnButton: "Über Flussökosysteme lernen", restartButton: "Nochmal fahren",
-                    finalWinTitle: "Rennen beendet!", finalWinCongrats: "Herzlichen Glückwunsch, du hast alle 5 Level geschafft!",
-                    finalWinTimeLabel: "Deine Endzeit:", finalWinButton: "Ergebnis speichern und zur App zurückkehren",
-                    gameOverTitle: "Rennen vorbei!", gameHint: "Klicke auf Wasser, um zu spritzen, klicke auf Müll für +10 Punkte!",
-                    scoreLabel: "Punkte:", timeLabel: "Zeit:", learnModalTitle: "Flussökosysteme",
-                    learnModalText: "Flüsse sind lebenswichtige Lebensadern. Sie schaffen einzigartige Lebensräume für Fische, Insekten und Mikroorganismen und bilden ein komplexes Nahrungsnetz. Fische helfen, Insektenpopulationen zu kontrollieren, während Mikroorganismen Abfälle abbauen und das Wasser natürlich reinigen. Flüsse fungieren auch als Korridore, die es Tieren ermöglichen, sich zu bewegen, zu vermehren und neue Reviere zu finden.",
-                    closeButton: "Schließen", factTitle: "Wusstest du schon?",
-                    levelComplete: (level) => `Level ${level} abgeschlossen!`,
-                    nextLevelDesc: { 2: "Nächstes: Verschmutzter Pass. Müll schickt dich zurück an den Start!", 3: "Nächstes: Knifflige Kurve. Eine Mischung aus Baumstämmen und Müll erwartet dich.", 4: "Nächstes: Die Stromschnellen! Die Strömung ist hier viel schneller!", 5: "Nächstes: Das neblige Finale! Navigiere durch dichten Nebel, um zu gewinnen!" },
-                    nextLevelButton: (level) => `Level ${level} starten`,
-                    gameOverLost: "Du hast das Rennen verloren!", gameOverWon: (level) => `Du hast Level ${level} gewonnen!`,
-                    gameOverChampion: "🎉 Du hast alle Level geschafft! Du bist der Champion! 🎉",
-                    gameOverBotWon: (name) => `${name} hat das Rennen gewonnen!`
-                },
-                cs: {
-                    title: "Závod Kačenek", subtitle: "První kačenka v cíli vyhrává!", startButton: "Spustit Závod",
-                    learnButton: "O říčních ekosystémech", restartButton: "Znovu závodit",
-                    finalWinTitle: "Závod dokončen!", finalWinCongrats: "Gratulujeme, dokončil jsi všech 5 úrovní!",
-                    finalWinTimeLabel: "Tvůj konečný čas:", finalWinButton: "Uložit skóre a vrátit se do aplikace",
-                    gameOverTitle: "Konec Závodu!", gameHint: "Klikni na vodu pro šplouchnutí, klikni na odpadky pro +10 bodů!",
-                    scoreLabel: "Skóre:", timeLabel: "Čas:", learnModalTitle: "Říční ekosystémy",
-                    learnModalText: "Řeky jsou životně důležité tepny. Vytvářejí jedinečná stanoviště pro ryby, hmyz a mikroorganismy a tvoří složitou potravní síť. Ryby pomáhají regulovat populace hmyzu, zatímco mikroorganismy rozkládají odpad a přirozeně čistí vodu. Řeky také fungují jako koridory, které zvířatům umožňují pohyb, rozmnožování a hledání nových teritorií.",
-                    closeButton: "Zavřít", factTitle: "Věděl jsi?",
-                    levelComplete: (level) => `Úroveň ${level} dokončena!`,
-                    nextLevelDesc: { 2: "Další: Znečištěný průsmyk. Odpadky tě pošlou zpět na start!", 3: "Další: Záludná zatáčka. Čeká na tebe směs klád a odpadků.", 4: "Další: Peřeje! Proud je zde mnohem rychlejší!", 5: "Další: Mlhavý finiš! Projdi hustou mlhou a vyhraj!" },
-                    nextLevelButton: (level) => `Spustit úroveň ${level}`,
-                    gameOverLost: "Prohrál jsi závod!", gameOverWon: (level) => `Vyhrál jsi úroveň ${level}!`,
-                    gameOverChampion: "🎉 Dokončil jsi všechny úrovně! Jsi šampion! 🎉",
-                    gameOverBotWon: (name) => `${name} vyhrál závod!`
-                }
+                en: { yourDuckHint: "Your duck is yellow!", rotationSuggestion: "For the best experience, rotate your device to landscape mode.", gotItButton: "Got it!", leaderboard: { title: "Leaderboard", loading: "Loading...", error: "Could not load leaderboard.", yourBest: "Your Best Rank:", rank: "Rank", player: "Player", time: "Time (s)" }, title: "Duck Race", subtitle: "First duck to cross the finish line wins!", startButton: "Start Race", learnButton: "Learn about river ecosystems", rankingButton: "Ranking", restartButton: "Race Again", finalWinTitle: "Race Completed!", finalWinCongrats: "Congratulations, you beat all 5 levels!", finalWinTimeLabel: "Your final time:", finalWinButton: "Save score and return to app", gameOverTitle: "Race Over!", gameHint: "Click water to splash, click garbage for +10 points!", timeLabel: "Time", closeButton: "Close", factTitle: "Did you know?", learnModal: { title: "River Ecosystems of the Tri-Border Region", text: `<p>Rivers like the Mandau and Neisse are more than just flowing water; they are vital lifelines for the entire tri-border region of Germany, Poland, and the Czech Republic.</p><p class="mt-4"><strong>A Corridor for Life:</strong> Rivers act as natural corridors, connecting forests, meadows, and wetlands. This allows animals like otters, beavers, and kingfishers to move safely between habitats to find food and mates. For fish such as trout and grayling, the river is their entire world, providing spawning grounds in gravelly shallows and shelter in deeper pools.</p><p class="mt-4"><strong>The Unseen Workforce:</strong> The riverbed is teeming with microorganisms and insects. These tiny workers break down fallen leaves and other organic matter, recycling nutrients back into the ecosystem. This process is fundamental to keeping the water clean and supporting the entire food web, from the smallest algae to the largest predatory fish.</p><p class="mt-4"><strong>Zittau and the Mandau:</strong> The city of Zittau has a long history intertwined with the Mandau. While historical modifications, like straightening channels, were made to protect against floods, there is now a growing understanding of the need to restore natural river features. Creating more natural banks and allowing for varied flow helps improve water quality and brings back biodiversity, making the river a healthier and more resilient ecosystem for everyone.</p>` }, levelComplete: (level) => `Level ${level} Complete!`, nextLevelDesc: (level) => ({ 2: "Next: Polluted Pass. Garbage will send you back to the start!", 3: "Next: Tricky Turn. A mix of logs and garbage awaits.", 4: "Next: The Rapids! The current is much faster here!", 5: "Next: The Foggy Finish! Navigate through thick fog to win!" }[level] || ""), nextLevelButton: (level) => `Start Level ${level}`, gameOverLost: "You lost the race!", gameOverChampion: "🎉 You beat all the levels! You're the champion! 🎉", gameOverBotWon: (name) => `${name} won the race!` },
+                pl: { yourDuckHint: "Twoja kaczka jest żółta!", rotationSuggestion: "Aby uzyskać najlepsze wrażenia, obróć urządzenie do trybu poziomego.", gotItButton: "Rozumiem!", leaderboard: { title: "Tabela Wyników", loading: "Ładowanie...", error: "Nie udało się załadować rankingu.", yourBest: "Twoja najlepsza pozycja:", rank: "Pozycja", player: "Gracz", time: "Czas (s)" }, title: "Wyścig Kaczek", subtitle: "Pierwsza kaczka na mecie wygrywa!", startButton: "Rozpocznij Wyścig", learnButton: "Dowiedz się o ekosystemach", rankingButton: "Ranking", restartButton: "Jeszcze Raz", finalWinTitle: "Wyścig Ukończony!", finalWinCongrats: "Gratulacje, ukończyłeś wszystkie 5 poziomów!", finalWinTimeLabel: "Twój końcowy czas:", finalWinButton: "Zapisz wynik i wróć", gameOverTitle: "Koniec Wyścigu!", gameHint: "Kliknij wodę by chlapać, kliknij śmieci by dostać +10 punktów!", timeLabel: "Czas", closeButton: "Zamknij", factTitle: "Czy wiesz, że?", learnModal: { title: "Ekosystemy rzeczne Trójstyku", text: `<p>Rzeki takie jak Mandau i Nysa to coś więcej niż tylko płynąca woda; to życiodajne arterie dla całego regionu trójstyku granic Polski, Czech i Niemiec.</p><p class="mt-4"><strong>Korytarz Życia:</strong> Rzeki działają jako naturalne korytarze, łącząc lasy, łąki i tereny podmokłe. Umożliwia to zwierzętom, takim jak wydry, bobry i zimorodki, bezpieczne przemieszczanie się między siedliskami w poszukiwaniu pożywienia i partnerów. Dla ryb, takich jak pstrąg i lipień, rzeka to cały świat, zapewniający miejsca do tarła na żwirowych płyciznach i schronienie w głębszych partiach.</p><p class="mt-4"><strong>Niewidzialni Pracownicy:</strong> Dno rzeki tętni życiem mikroorganizmów i owadów. Ci mali pracownicy rozkładają opadłe liście i inną materię organiczną, przywracając składniki odżywcze do ekosystemu. Proces ten jest fundamentalny dla utrzymania czystości wody i wspierania całej sieci pokarmowej, od najmniejszych glonów po największe drapieżne ryby.</p><p class="mt-4"><strong>Zittau i Mandau:</strong> Miasto Zittau ma długą historię splecioną z rzeką Mandau. Chociaż historyczne modyfikacje, takie jak prostowanie koryt, miały na celu ochronę przed powodziami, obecnie rośnie zrozumienie potrzeby przywracania naturalnych cech rzek. Tworzenie bardziej naturalnych brzegów i umożliwienie zróżnicowanego przepływu pomaga poprawić jakość wody i przywraca bioróżnorodność, czyniąc rzekę zdrowszym i bardziej odpornym ekosystemem dla wszystkich.</p>` }, levelComplete: (level) => `Poziom ${level} Ukończony!`, nextLevelDesc: (level) => ({ 2: "Następny: Zanieczyszczona Przełęcz. Śmieci cofną cię na start!", 3: "Następny: Podstępny Zakręt. Czeka na ciebie mieszanka kłód i śmieci.", 4: "Następny: Bystrza! Prąd jest tu znacznie szybszy!", 5: "Następny: Mglisty Finisz! Przebij się przez gęstą mgłę, aby wygrać!" }[level] || ""), nextLevelButton: (level) => `Rozpocznij Poziom ${level}`, gameOverLost: "Przegrałeś wyścig!", gameOverChampion: "🎉 Ukończyłeś wszystkie poziomy! Jesteś mistrzem! 🎉", gameOverBotWon: (name) => `${name} wygrał wyścig!` },
+                de: { yourDuckHint: "Deine Ente ist gelb!", rotationSuggestion: "Für das beste Erlebnis drehe dein Gerät ins Querformat.", gotItButton: "Verstanden!", leaderboard: { title: "Bestenliste", loading: "Wird geladen...", error: "Bestenliste konnte nicht geladen werden.", yourBest: "Dein bester Rang:", rank: "Rang", player: "Spieler", time: "Zeit (s)" }, title: "Entenrennen", subtitle: "Die erste Ente im Ziel gewinnt!", startButton: "Rennen starten", learnButton: "Über Ökosysteme lernen", rankingButton: "Rangliste", restartButton: "Nochmal fahren", finalWinTitle: "Rennen beendet!", finalWinCongrats: "Herzlichen Glückwunsch, du hast alle 5 Level geschafft!", finalWinTimeLabel: "Deine Endzeit:", finalWinButton: "Ergebnis speichern & zurück", gameOverTitle: "Rennen vorbei!", gameHint: "Klicke auf Wasser, um zu spritzen, klicke auf Müll für +10 Punkte!", timeLabel: "Zeit", closeButton: "Schließen", factTitle: "Wusstest du schon?", learnModal: { title: "Flussökosysteme des Dreiländerecks", text: `<p>Flüsse wie die Mandau und die Neiße sind mehr als nur fließendes Wasser; sie sind lebenswichtige Lebensadern für das gesamte Dreiländereck Deutschland, Polen und Tschechien.</p><p class="mt-4"><strong>Ein Korridor für das Leben:</strong> Flüsse fungieren als natürliche Korridore, die Wälder, Wiesen und Feuchtgebiete verbinden. Dies ermöglicht Tieren wie Ottern, Bibern und Eisvögeln, sich sicher zwischen den Lebensräumen zu bewegen, um Nahrung und Partner zu finden. Für Fische wie Forellen und Äschen ist der Fluss ihre ganze Welt, der ihnen Laichplätze in kiesigen Flachwasserzonen und Schutz in tieferen Gumpen bietet.</p><p class="mt-4"><strong>Die unsichtbaren Arbeiter:</strong> Das Flussbett wimmelt von Mikroorganizmussen und Insekten. Diese winzigen Arbeiter zersetzen Laub und anderes organisches Material und führen die Nährstoffe wieder dem Ökosystem zu. Dieser Prozess ist grundlegend, um das Wasser sauber zu halten und das gesamte Nahrungsnetz zu unterstützen, von der kleinsten Alge bis zum größten Raubfisch.</p><p class="mt-4"><strong>Zittau und die Mandau:</strong> Die Stadt Zittau hat eine lange Geschichte, die eng mit der Mandau verbunden ist. Während historische Eingriffe wie die Begradigung von Kanälen dem Hochwasserschutz dienten, wächst heute das Verständnis für die Notwendigkeit, natürliche Flussmerkmale wiederherzustellen. Die Schaffung naturnaher Ufer und die Zulassung einer vielfältigen Strömung verbessern die Wasserqualität und fördern die Artenvielfalt, was den Fluss zu einem gesünderen und widerstandsfähigeren Ökosystem für alle macht.</p>` }, levelComplete: (level) => `Level ${level} abgeschlossen!`, nextLevelDesc: (level) => ({ 2: "Nächstes: Verschmutzter Pass. Müll schickt dich zurück an den Start!", 3: "Nächstes: Knifflige Kurve. Eine Mischung aus Baumstämmen und Müll erwartet dich.", 4: "Nächstes: Die Stromschnellen! Die Strömung ist hier viel schneller!", 5: "Nächstes: Das neblige Finale! Navigiere durch dichten Nebel, um zu gewinnen!" }[level] || ""), nextLevelButton: (level) => `Level ${level} starten`, gameOverLost: "Du hast das Rennen verloren!", gameOverChampion: "🎉 Du hast alle Level geschafft! Du bist der Champion! 🎉", gameOverBotWon: (name) => `${name} hat das Rennen gewonnen!` },
+                cs: { yourDuckHint: "Tvoje kachna je žlutá!", rotationSuggestion: "Pro nejlepší zážitek otočte zařízení do režimu na šířku.", gotItButton: "Rozumím!", leaderboard: { title: "Žebříček", loading: "Načítání...", error: "Žebříček se nepodařilo načíst.", yourBest: "Tvoje nejlepší pozice:", rank: "Pořadí", player: "Hráč", time: "Čas (s)" }, title: "Kachní Závod", subtitle: "První kachna v cíli vyhrává!", startButton: "Spustit Závod", learnButton: "O ekosystémech", rankingButton: "Žebříček", restartButton: "Znovu závodit", finalWinTitle: "Závod dokončen!", finalWinCongrats: "Gratulujeme, dokončil jsi všech 5 úrovní!", finalWinTimeLabel: "Tvůj konečný čas:", finalWinButton: "Uložit skóre a vrátit se", gameOverTitle: "Konec Závodu!", gameHint: "Klikni na vodu pro šplouchnutí, klikni na odpadky pro +10 bodů!", timeLabel: "Čas", closeButton: "Zavřít", factTitle: "Věděl jsi?", learnModal: { title: "Říční ekosystémy Trojmezí", text: `<p>Řeky jako Mandava a Nisa jsou víc než jen tekoucí voda; jsou životně důležitými tepnami pro celý region trojmezí Německa, Polska a České republiky.</p><p class="mt-4"><strong>Koridor pro život:</strong> Řeky fungují jako přírodní koridory, které spojují lesy, louky a mokřady. To umožňuje zvířatům, jako jsou vydry, bobři a ledňáčci, bezpečně se pohybovat mezi stanovišti za potravou a partnery. Pro ryby, jako je pstruh a lipan, je řeka celým jejich světem, poskytujícím místa pro tření na štěrkových mělčinách a úkryt v hlubších tůních.</p><p class="mt-4"><strong>Neviditelná pracovní síla:</strong> Řečiště se hemží mikroorganismy a hmyzem. Tito malí pracovníci rozkládají spadané listí a další organickou hmotu a recyklují živiny zpět do ekosystému. Tento proces je zásadní pro udržení čisté vody a podporu celého potravního řetězce, od nejmenších řas po největší dravé ryby.</p><p class="mt-4"><strong>Žitava a Mandava:</strong> Město Žitava má dlouhou historii spojenou s řekou Mandavou. Zatímco historické úpravy, jako je napřimování koryt, byly provedeny za účelem ochrany před povodněmi, dnes roste porozumění pro potřebu obnovy přirozených říčních prvků. Vytváření přirozenějších břehů a umožnění rozmanitého proudění pomáhá zlepšit kvalitu vody a navrací biodiverzitu, čímž se řeka stává zdravějším a odolnějším ekosystémem pro všechny.</p>` }, levelComplete: (level) => `Úroveň ${level} dokončena!`, nextLevelDesc: (level) => ({ 2: "Další: Znečištěný průsmyk. Odpadky tě pošlou zpět na start!", 3: "Další: Záludná zatáčka. Čeká na tebe směs klád a odpadků.", 4: "Další: Peřeje! Proud je zde mnohem rychlejší!", 5: "Další: Mlhavý finiš! Projdi hustou mlhou a vyhraj!" }[level] || ""), nextLevelButton: (level) => `Spustit úroveň ${level}`, gameOverLost: "Prohrál jsi závod!", gameOverChampion: "🎉 Dokončil jsi všechny úrovně! Jsi šampion! 🎉", gameOverBotWon: (name) => `${name} vyhrál závod!` }
             };
 
             const facts = {
-                en: [
-                    "The length of the Mandau river is about 41km.",
-                    "Mandau flows through both the Czech Republic (Bohemia) and Germany (Saxony) before joining the Lusatian Neisse close to Poland. So the water travels through 3 different countries!",
-                    "Fish help control insect populations and recycle nutrients in rivers.",
-                    "Microorganisms break down waste and dead plants, keeping rivers clean.",
-                    "Rivers connect different habitats, allowing animals to move, breed, and migrate.",
-                    "There are around 245 fish species present in Germany."
-                ],
-                pl: [ "Długość rzeki Mandau wynosi około 41 km.", "Mandau płynie przez Czechy (Bohemia) i Niemcy (Saksonia), zanim wpłynie do Nysy Łużyckiej blisko Polski. Woda podróżuje więc przez 3 różne kraje!", "Ryby pomagają kontrolować populacje owadów i przetwarzają składniki odżywcze w rzekach.", "Mikroorganizmy rozkładają odpady i martwe rośliny, utrzymując czystość rzek.", "Rzeki łączą różne siedliska, umożliwiając zwierzętom przemieszczanie się, rozmnażanie i migrację.", "W Niemczech występuje około 245 gatunków ryb." ],
-                de: [ "Die Länge der Mandau beträgt etwa 41 km.", "Die Mandau fließt durch Tschechien (Böhmen) und Deutschland (Sachsen), bevor sie nahe Polen in die Lausitzer Neiße mündet. Das Wasser reist also durch 3 verschiedene Länder!", "Fische helfen, Insektenpopulationen zu kontrollieren und Nährstoffe in Flüssen zu recyceln.", "Mikroorganismen zersetzen Abfälle und tote Pflanzen und halten so die Flüsse sauber.", "Flüsse verbinden verschiedene Lebensräume und ermöglichen es Tieren, sich zu bewegen, zu vermehren und zu wandern.", "In Deutschland gibt es etwa 245 Fischarten." ],
-                cs: [ "Délka řeky Mandavy je přibližně 41 km.", "Mandava protéká jak Českou republikou (Čechy), tak Německem (Sasko), než se poblíž Polska vlije do Lužické Nisy. Voda tedy putuje přes 3 různé země!", "Ryby pomáhají regulovat populace hmyzu a recyklovat živiny v řekách.", "Mikroorganismy rozkládají odpad a mrtvé rostliny a udržují tak řeky čisté.", "Řeky propojují různá stanoviště a umožňují zvířatům pohyb, rozmnožování a migraci.", "V Německu se vyskytuje přibližně 245 druhů ryb." ]
+                en: [ "The length of the Mandau river is about 41km.", "Mandau flows through the Czech Republic, Germany, and borders Poland. Its water travels through 3 countries!", "Fish help control insect populations and recycle nutrients in rivers.", "Microorganisms break down waste and dead plants, keeping rivers clean.", "Rivers connect habitats, allowing animals like otters and beavers to move and breed.", "There are around 245 fish species present in Germany." ],
+                pl: [ "Długość rzeki Mandau wynosi około 41 km.", "Mandau płynie przez Czechy, Niemcy i graniczy z Polską. Jej woda podróżuje przez 3 kraje!", "Ryby pomagają kontrolować populacje owadów i przetwarzają składniki odżywcze w rzekach.", "Mikroorganizmy rozkładają odpady, utrzymując czystość rzek.", "Rzeki łączą siedliska, umożliwiając zwierzętom, takim jak wydry i bobry, przemieszczanie się.", "W Niemczech występuje około 245 gatunków ryb." ],
+                de: [ "Die Länge der Mandau beträgt etwa 41 km.", "Die Mandau fließt durch Tschechien, Deutschland und grenzt an Polen. Ihr Wasser reist durch 3 Länder!", "Fische helfen, Insektenpopulationen zu kontrollieren und Nährstoffe in Flüssen zu recyceln.", "Mikroorganismen zersetzen Abfälle und halten so die Flüsse sauber.", "Flüsse verbinden Lebensräume und ermöglichen Tieren wie Ottern und Bibern die Fortbewegung.", "In Deutschland gibt es etwa 245 Fischarten." ],
+                cs: [ "Délka řeky Mandavy je přibližně 41 km.", "Mandava protéká Českou republikou, Německem a hraničí s Polskem. Její voda putuje přes 3 země!", "Ryby pomáhají regulovat populace hmyzu a recyklovat živiny v řekách.", "Mikroorganismy rozkládají odpad a udržují tak řeky čisté.", "Řeky propojují stanoviště a umožňují zvířatům, jako jsou vydry a bobři, pohyb.", "V Německu se vyskytuje přibližně 245 druhů ryb." ]
             };
 
-            // --- Level Configurations, Constants ---
-            const LEVEL_CONFIGS = [
-                { level: 1, flow: 0.5, spawnRate: 500, maxObs: 15, types: [ObstacleType.Log], hasFog: false, name: "The Calm River" },
-                { level: 2, flow: 0.5, spawnRate: 450, maxObs: 20, types: [ObstacleType.Garbage], hasFog: false, name: "Polluted Pass" },
-                { level: 3, flow: 0.6, spawnRate: 400, maxObs: 25, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "Tricky Turn" },
-                { level: 4, flow: 1.0, spawnRate: 300, maxObs: 30, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "The Rapids" },
-                { level: 5, flow: 0.9, spawnRate: 320, maxObs: 35, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: true, name: "The Foggy Finish" }
-            ];
+            const LEVEL_CONFIGS = [ { level: 1, flow: 0.5, spawnRate: 500, maxObs: 15, types: [ObstacleType.Log], hasFog: false, name: "The Calm River" }, { level: 2, flow: 0.5, spawnRate: 450, maxObs: 20, types: [ObstacleType.Garbage], hasFog: false, name: "Polluted Pass" }, { level: 3, flow: 0.6, spawnRate: 400, maxObs: 25, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "Tricky Turn" }, { level: 4, flow: 1.0, spawnRate: 300, maxObs: 30, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: false, name: "The Rapids" }, { level: 5, flow: 0.9, spawnRate: 320, maxObs: 35, types: [ObstacleType.Log, ObstacleType.Garbage], hasFog: true, name: "The Foggy Finish" } ];
             const MAX_LEVEL = LEVEL_CONFIGS.length;
-            const SIM_HEIGHT = 1.1; const CANVAS_HEIGHT = 300; const CANVAS_WIDTH = 1200;
-            const C_SCALE = CANVAS_HEIGHT / SIM_HEIGHT; const SIM_WIDTH = CANVAS_WIDTH / C_SCALE;
-            const RESOLUTION = 30; const DT = 1.0 / 60.0; const NUM_ITERS = 20;
-            const OVER_RELAXATION = 1.9; const NUM_PLAYERS = 3; const DUCK_SIZE = 12;
+            const SIM_HEIGHT = 1.1; const DUCK_SIZE = 12; const RESOLUTION = 30;
+            const DT = 1.0 / 60.0; const NUM_ITERS = 20; const OVER_RELAXATION = 1.9; const NUM_PLAYERS = 3; 
             const FINISH_LINE_X = 0.95; const SPLASH_EFFECT_RADIUS = 0.5;
             const STUN_DURATION = 1.5; const FLUID_FORCE_FACTOR = 0.1; const DAMPING_FACTOR = 0.80;
             const SPLASH_RADIUS_RATE = 60; const SPLASH_OPACITY_RATE = 1.2; const OBSTACLE_FLUID_FORCE_FACTOR = DT;
             const RIVERBANK_MARGIN = 0.05 * SIM_HEIGHT; const FOG_START_X = 0.6; const SCORE_PER_GARBAGE = 10;
             const SPLASH_STRENGTH = 2.5; const BOT_SPLASH_STRENGTH = 1.5;
             const BOT_AVOID_DISTANCE = 0.3; const BOT_OFFENSIVE_RANGE = 0.4; const BOT_OFFENSIVE_CHANCE = 0.3;
+            const SPLASH_COOLDOWN_MS = 300;
+            const BOT_SPLASH_COOLDOWN_MS = 1000;
+            // ZMIANA 2: Stała zwiększająca hitbox przeszkód na urządzeniach mobilnych
+            const OBSTACLE_TAP_RADIUS_MULTIPLIER = 1.5;
 
-            // --- Fluid Simulator Class ---
             const U_FIELD = 0; const V_FIELD = 0.5; const S_FIELD = 1.0;
-            class FluidSimulator { /* ... (class remains unchanged) ... */ }
-            // --- The rest of the FluidSimulator class should be pasted here ---
-            
-            // --- Game State and DOM Elements ---
-            let currentLang = 'en';
+            class FluidSimulator { constructor(density, numX, numY, h) { this.density = density; this.h = h; this.numX = numX + 2; this.numY = numY + 2; const createGrid = (fill = 0.0) => Array(this.numX).fill(0).map(() => Array(this.numY).fill(fill)); this.u = createGrid(); this.v = createGrid(); this.p = createGrid(); this.s = createGrid(); this.m = createGrid(1.0); const pipeH = 0.8 * this.numY; this.inletMinJ = Math.floor(0.5 * this.numY - 0.5 * pipeH); this.inletMaxJ = Math.floor(0.5 * this.numY + 0.5 * pipeH); for (let i = 0; i < this.numX; i++) for (let j = 0; j < this.numY; j++) this.s[i][j] = (i === 0 || j === 0 || j === this.numY - 1) ? 0.0 : 1.0; } integrate(dt, gravity) { for (let i = 1; i < this.numX; i++) for (let j = 1; j < this.numY - 1; j++) if (this.s[i][j] !== 0.0 && this.s[i][j - 1] !== 0.0) this.v[i][j] += gravity * dt; } solveIncompressibility(numIters, dt, overRelaxation) { const cp = this.density * this.h / dt; for (let iter = 0; iter < numIters; iter++) for (let i = 1; i < this.numX - 1; i++) for (let j = 1; j < this.numY - 1; j++) { if (this.s[i][j] === 0.0) continue; const s_sum = this.s[i - 1][j] + this.s[i + 1][j] + this.s[i][j - 1] + this.s[i][j + 1]; if (s_sum === 0.0) continue; const div = this.u[i + 1][j] - this.u[i][j] + this.v[i][j + 1] - this.v[i][j]; const pressureChange = -div / s_sum * overRelaxation; this.p[i][j] += cp * pressureChange; this.u[i][j] -= this.s[i - 1][j] * pressureChange; this.u[i + 1][j] += this.s[i + 1][j] * pressureChange; this.v[i][j] -= this.s[i][j - 1] * pressureChange; this.v[i][j + 1] += this.s[i][j + 1] * pressureChange; } } extrapolate() { for (let i = 0; i < this.numX; i++) { this.u[i][0] = this.u[i][1]; this.u[i][this.numY - 1] = this.u[i][this.numY - 2]; } for (let j = 0; j < this.numY; j++) { this.v[0][j] = this.v[1][j]; this.v[this.numX - 1][j] = this.v[this.numX - 2][j]; } } sampleField(x, y, fieldType, fieldData) { const h1 = 1.0 / this.h, h2 = 0.5 * this.h; x = Math.max(Math.min(x, this.numX * this.h), this.h); y = Math.max(Math.min(y, this.numY * this.h), this.h); let dx = 0.0, dy = 0.0; if (fieldType === U_FIELD) dy = h2; else if (fieldType === V_FIELD) dx = h2; else if (fieldType === S_FIELD) { dx = h2; dy = h2; } const x0 = Math.max(0, Math.min(Math.floor((x - dx) * h1), this.numX - 2)); const tx = ((x - dx) - x0 * this.h) * h1; const x1 = Math.min(x0 + 1, this.numX - 2); const y0 = Math.max(0, Math.min(Math.floor((y - dy) * h1), this.numY - 2)); const ty = ((y - dy) - y0 * this.h) * h1; const y1 = Math.min(y0 + 1, this.numY - 2); const sx = 1.0 - tx, sy = 1.0 - ty; const val = sx * sy * fieldData[x0][y0] + tx * sy * fieldData[x1][y0] + tx * ty * fieldData[x1][y1] + sx * ty * fieldData[x0][y1]; return val; } advectVel(dt) { const newU = this.u.map(row => [...row]); const newV = this.v.map(row => [...row]); const h2 = 0.5 * this.h; for (let i = 1; i < this.numX - 1; i++) for (let j = 1; j < this.numY - 1; j++) { if (this.s[i][j] !== 0.0 && this.s[i - 1][j] !== 0.0) { const avgV = (this.v[i - 1][j] + this.v[i][j] + this.v[i - 1][j + 1] + this.v[i][j + 1]) * 0.25; let posX = i * this.h, posY = j * this.h + h2; posX -= dt * this.u[i][j]; posY -= dt * avgV; newU[i][j] = this.sampleField(posX, posY, U_FIELD, this.u); } if (this.s[i][j] !== 0.0 && this.s[i][j - 1] !== 0.0) { const avgU = (this.u[i][j - 1] + this.u[i][j] + this.u[i + 1][j - 1] + this.u[i + 1][j]) * 0.25; let posX = i * this.h + h2, posY = j * this.h; posX -= dt * avgU; posY -= dt * this.v[i][j]; newV[i][j] = this.sampleField(posX, posY, V_FIELD, this.v); } } this.u = newU; this.v = newV; } advectSmoke(dt) { const newM = this.m.map(row => [...row]); const h2 = 0.5 * this.h; for (let i = 1; i < this.numX - 1; i++) for (let j = 1; j < this.numY - 1; j++) if (this.s[i][j] !== 0.0) { const avgU = (this.u[i][j] + this.u[i + 1][j]) * 0.5; const avgV = (this.v[i][j] + this.v[i][j + 1]) * 0.5; const x = i * this.h + h2 - dt * avgU; const y = j * this.h + h2 - dt * avgV; newM[i][j] = this.sampleField(x, y, S_FIELD, this.m); } this.m = newM; } simulate(dt, gravity, numIters, overRelaxation, flowVelocity, currentTime) { for (let j = 1; j < this.numY - 1; j++) this.u[1][j] = 0.0; const inletCenterJ = (this.inletMinJ + this.inletMaxJ) / 2.0; const inletHalfWidth = (this.inletMaxJ - this.inletMinJ) / 2.0; const waveFrequency = 2.0, waveAmplitude = 0.4; const timeBasedVelocity = flowVelocity * (1.0 + waveAmplitude * Math.cos(currentTime * waveFrequency)); if (inletHalfWidth > 0) for (let j = this.inletMinJ; j < this.inletMaxJ; j++) { const relativePos = (j - inletCenterJ) / inletHalfWidth; const speed = timeBasedVelocity * (1 - relativePos * relativePos); this.u[1][j] = Math.max(0.0, speed); } for (let j = this.inletMinJ; j < this.inletMaxJ; j++) this.m[1][j] = 0.0; this.integrate(dt, gravity); for (let i = 0; i < this.numX; i++) for (let j = 0; j < this.numY; j++) this.p[i][j] = 0.0; this.solveIncompressibility(numIters, dt, overRelaxation); this.extrapolate(); this.advectVel(dt); this.advectSmoke(dt); } }
+
+            let currentLang;
             let availableFacts = [];
             let currentGameState = GameState.StartScreen;
-            let winner = null; let level = 1; let animationFrameId = 0;
-            let isGameOver = false; let score = 0;
-            let levelStartTime = 0; let totalTimeMs = 0; let finalCompletionTimeMs = 0;
-            let fluid = null; let ducks = []; let obstacles = []; let splashes = [];
-            let lastObstacleSpawnTime = 0; let lastFrameTime = performance.now();
-            
-            const screens = {
-                start: document.getElementById('start-screen'),
-                levelComplete: document.getElementById('level-complete-screen'),
-                gameOver: document.getElementById('game-over-screen'),
-                canvasContainer: document.getElementById('game-canvas-container'),
-                finalWin: document.getElementById('final-win-screen'),
-            };
-            const canvas = document.getElementById('game-canvas');
-            const ctx = canvas.getContext('2d');
-            const gameUi = document.getElementById('game-ui');
+            let winner = null, level = 1, animationFrameId = 0, isGameOver = false;
+            let levelStartTime = 0, totalTimeMs = 0, finalCompletionTimeMs = 0;
+            let fluid = null, ducks = [], obstacles = [], splashes = [];
+            let lastObstacleSpawnTime = 0, lastFrameTime = performance.now();
+            let lastSplashTime = 0;
+            let CANVAS_WIDTH = 1200, CANVAS_HEIGHT = 300, C_SCALE = 1, SIM_WIDTH = 1;
+            let userNickname = 'Guest';
+
+            const screens = { start: document.getElementById('start-screen'), levelComplete: document.getElementById('level-complete-screen'), gameOver: document.getElementById('game-over-screen'), canvasContainer: document.getElementById('game-canvas-container'), finalWin: document.getElementById('final-win-screen'), };
+            const canvas = document.getElementById('game-canvas'), ctx = canvas.getContext('2d');
             const startButton = document.getElementById('start-button');
-            const nextLevelButton = document.getElementById('next-level-button');
-            const restartButton = document.getElementById('restart-button');
+            const nextLevelButton = document.getElementById('next-level-button'), restartButton = document.getElementById('restart-button');
             const levelDisplay = document.getElementById('level-display');
             const levelCompleteTitle = document.getElementById('level-complete-title');
             const levelCompleteDesc = document.getElementById('level-complete-desc');
-            const levelCompleteStats = document.getElementById('level-complete-stats');
-            const gameOverText = document.getElementById('game-over-text');
-            const gameOverStats = document.getElementById('game-over-stats');
-            const scoreDisplay = document.getElementById('score-display');
             const timeDisplay = document.getElementById('time-display');
-            const finalTimeDisplay = document.getElementById('final-time-display');
-            const closeAndSaveButton = document.getElementById('close-and-save-button');
-            const factModal = document.getElementById('fact-modal');
-            const factText = document.getElementById('fact-text');
-            const closeFactModal = document.getElementById('close-fact-modal');
-            const learnModal = document.getElementById('learn-modal');
-
-            // --- Main Functions ---
-            function t(key, ...args) { /* ... (function remains unchanged) ... */ }
-
-            function updateAllTexts() { /* ... (function remains unchanged) ... */ }
-
-            function formatTime(ms) {
-                const totalSeconds = ms / 1000;
-                const seconds = Math.floor(totalSeconds);
-                const milliseconds = Math.floor(ms % 1000).toString().padStart(3, '0');
-                return `${seconds}:${milliseconds}`;
-            }
-
-            function createSplash(simX, simY, strength) {
-                splashes.push({ x: simX, y: simY, radius: 10, opacity: 1 });
-                ducks.forEach(duck => { /* ... */ });
-                // Immediately run a small simulation step for responsiveness
-                if (fluid && !isGameOver) {
-                    const config = LEVEL_CONFIGS[level - 1];
-                    fluid.simulate(DT / 3, NUM_ITERS / 3, OVER_RELAXATION, config.flow, performance.now() / 1000);
-                }
-            }
-
-            function initializeGame() {
-                // ...
-                const playerNames = ['You', 'Duck Alice', 'Duck Bob'];
-                // ... (rest of the function is the same)
-            }
-
-            function draw() { /* ... (function remains unchanged) ... */ }
-
-            function update(currentTime) { /* ... (function remains unchanged) ... */ }
-
-            function showRandomFact() { /* ... (function remains unchanged) ... */ }
-
-            function updateUI(finalTimeInSeconds = 0) { /* ... (function remains unchanged, but uses t() helper) ... */ }
+            const finalTimeDisplay = document.getElementById('final-time-display'), closeAndSaveButton = document.getElementById('close-and-save-button');
+            const factModal = document.getElementById('fact-modal'), factText = document.getElementById('fact-text');
+            const closeFactModal = document.getElementById('close-fact-modal'), learnModal = document.getElementById('learn-modal');
+            const rankingButton = document.getElementById('ranking-button'), leaderboardModal = document.getElementById('leaderboard-modal');
+            const leaderboardContent = document.getElementById('leaderboard-content'), closeLeaderboardModal = document.getElementById('close-leaderboard-modal');
+            const gameOverText = document.getElementById('game-over-text');
+            const rotationSuggestionToast = document.getElementById('rotation-suggestion-toast');
+            const closeRotationToast = document.getElementById('close-rotation-toast');
             
-            function handleGameEnd(winnerName) { /* ... (function remains unchanged) ... */ }
-
-            // --- Game Flow Functions ---
-            function startGameFlow() { /* ... (function remains unchanged) ... */ }
-            function startGame() { 
-                level = 1; 
-                totalTimeMs = 0;
-                availableFacts = [...facts[currentLang]];
-                startGameFlow(); 
-            };
-            const restartGame = () => { showRandomFact(); startGame(); };
+            function t(key, ...args) { const langDict = translations[currentLang] || translations.en; let value = key.split('.').reduce((obj, k) => (obj && obj[k] !== undefined) ? obj[k] : undefined, langDict); if (typeof value === 'function') return value(...args); return value || key; }
+            function updateAllTexts() { document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); }); document.querySelectorAll('[data-t-html]').forEach(el => { el.innerHTML = t(el.dataset.tHtml); }); }
+            function formatTime(ms) { const seconds = Math.floor(ms / 1000); const milliseconds = Math.floor(ms % 1000).toString().padStart(3, '0'); return `${seconds}:${milliseconds}`; }
+            // NAPRAWA BŁĘDU LEADERBOARDU: Dodanie brakującej funkcji
+            function formatLeaderboardTime(ms) { return (ms / 1000).toFixed(3); }
+            function showRandomFact() { const currentFacts = facts[currentLang] || facts.en; if (availableFacts.length === 0) availableFacts = [...currentFacts]; const factIndex = Math.floor(Math.random() * availableFacts.length); factText.textContent = availableFacts[factIndex]; availableFacts.splice(factIndex, 1); factModal.classList.remove('hidden'); }
+            
+            async function fetchAndShowLeaderboard() {
+                leaderboardContent.innerHTML = `<p class="text-center">${t('leaderboard.loading')}</p>`;
+                leaderboardModal.classList.remove('hidden');
+                try {
+                    const response = await fetch(`https://flowapp-api.maciej-tadej.workers.dev/api/duck-race?playerName=${encodeURIComponent(userNickname)}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    const uniqueTopScores = [];
+                    const processedPlayers = new Set();
+                    if(data.top10) { for (const entry of data.top10) { if (!processedPlayers.has(entry.player_name)) { uniqueTopScores.push(entry); processedPlayers.add(entry.player_name); } } }
+                    let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-gray-600"><th class="p-2">${t('leaderboard.rank')}</th><th class="p-2">${t('leaderboard.player')}</th><th class="p-2 text-right">${t('leaderboard.time')}</th></tr></thead><tbody>`;
+                    uniqueTopScores.forEach((entry, index) => { const isCurrentUser = entry.player_name === userNickname; html += `<tr class="${isCurrentUser ? 'text-yellow-300 font-bold' : ''} border-b border-gray-700/50"><td class="p-2">${index + 1}.</td><td class="p-2">${entry.player_name}</td><td class="p-2 text-right font-mono">${formatLeaderboardTime(entry.completion_time_ms)}</td></tr>`; });
+                    html += '</tbody></table>';
+                    const isUserInTopList = uniqueTopScores.some(e => e.player_name === userNickname && e.completion_time_ms === data.userRank.time);
+                    if (data.userRank && !isUserInTopList) { html += `<div class="mt-6 text-center border-t border-gray-600 pt-4"><p class="text-lg">${t('leaderboard.yourBest')}</p><p class="text-yellow-300 font-bold text-xl">${data.userRank.rank}. ${userNickname} - ${formatLeaderboardTime(data.userRank.time)}s</p></div>`; }
+                    leaderboardContent.innerHTML = html;
+                } catch (error) { console.error("Failed to fetch leaderboard:", error); leaderboardContent.innerHTML = `<p class="text-center text-red-400">${t('leaderboard.error')}</p>`; }
+            }
+            
+            function createSplash(simX, simY, strength) { splashes.push({ x: simX, y: simY, radius: 10, opacity: 1 }); ducks.forEach(duck => { if (duck.stunned > 0) return; const dx = duck.x - simX, dy = duck.y - simY, dist = Math.hypot(dx, dy); if (dist > 0.01 && dist < SPLASH_EFFECT_RADIUS) { const falloff = 1 - (dist / SPLASH_EFFECT_RADIUS); duck.vx += (dx / dist) * strength * falloff; duck.vy += (dy / dist) * strength * falloff; } }); }
+            function spawnObstacle() { const config = LEVEL_CONFIGS[level - 1]; const availableTypes = config.types; const obstacleType = availableTypes[Math.floor(Math.random() * availableTypes.length)]; obstacles.push({ id: Date.now() + Math.random(), x: -0.1 * SIM_WIDTH, y: RIVERBANK_MARGIN + (SIM_HEIGHT - 2 * RIVERBANK_MARGIN) * Math.random(), vx: 0, vy: 0, width: 0.08 + Math.random() * 0.07, height: 0.03 + Math.random() * 0.02, angle: Math.random() * Math.PI * 2, type: obstacleType }); }
+            function initializeGame() { isGameOver = false; splashes = []; levelStartTime = performance.now(); const rect = canvas.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; CANVAS_WIDTH = canvas.width; CANVAS_HEIGHT = canvas.height; C_SCALE = CANVAS_HEIGHT / SIM_HEIGHT; SIM_WIDTH = CANVAS_WIDTH / C_SCALE; const h = SIM_HEIGHT / RESOLUTION, numY = RESOLUTION, numX = Math.floor(SIM_WIDTH / h); fluid = new FluidSimulator(1000.0, numX, numY, h); ducks = []; 
+                const playerNames = ['You', 'Duck Alice', 'Duck Bob'];
+                const playerColors = ['#FFD700', '#A0522D', '#8B572A'];
+                const takenPositions = new Set(); for (let i = 0; i < NUM_PLAYERS; i++) { const startX = 0.1 * SIM_WIDTH; let startY; do { startY = RIVERBANK_MARGIN + (SIM_HEIGHT - 2 * RIVERBANK_MARGIN) * (0.1 + Math.random() * 0.8); } while (takenPositions.has(Math.floor(startY * 10))); takenPositions.add(Math.floor(startY * 10)); 
+                ducks.push({ id: i, name: playerNames[i], x: startX, y: startY, startX, startY, vx: 0, vy: 0, color: playerColors[i], type: i === 0 ? PlayerType.Human : PlayerType.Bot, stunned: 0, lastSplashTime: 0 }); } obstacles = []; lastObstacleSpawnTime = performance.now(); }
+            function draw() { if (!ctx) return; ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); const config = LEVEL_CONFIGS[level-1]; const bankTopY = RIVERBANK_MARGIN * C_SCALE, bankBottomY = CANVAS_HEIGHT - RIVERBANK_MARGIN * C_SCALE, waveAmplitude = 8, waveLength = 100; ctx.fillStyle = '#228B22'; ctx.beginPath(); ctx.moveTo(0, 0); for (let x = 0; x <= CANVAS_WIDTH; x += 10) ctx.lineTo(x, bankTopY + Math.sin(x / waveLength) * waveAmplitude); ctx.lineTo(CANVAS_WIDTH, 0); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT); for (let x = 0; x <= CANVAS_WIDTH; x += 10) ctx.lineTo(x, bankBottomY + Math.sin(x / waveLength + Math.PI) * waveAmplitude); ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT); ctx.closePath(); ctx.fill(); if (fluid) { const h = fluid.h; for (let i = 0; i < fluid.numX; i++) for (let j = 0; j < fluid.numY; j++) { const alpha = (1 - fluid.m[i][j]) * 0.15; if (alpha > 0.01) { ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; ctx.fillRect(i * h * C_SCALE, j * h * C_SCALE, h * C_SCALE, h * C_SCALE); } } } obstacles.forEach(obs => { ctx.save(); ctx.translate(obs.x * C_SCALE, obs.y * C_SCALE); ctx.rotate(obs.angle); if (obs.type === ObstacleType.Log) { ctx.fillStyle = '#8B4513'; ctx.fillRect(-obs.width / 2 * C_SCALE, -obs.height / 2 * C_SCALE, obs.width * C_SCALE, obs.height * C_SCALE); } else { ctx.fillStyle = '#556B2F'; ctx.beginPath(); ctx.arc(0, 0, obs.width / 2 * C_SCALE, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); }); splashes.forEach(splash => { ctx.strokeStyle = `rgba(255, 255, 255, ${splash.opacity})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(splash.x * C_SCALE, splash.y * C_SCALE, splash.radius, 0, 2 * Math.PI); ctx.stroke(); }); ducks.forEach(duck => { ctx.save(); ctx.translate(duck.x * C_SCALE, duck.y * C_SCALE); ctx.rotate(Math.atan2(duck.vy, duck.vx)); ctx.fillStyle = duck.color; ctx.beginPath(); ctx.arc(0, 0, DUCK_SIZE, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = '#FFA500'; ctx.beginPath(); ctx.moveTo(DUCK_SIZE - 2, 0); ctx.lineTo(DUCK_SIZE + 10, -4); ctx.lineTo(DUCK_SIZE + 10, 4); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(DUCK_SIZE / 2, -DUCK_SIZE / 3, 2, 0, 2 * Math.PI); ctx.fill(); if (duck.stunned > 0) { ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, -DUCK_SIZE, DUCK_SIZE * 0.8, Math.PI * 1.5, Math.PI * 1.5 + (Math.PI * 2 * (duck.stunned / STUN_DURATION))); ctx.stroke(); } ctx.restore(); }); if (config.hasFog) { const fogX = FOG_START_X * CANVAS_WIDTH; const gradient = ctx.createLinearGradient(fogX, 0, CANVAS_WIDTH, 0); gradient.addColorStop(0, 'rgba(200, 200, 220, 0.0)'); gradient.addColorStop(0.3, 'rgba(200, 200, 220, 0.7)'); gradient.addColorStop(1, 'rgba(200, 200, 220, 0.9)'); ctx.fillStyle = gradient; ctx.fillRect(fogX, 0, CANVAS_WIDTH - fogX, CANVAS_HEIGHT); } ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]); ctx.beginPath(); const finishLineCanvasX = FINISH_LINE_X * CANVAS_WIDTH; ctx.moveTo(finishLineCanvasX, 0); ctx.lineTo(finishLineCanvasX, CANVAS_HEIGHT); ctx.stroke(); ctx.setLineDash([]); }
+            function update(currentTime) { if (isGameOver || !fluid) { animationFrameId = requestAnimationFrame(update); return; } const deltaTime = (currentTime - lastFrameTime) / 1000; lastFrameTime = currentTime; const config = LEVEL_CONFIGS[level - 1]; const elapsedTimeMs = performance.now() - levelStartTime; timeDisplay.textContent = formatTime(elapsedTimeMs); splashes = splashes.map(s => ({ ...s, radius: s.radius + SPLASH_RADIUS_RATE * deltaTime, opacity: s.opacity - SPLASH_OPACITY_RATE * deltaTime, })).filter(s => s.opacity > 0); fluid.simulate(DT, 0, NUM_ITERS, OVER_RELAXATION, config.flow, currentTime / 1000.0); if (currentTime - lastObstacleSpawnTime > config.spawnRate && obstacles.length < config.maxObs) { spawnObstacle(); lastObstacleSpawnTime = currentTime; } ducks.forEach(duck => { if (duck.stunned > 0) { duck.stunned = Math.max(0, duck.stunned - deltaTime); duck.vx *= 0.95; duck.vy *= 0.95; } else if (duck.type === PlayerType.Bot) { let actionTaken = false; const now = performance.now(); if(now - duck.lastSplashTime > BOT_SPLASH_COOLDOWN_MS) { const otherDucks = ducks.filter(d => d.id !== duck.id); const target = otherDucks.find(d => d.x > duck.x && (d.x - duck.x) < BOT_OFFENSIVE_RANGE && Math.abs(d.y - duck.y) < BOT_OFFENSIVE_RANGE / 2); if (target && Math.random() < BOT_OFFENSIVE_CHANCE) { createSplash(target.x + 0.1, target.y, BOT_SPLASH_STRENGTH * 0.8); actionTaken = true; } if (!actionTaken) { const obstaclesInPath = obstacles.filter(obs => obs.x > duck.x && (obs.x - duck.x) < BOT_AVOID_DISTANCE).sort((a, b) => (a.x - duck.x) - (b.x - duck.x)); if (obstaclesInPath.length > 0) { const closestObstacle = obstaclesInPath[0], predictionTime = 0.5, duckFutureY = duck.y + duck.vy * predictionTime, obsFutureY = closestObstacle.y + closestObstacle.vy * predictionTime; if (Math.abs(duckFutureY - obsFutureY) < (DUCK_SIZE / C_SCALE + closestObstacle.height / 2)) { const pushDirectionY = duck.y < obsFutureY ? -1 : 1, splashOffsetY = -pushDirectionY * 0.15; createSplash(duck.x - 0.1, duck.y + splashOffsetY, BOT_SPLASH_STRENGTH * 1.2); actionTaken = true; } } } if (!actionTaken) { const leadingDuckX = Math.max(...ducks.map(d => d.x)); if (duck.x < leadingDuckX - 0.05 * SIM_WIDTH || duck.x < SIM_WIDTH * 0.2) { const splashX = duck.x - 0.15, steerDirection = Math.sign(SIM_HEIGHT / 2 - duck.y), splashY = duck.y - steerDirection * 0.1; createSplash(splashX, splashY, BOT_SPLASH_STRENGTH); actionTaken = true; } } if (actionTaken) { duck.lastSplashTime = now; } } } duck.vx += fluid.sampleField(duck.x, duck.y, 0, fluid.u) * FLUID_FORCE_FACTOR; duck.vy += fluid.sampleField(duck.x, duck.y, 1, fluid.v) * FLUID_FORCE_FACTOR; duck.vx *= DAMPING_FACTOR; duck.vy *= DAMPING_FACTOR; duck.x += duck.vx * DT; duck.y += duck.vy * DT; if (duck.y < RIVERBANK_MARGIN) { duck.y = RIVERBANK_MARGIN; duck.vy *= -0.5; } if (duck.y > SIM_HEIGHT - RIVERBANK_MARGIN) { duck.y = SIM_HEIGHT - RIVERBANK_MARGIN; duck.vy *= -0.5; } }); obstacles = obstacles.filter(obs => obs.x < SIM_WIDTH * 1.1); obstacles.forEach(obs => { obs.vx += fluid.sampleField(obs.x, obs.y, 0, fluid.u) * OBSTACLE_FLUID_FORCE_FACTOR; obs.vy += fluid.sampleField(obs.x, obs.y, 1, fluid.v) * OBSTACLE_FLUID_FORCE_FACTOR; obs.vx *= 0.99; obs.vy *= 0.99; obs.x += obs.vx * DT; obs.y += obs.vy * DT; }); for (const duck of ducks) for (const obs of obstacles) if (Math.hypot(duck.x - obs.x, duck.y - obs.y) < (DUCK_SIZE / C_SCALE + obs.width / 2)) { if (obs.type === ObstacleType.Log) { duck.stunned = STUN_DURATION; duck.vx *= -0.5; } else if (obs.type === ObstacleType.Garbage) { duck.x = duck.startX; duck.y = duck.startY; duck.vx = 0; duck.vy = 0; duck.stunned = STUN_DURATION; } } const winnerDuck = ducks.find(d => d.x / SIM_WIDTH >= FINISH_LINE_X); if (winnerDuck) { handleGameEnd(winnerDuck.name); return; } draw(); animationFrameId = requestAnimationFrame(update); }
+            function handleGameEnd(winnerName) { isGameOver = true; cancelAnimationFrame(animationFrameId); winner = winnerName; showRandomFact(); const levelTime = performance.now() - levelStartTime; totalTimeMs += levelTime; if (winnerName === 'You' && level < MAX_LEVEL) { currentGameState = GameState.LevelComplete; updateUI(levelTime / 1000); } else if (winnerName === 'You' && level === MAX_LEVEL) { currentGameState = GameState.FinalWin; finalCompletionTimeMs = Math.round(totalTimeMs); finalTimeDisplay.textContent = formatTime(finalCompletionTimeMs); updateUI(); } else { currentGameState = GameState.GameOver; updateUI(totalTimeMs / 1000); } }
+            function updateUI(finalTimeInSeconds = 0) { Object.values(screens).forEach(s => s.classList.add('hidden')); const mainOverlay = document.getElementById('main-overlay'); mainOverlay.style.backdropFilter = 'blur(4px)'; switch (currentGameState) { case GameState.StartScreen: screens.start.classList.remove('hidden'); mainOverlay.style.backdropFilter = 'blur(8px)'; break; case GameState.LevelComplete: screens.levelComplete.classList.remove('hidden'); levelCompleteTitle.textContent = t('levelComplete', level); const nextLevel = level + 1; levelCompleteDesc.textContent = t('nextLevelDesc', nextLevel); nextLevelButton.textContent = t('nextLevelButton', nextLevel); break; case GameState.GameOver: screens.gameOver.classList.remove('hidden'); gameOverText.textContent = winner?.startsWith('Duck') ? t('gameOverBotWon', winner) : t('gameOverLost'); break; case GameState.FinalWin: screens.finalWin.classList.remove('hidden'); break; case GameState.Playing: screens.canvasContainer.classList.remove('hidden'); mainOverlay.style.backdropFilter = 'none'; const config = LEVEL_CONFIGS[level - 1]; levelDisplay.textContent = `Level ${config.level}: ${config.name}`; break; } }
+            
+            function startGameFlow() { currentGameState = GameState.Playing; updateUI(); initializeGame(); lastFrameTime = performance.now(); if(animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(update); }
+            function startGame() { level = 1; totalTimeMs = 0; const factsForLang = facts[currentLang] || facts.en; availableFacts = [...(factsForLang || [])]; startGameFlow(); };
+            const restartGame = () => { startGame(); };
             const startNextLevel = () => { level++; startGameFlow(); };
 
-            // --- Event Listeners ---
+            // ZMIANA 2: Ulepszona funkcja do wykrywania urządzeń mobilnych
+            function isMobileDevice() {
+                const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                return hasTouch && isMobileUA;
+            }
+            // ZMIANA 3: Funkcja do ustawiania języka
+            function setInitialLanguage() {
+                const supportedLangs = ['en', 'pl', 'de', 'cs'];
+                const browserLang = navigator.language.split('-')[0];
+                currentLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+                document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`.lang-btn[data-lang="${currentLang}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+
             startButton.addEventListener('click', startGame);
             restartButton.addEventListener('click', restartGame);
             nextLevelButton.addEventListener('click', startNextLevel);
-            closeAndSaveButton.addEventListener('click', () => { /* ... */ });
-            canvas.addEventListener('click', (e) => { /* ... */ });
-            
-            document.querySelectorAll('.lang-btn').forEach(button => { /* ... */ });
+            closeAndSaveButton.addEventListener('click', () => { window.parent.postMessage({ type: 'gameTime', completion_time_ms: finalCompletionTimeMs, language: currentLang }, '*'); });
+            canvas.addEventListener('click', (e) => { 
+                if (currentGameState !== GameState.Playing) return; 
+                const now = performance.now();
+                if (now - lastSplashTime < SPLASH_COOLDOWN_MS) { return; }
+                lastSplashTime = now; 
+                const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height; const simX = (e.clientX - rect.left) * scaleX / C_SCALE, simY = (e.clientY - rect.top) * scaleY / C_SCALE; 
+                // ZMIANA 2: Zwiększony hitbox dla przeszkód na urządzeniach mobilnych
+                const clickedObstacleIdx = obstacles.findIndex(obs => {
+                    const radius = (obs.width / 2) * (isMobileDevice() ? OBSTACLE_TAP_RADIUS_MULTIPLIER : 1.0);
+                    return Math.hypot(simX - obs.x, simY - obs.y) < radius;
+                });
+                if (clickedObstacleIdx !== -1) { obstacles.splice(clickedObstacleIdx, 1); return; } 
+                createSplash(simX, simY, SPLASH_STRENGTH); 
+            });
+            document.querySelectorAll('.lang-btn').forEach(button => { button.addEventListener('click', () => { currentLang = button.dataset.lang; document.querySelector('.lang-btn.active').classList.remove('active'); button.classList.add('active'); updateAllTexts(); }); });
             document.getElementById('learn-button').addEventListener('click', () => learnModal.classList.remove('hidden'));
             document.getElementById('close-learn-modal').addEventListener('click', () => learnModal.classList.add('hidden'));
             closeFactModal.addEventListener('click', () => factModal.classList.add('hidden'));
+            rankingButton.addEventListener('click', fetchAndShowLeaderboard);
+            closeLeaderboardModal.addEventListener('click', () => leaderboardModal.classList.add('hidden'));
+            closeRotationToast.addEventListener('click', () => rotationSuggestionToast.classList.add('hidden'));
             
-            // --- Initial Setup ---
-            canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
-            gameUi.style.width = `${CANVAS_WIDTH}px`;
-            document.querySelector('.lang-btn[data-lang="en"]').classList.add('active');
+            let resizeTimeout;
+            window.addEventListener('resize', () => { 
+                clearTimeout(resizeTimeout); 
+                resizeTimeout = setTimeout(() => { 
+                    if(currentGameState === GameState.Playing) { initializeGame(); } 
+                }, 250); 
+            });
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            userNickname = urlParams.get('nickname') || 'Guest';
+            
+            setInitialLanguage(); // ZMIANA 3
             updateAllTexts();
-            updateUI(); // This call is now correctly inside the DOMContentLoaded listener
+            updateUI();
         });
     </script>
 </body>
