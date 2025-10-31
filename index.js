@@ -1,9 +1,7 @@
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// START: API_URLS LIST:
-const API_URL = 'https://flowapp-api.maciej-tadej.workers.dev/api/duck-race';
-// END: API_URLS LIST
+const API_BASE_URL = 'https://flowapp-api.maciej-tadej.workers.dev';
 
 const translations = {
   en: {
@@ -586,19 +584,76 @@ const App = () => {
 
 // START: Sending player data to db
 
-  const sendGameTimeToServer = async (timeInMs, language) => {
-    if (!userNickname) { console.error("Cannot send time without a user nickname."); return; }
-    console.log(`Sending data to server: Nickname: ${userNickname}, Time: ${timeInMs}ms, Language: ${language}`);
+// START: Sending player data to db
+  const sendGameResultToServer = async (endpoint, data) => {
+    if (!userNickname) {
+      console.error("Cannot send result without a user nickname.");
+      return;
+    }
+    
+    // Upewniamy się, że nazwa gracza jest w danych
+    const payload = {
+      ...data,
+      player_name: userNickname,
+    };
+    
+    console.log(`Sending data to ${endpoint}:`, payload);
+    
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_name: userNickname, completion_time_ms: timeInMs, language: language }),
+        body: JSON.stringify(payload),
       });
-      if (response.ok) { console.log("Data successfully sent to the server!"); } 
-      else { const errorText = await response.text(); console.error("Failed to send data to the server:", errorText); }
-    } catch (error) { console.error("Error sending data to the server:", error); }
+      if (response.ok) {
+        console.log("Data successfully sent to the server!");
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to send data to the server:", errorText);
+      }
+    } catch (error) {
+      console.error("Error sending data to the server:", error);
+    }
   };
+  // END: Sending player data to db
+
+  useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
+  useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
+  useEffect(() => { const storedNickname = localStorage.getItem('userNickname'); if (storedNickname) setUserNickname(storedNickname); const storedScores = localStorage.getItem('flowapp_scores'); if (storedScores) setScores(JSON.parse(storedScores)); }, []);
+  
+  useEffect(() => {
+    const handleGameMessage = (event) => {
+      if (!event.data || !event.data.type) return;
+
+      // Obsługa starych gier zwracających punkty
+      if (event.data.type === 'gameScore') {
+        const { station, score } = event.data;
+        if (station && typeof score === 'number') {
+          setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
+          setGameModal({ isOpen: false, url: null });
+        }
+      } 
+      // Obsługa Duck Race (stary format)
+      else if (event.data.type === 'gameTime') {
+        const { completion_time_ms, language } = event.data;
+        if (typeof completion_time_ms === 'number') {
+          const gameData = { completion_time_ms, language };
+          sendGameResultToServer('/api/duck-race', gameData);
+          setGameModal({ isOpen: false, url: null });
+        }
+      }
+      // NOWOŚĆ: Obsługa nowego, uniwersalnego formatu
+      else if (event.data.type === 'saveResult') {
+        const { endpoint, data } = event.data.payload;
+        if (endpoint && data) {
+          sendGameResultToServer(endpoint, data);
+          setGameModal({ isOpen: false, url: null });
+        }
+      }
+    };
+    window.addEventListener('message', handleGameMessage);
+    return () => window.removeEventListener('message', handleGameMessage);
+  }, [userNickname]); // Ważne: userNickname musi być w tablicy zależności
   // END: Sending player data to db
 
   useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
