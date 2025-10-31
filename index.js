@@ -479,8 +479,8 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
         ),
         React.createElement('div', { className: 'sponsor-bar' },
             React.createElement('div', { className: 'sponsor-logos-container' },
-                React.createElement('img', { src: './assets/sponsor_logo_1.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
-                React.createElement('img', { src: './assets/sponsor_logo_2.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
+                React.createElement('img', { src: '/assets/sponsor_logo_1.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
+                React.createElement('img', { src: '/assets/sponsor_logo_2.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
             )
         )
     );
