@@ -1,8 +1,9 @@
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// !!! POPRAWKA 1: Zaktualizowano URL do nowego endpointu API !!!
+// START: API_URLS LIST:
 const API_URL = 'https://flowapp-api.maciej-tadej.workers.dev/api/duck-race';
+// END: API_URLS LIST
 
 const translations = {
   en: {
@@ -14,15 +15,15 @@ const translations = {
     station1Title: "Station I: Falling Drop",
     station1Text: "Every journey of water starts with a single drop of rain…\nHigh in the clouds, tiny drops come together until they grow heavy and fall toward the earth.\nBut not every drop has an easy path. Some are caught by birds, leaves, or clouds before they ever touch the Earth.\nYour mission begins up here — guide the drop safely to the ground, and discover how small changes in the sky can lead to big changes below.",
     station2Title: "Station II: Water Flow Simulation",
-    station2Text: "Water can flow smoothly (laminar) or become chaotic (turbulent). This transition is key in river engineering. In the Reynolds Challenge, you'll experiment with fluid dynamics to understand these forces. Play the game to see it in action!",
+    station2Text: "And when just enough drops fall down, they form a river, or a lake, or a pond, maybe even the ocean. But what’s the difference between all of them?\nHere’s a hint: one of them likes to move… a lot. Yep, you guessed it — the river! Unlike lakes or ponds, rivers are constantly flowing. And guess what? This flow has a superpower… it’s called velocity!\nBasically, velocity is just a fancy word for the speed at which the water is flowing, but let’s see how it works.",
     station3Title: "Station III: River Vortex",
-    station3Text: "Vortices are swirling motions in water, often seen behind bridge piers or at river bends. They play a crucial role in mixing nutrients and sediments but can also pose navigational challenges. In this game, navigate the powerful river vortex and test your skills!",
+    station3Text: "Since the water in the rivers is constantly flowing, we humans found the way to use its power to run our homes, factories and even whole cities.This energy is called hydropower. When water flows or falls, it can spin big turbines that make electricity — just like a waterwheel, but much stronger!\nThe faster the water moves, the more energy it can create. Now imagine your ship runs on hydropower too. Use the river’s energy wisely and see if you can outsmart your opponent!",
     station4Title: "Station IV: Hex Connect",
-    station4Text: "Connect the hexagonal pipes to guide the water from the source to the destination. A puzzle of logic and flow!",
+    station4Text: "Another magic of rivers is called meandering — it happens when flowing water meets rocks, roots, or different kinds of soil.\nThese gentle twists and turns make rivers change their direction, speed, and shape as they travel through the landscape.\n\nNow it’s your turn! Can you guide the water from its source to the end of the river system?\nRemember — the fastest path isn’t always the safest one. Some routes may cause floods, while others might lead to dead ends.\n\nEach hexagon represents a river segment with its own flow speed and direction. Click to rotate them and find the best route — a river that flows smoothly and steadily all the way through!",
     station5Title: "Station V: Ecosystem Impact",
-    station5Text: "The river's ecosystem is a delicate balance. Even fun activities can have an impact. Race your duck down the river to see how objects and flow interact! Play the game to learn more.",
+    station5Text: "As a river meanders, slower sections can form small ponds or calm areas that become important habitats for aquatic life. Fish, ducks, insects, and plants all depend on these waters to survive and thrive.\n\nNow it’s your turn to help the river’s little travelers! Guide the ducks along their path, avoid obstacles, and see how a healthy river keeps everyone happy and safe.",
     station6Title: "Station VI: Bridge over the Mandau",
-    station6Text: "You are standing on the Bridge over the Mandau. This river winds through three countries and holds many stories. Unfortunately, it also holds some trash. Your first task is to help clean this section of the river. Play the game to make a difference!",
+    station6Text: "You’ve seen how rivers twist, flow, and create homes for life of all kinds. But rivers don’t just shape the land — they also carry everything we leave behind. Sometimes, that includes things that don’t belong in nature at all.\nAnd this is where you come in. The river has given life, transport, and safety — now it needs a guardian. Will you take up the role of Guardian of the River and protect it from pollution?",
     slider1Label: "How far is the source of the water from city?",
     simulationTitle: "Simulation Results",
     nextStationButton: (station) => `Next Station ${station}`,
@@ -51,15 +52,15 @@ const translations = {
     station1Title: "Stacja I: Spadająca Kropla",
     station1Text: "Każda podróż wody zaczyna się od jednej kropli deszczu…\nWysoko w chmurach małe kropelki łączą się, aż stają się ciężkie i spadają na ziemię.\nAle nie każda kropla ma łatwą drogę. Niektóre są łapane przez ptaki, liście lub chmury, zanim dotkną Ziemi.\nTwoja misja zaczyna się tutaj — poprowadź kroplę bezpiecznie na ziemię i odkryj, jak małe zmiany na niebie mogą prowadzić do wielkich zmian na dole.",
     station2Title: "Stacja II: Symulacja przepływu wody",
-    station2Text: "Woda może płynąć spokojnie (laminarnie) lub chaotycznie (turbulentnie). Ta zmiana jest kluczowa w inżynierii rzecznej. W Wyzwaniu Reynoldsa będziesz eksperymentować z dynamiką płynów, aby zrozumieć te siły. Zagraj w grę, aby zobaczyć to w akcji!",
+    station2Text: "A kiedy spadnie wystarczająco dużo kropel, tworzą rzekę, jezioro, staw, a może nawet ocean. Ale jaka jest między nimi różnica?\nOto podpowiedź: jedno z nich bardzo lubi się ruszać… Tak, zgadłeś — rzeka! W przeciwieństwie do jezior czy stawów, rzeki nieustannie płyną. I wiesz co? Ten przepływ ma supermoc… nazywa się prędkością!\nZasadniczo, prędkość to tylko wymyślne słowo na szybkość, z jaką płynie woda, ale zobaczmy, jak to działa.",
     station3Title: "Stacja III: Wir Rzeczny",
-    station3Text: "Wiry to kręcące się ruchy w wodzie, często widoczne za filarami mostów lub na zakrętach rzek. Odgrywają kluczową rolę w mieszaniu składników odżywczych i osadów, ale mogą również stanowić wyzwanie dla nawigacji. W tej grze zmierz się z potężnym wirem rzecznym i przetestuj swoje umiejętności!",
+    station3Text: "Ponieważ woda w rzekach nieustannie płynie, my, ludzie, znaleźliśmy sposób, aby wykorzystać jej moc do zasilania naszych domów, fabryk, a nawet całych miast. Ta energia nazywa się hydroenergią. Kiedy woda płynie lub spada, może obracać wielkie turbiny, które wytwarzają prąd — zupełnie jak koło wodne, ale o wiele potężniejsze!\nIm szybciej porusza się woda, tym więcej energii może wytworzyć. A teraz wyobraź sobie, że twój statek również działa na hydroenergię. Używaj energii rzeki mądrze i sprawdź, czy potrafisz przechytrzyć przeciwnika!",
     station4Title: "Stacja IV: Hex Connect",
-    station4Text: "Połącz sześciokątne rury, aby poprowadzić wodę od źródła do celu. Logiczna łamigłówka przepływu!",
+    station4Text: "Inną magią rzek jest meandrowanie — dzieje się tak, gdy płynąca woda napotyka skały, korzenie lub różne rodzaje gleby.\nTe łagodne zakręty sprawiają, że rzeki zmieniają swój kierunek, prędkość i kształt podczas podróży przez krajobraz.\n\nTeraz twoja kolej! Czy potrafisz poprowadzić wodę od źródła do końca systemu rzecznego?\nPamiętaj — najszybsza droga nie zawsze jest najbezpieczniejsza. Niektóre trasy mogą powodować powodzie, a inne mogą prowadzić do ślepych zaułków.\n\nKażdy sześciokąt reprezentuje odcinek rzeki z własną prędkością i kierunkiem przepływu. Klikaj, aby je obracać i znaleźć najlepszą trasę — rzekę, która płynie gładko i stabilnie na całej długości!",
     station5Title: "Stacja V: Wpływ na ekosystem",
-    station5Text: "Ekosystem rzeki to delikatna równowaga. Nawet zabawa może mieć na niego wpływ. Puść swoją kaczkę z prądem rzeki, aby zobaczyć, jak obiekty i przepływ na siebie oddziałują! Zagraj w grę, aby dowiedzieć się więcej.",
+    station5Text: "Gdy rzeka meandruje, w wolniejszych odcinkach mogą tworzyć się małe stawy lub spokojne obszary, które stają się ważnymi siedliskami dla życia wodnego. Ryby, kaczki, owady i rośliny zależą od tych wód, aby przetrwać i rozwijać się.\n\nTeraz Twoja kolej, aby pomóc małym podróżnikom rzeki! Poprowadź kaczki wzdłuż ich ścieżki, omijaj przeszkody i zobacz, jak zdrowa rzeka sprawia, że wszyscy są szczęśliwi i bezpieczni.",
     station6Title: "Stacja VI: Most na Mandau",
-    station6Text: "Stoisz na moście nad Mandau. Ta rzeka wije się przez trzy kraje i kryje w sobie wiele historii. Niestety, kryje też trochę śmieci. Twoim pierwszym úkolem jest pomoc w oczyszczeniu tego odcinka rzeki. Zagraj w grę, aby coś zmienić!",
+    station6Text: "Widziałeś, jak rzeki wiją się, płyną i tworzą domy dla wszelkiego rodzaju życia. Ale rzeki nie tylko kształtują ląd — niosą ze sobą również wszystko, co po sobie zostawiamy. Czasami są to rzeczy, które w ogóle nie należą do natury.\nI tu wkraczasz ty. Rzeka dała życie, transport i bezpieczeństwo — teraz potrzebuje strażnika. Czy podejmiesz się roli Strażnika Rzeki i ochronisz ją przed zanieczyszczeniem?",
     slider1Label: "Jak daleko od miasta znajduje się źródło wody?",
     simulationTitle: "Wyniki symulacji",
     nextStationButton: (station) => `Następna stacja ${station}`,
@@ -88,15 +89,15 @@ const translations = {
     station1Title: "Station I: Fallender Tropfen",
     station1Text: "Jede Reise des Wassers beginnt mit einem einzigen Regentropfen…\nHoch in den Wolken verbinden sich winzige Tropfen, bis sie schwer werden und zur Erde fallen.\nAber nicht jeder Tropfen hat einen leichten Weg. Einige werden von Vögeln, Blättern oder Wolken aufgefangen, bevor sie die Erde berühren.\nDeine Mission beginnt hier oben – führe den Tropfen sicher zu Boden und entdecke, wie kleine Veränderungen am Himmel zu großen Veränderungen unten führen können.",
     station2Title: "Station II: Wasserflusssimulation",
-    station2Text: "Wasser kann ruhig (laminar) oder chaotisch (turbulent) fließen. Dieser Übergang ist in der Flusstechnik entscheidend. In der Reynolds-Herausforderung experimentieren Sie mit der Fluiddynamik, um diese Kräfte zu verstehen. Spielen Sie das Spiel, um es in Aktion zu sehen!",
+    station2Text: "Und wenn genug Tropfen herunterfallen, bilden sie einen Fluss, einen See, einen Teich oder vielleicht sogar das Meer. Aber was ist der Unterschied zwischen ihnen allen?\nHier ist ein Hinweis: einer von ihnen bewegt sich gerne… sehr. Ja, du hast es erraten – der Fluss! Im Gegensatz zu Seen oder Teichen fließen Flüsse ständig. Und rate mal? Dieser Fluss hat eine Superkraft… sie heißt Geschwindigkeit!\nIm Grunde ist Geschwindigkeit nur ein schickes Wort für die Geschwindigkeit, mit der das Wasser fließt, aber sehen wir uns an, wie es funktioniert.",
     station3Title: "Station III: Flusswirbel",
-    station3Text: "Wirbel sind kreisende Bewegungen im Wasser, die oft hinter Brückenpfeilern oder in Flussbiegungen zu sehen sind. Sie spielen eine entscheidende Rolle bei der Vermischung von Nährstoffen und Sedimenten, können aber auch eine Herausforderung für die Schifffahrt darstellen. Navigieren Sie in diesem Spiel durch den mächtigen Flusswirbel und testen Sie Ihre Fähigkeiten!",
+    station3Text: "Da das Wasser in den Flüssen ständig fließt, haben wir Menschen einen Weg gefunden, seine Kraft zu nutzen, um unsere Häuser, Fabriken und sogar ganze Städte zu betreiben. Diese Energie wird Wasserkraft genannt. Wenn Wasser fließt oder fällt, kann es große Turbinen antreiben, die Strom erzeugen – genau wie ein Wasserrad, nur viel stärker!\nJe schneller sich das Wasser bewegt, desto mehr Energie kann es erzeugen. Stell dir nun vor, auch dein Schiff wird mit Wasserkraft angetrieben. Nutze die Energie des Flusses weise und sieh, ob du deinen Gegner überlisten kannst!",
     station4Title: "Station IV: Hex Connect",
-    station4Text: "Verbinde die sechseckigen Rohre, um das Wasser von der Quelle zum Ziel zu leiten. Ein Logik- und Fließrätsel!",
+    station4Text: "Eine weitere Magie der Flüsse nennt sich Mäandrieren – es passiert, wenn fließendes Wasser auf Felsen, Wurzeln oder verschiedene Bodenarten trifft.\nDiese sanften Kurven und Windungen lassen Flüsse ihre Richtung, Geschwindigkeit und Form ändern, während sie durch die Landschaft reisen.\n\nJetzt bist du an der Reihe! Kannst du das Wasser von seiner Quelle bis zum Ende des Flusssystems leiten?\nDenk daran – der schnellste Weg ist nicht immer der sicherste. Einige Routen können Überschwemmungen verursachen, während andere in Sackgassen enden können.\n\nJedes Sechseck stellt einen Flussabschnitt mit eigener Fließgeschwindigkeit und -richtung dar. Klicke, um sie zu drehen und den besten Weg zu finden – einen Fluss, der auf ganzer Länge reibungslos und stetig fließt!",
     station5Title: "Station V: Auswirkungen auf das Ökosystem",
-    station5Text: "Das Ökosystem des Flusses ist ein empfindliches Gleichgewicht. Selbst lustige Aktivitäten können Auswirkungen haben. Lass deine Ente den Fluss hinunterrasen, um zu sehen, wie Objekte und Strömung interagieren! Spiele das Spiel, um mehr zu erfahren.",
+    station5Text: "Wenn ein Fluss mäandriert, können in langsameren Abschnitten kleine Teiche oder ruhige Bereiche entstehen, die zu wichtigen Lebensräumen für Wasserlebewesen werden. Fische, Enten, Insekten und Pflanzen sind alle auf diese Gewässer angewiesen, um zu überleben und zu gedeihen.\n\nJetzt bist du an der Reihe, den kleinen Reisenden des Flusses zu helfen! Führe die Enten auf ihrem Weg, weiche Hindernissen aus und sieh, wie ein gesunder Fluss alle glücklich und sicher macht.",
     station6Title: "Station VI: Brücke über die Mandau",
-    station6Text: "Sie stehen auf der Brücke über die Mandau. Dieser Fluss schlängelt sich durch drei Länder und birgt viele Geschichten. Leider birgt er auch etwas Müll. Ihre erste Aufgabe ist es, bei der Reinigung dieses Flussabschnitts zu helfen. Spielen Sie das Spiel, um etwas zu bewirken!",
+    station6Text: "Du hast gesehen, wie Flüsse sich winden, fließen und Lebensräume für alle Arten von Lebewesen schaffen. Aber Flüsse formen nicht nur das Land – sie tragen auch alles mit sich, was wir zurücklassen. Manchmal gehören dazu Dinge, die überhaupt nicht in die Natur gehören.\nUnd hier kommst du ins Spiel. Der Fluss hat Leben, Transport und Sicherheit gegeben – jetzt braucht er einen Wächter. Wirst du die Rolle des Wächters des Flusses übernehmen und ihn vor Verschmutzung schützen?",
     slider1Label: "Wie weit ist die Wasserquelle von der Stadt entfernt?",
     simulationTitle: "Simulationsergebnisse",
     nextStationButton: (station) => `Nächste Station ${station}`,
@@ -125,15 +126,15 @@ const translations = {
     station1Title: "Stanice I: Padající kapka",
     station1Text: "Každá cesta vody začíná jedinou kapkou deště…\nVysoko v oblacích se malé kapky spojují, dokud neztěžknou a nespadnou na zem.\nAle ne každá kapka má snadnou cestu. Některé jsou zachyceny ptáky, listy nebo mraky, než se vůbec dotknou Země.\nTvá mise začíná tady nahoře – veď kapku bezpečně na zem a objev, jak malé změny na obloze mohou vést k velkým změnám dole.",
     station2Title: "Stanice II: Simulace proudění vody",
-    station2Text: "Voda může proudit hladce (laminárně) nebo se stát chaotickou (turbulentní). Tento přechod je klíčový v říčním inženýrství. V Reynoldsově výzvě budete experimentovat s dynamikou kapalin, abyste pochopili tyto síly. Zahrajte si hru a uvidíte to v akci!",
+    station2Text: "A když spadne dostatek kapek, vytvoří řeku, jezero, rybník nebo možná i oceán. Ale jaký je mezi nimi rozdíl?\nTady je nápověda: jedno z nich se rádo hýbe… hodně. Ano, uhodl jsi – řeka! Na rozdíl od jezer nebo rybníků řeky neustále tečou. A hádej co? Tento proud má superschopnost… říká se jí rychlost!\nV podstatě je rychlost jen nóbl slovo pro rychlost, jakou voda teče, ale podívejme se, jak to funguje.",
     station3Title: "Stanice III: Říční vír",
-    station3Text: "Víry jsou krouživé pohyby ve vodě, často viditelné za mostními pilíři nebo v ohybech řek. Hrají klíčovou roli při míchání živin a sedimentů, ale mohou také představovat navigační výzvu. V této hře proplujte mocným říčním vírem a otestujte své dovednosti!",
+    station3Text: "Jelikož voda v řekách neustále proudí, my lidé jsme našli způsob, jak její sílu využít k napájení našich domovů, továren a dokonce celých měst. Tato energie se nazývá hydroenergie. Když voda proudí nebo padá, může roztáčet velké turbíny, které vyrábějí elektřinu – stejně jako vodní kolo, ale mnohem silnější!\nČím rychleji se voda pohybuje, tím více energie může vytvořit. Teď si představ, že i tvoje loď jezdí na hydroenergii. Využívej energii řeky moudře a zjisti, jestli dokážeš přechytračit svého soupeře!",
     station4Title: "Stanice IV: Hex Connect",
-    station4Text: "Spojte šestiúhelníkové trubky a veďte vodu od zdroje k cíli. Logická hádanka o proudění!",
+    station4Text: "Další kouzlo řek se nazývá meandrování — dochází k němu, když tekoucí voda narazí na skály, kořeny nebo různé druhy půdy.\nTyto jemné zákruty způsobují, že řeky mění svůj směr, rychlost a tvar, jak putují krajinou.\n\nNyní jsi na řadě ty! Dokážeš vést vodu od jejího zdroje až na konec říčního systému?\nPamatuj — nejrychlejší cesta není vždy ta nejbezpečnější. Některé trasy mohou způsobit záplavy, zatímco jiné mohou vést do slepých uliček.\n\nKaždý šestiúhelník představuje úsek řeky s vlastní rychlostí a směrem toku. Klikáním je otáčej a najdi nejlepší cestu — řeku, která teče plynule a stabilně po celé délce!",
     station5Title: "Stanice V: Vliv na ekosystém",
-    station5Text: "Ekosystém řeky je křehká rovnováha. I zábavné aktivity mohou mít dopad. Pusťte svou kachnu po řece, abyste viděli, jak objekty a proudění interagují! Zahrajte si hru a dozvíte se více.",
+    station5Text: "Jak řeka meandruje, v pomalejších úsecích se mohou tvořit malá jezírka nebo klidné oblasti, které se stávají důležitými stanovišti pro vodní život. Ryby, kachny, hmyz a rostliny jsou všechny závislé na těchto vodách, aby přežily a prospívaly.\n\nNyní je řada na tobě, abys pomohl malým cestovatelům řeky! Veď kachny po jejich cestě, vyhýbej se překážkám a podívej se, jak zdravá řeka udržuje všechny šťastné a v bezpečí.",
     station6Title: "Stanice VI: Most přes Mandavu",
-    station6Text: "Stojíte na mostě přes Mandavu. Tato řeka se vine třemi zeměmi a skrývá mnoho příběhů. Bohužel také skrývá nějaké odpadky. Vaším prvním úkolem je pomoci vyčistit tento úsek řeky. Zahrajte si hru, abyste něco změnili!",
+    station6Text: "Viděl jsi, jak se řeky kroutí, tečou a vytvářejí domovy pro život všeho druhu. Ale řeky nejen formují krajinu – nesou s sebou také vše, co zanecháme. Někdy to zahrnuje věci, které do přírody vůbec nepatří.\nA tady přicházíš na řadu ty. Řeka dala život, dopravu a bezpečí – nyní potřebuje strážce. Přijmeš roli Strážce řeky a ochráníš ji před znečištěním?",
     slider1Label: "Jak daleko je zdroj vody od města?",
     simulationTitle: "Výsledky simulace",
     nextStationButton: (station) => `Další stanice ${station}`,
@@ -545,10 +546,6 @@ const MainView = ({ currentStation, onNextStation, scores, t, onPlayGame }) => {
                 scores[currentStation] !== undefined && React.createElement('p', { className: 'score-text' }, `${t('yourScore')} ${scores[currentStation]}`)
             )
         ),
-        currentStation !== 1 && React.createElement('section', { className: 'simulation-results-container', 'aria-labelledby': 'simulation-results-heading' },
-            React.createElement('h3', { className: 'simulation-title', id: 'simulation-results-heading' }, t('simulationTitle')),
-            React.createElement('div', { className: 'gif-image', style: { backgroundColor: '#f0f4f7' }, role: 'img', 'aria-label': 'Brak symulacji dla tej stacji' })
-        ),
         React.createElement('button', { className: 'navigation-button', onClick: onNextStation }, currentStation < 6 ? t('nextStationButton', currentStation + 1) : t('viewSummaryButton'))
     );
 };
@@ -586,7 +583,9 @@ const App = () => {
   const touchStartX = useRef(0), touchStartY = useRef(0), touchEndX = useRef(0), touchEndY = useRef(0);
 
   const t = (key, ...args) => { const value = translations[lang][key] || translations['en'][key]; return typeof value === 'function' ? value(...args) : value || key; };
-  
+
+// START: Sending player data to db
+
   const sendGameTimeToServer = async (timeInMs, language) => {
     if (!userNickname) { console.error("Cannot send time without a user nickname."); return; }
     console.log(`Sending data to server: Nickname: ${userNickname}, Time: ${timeInMs}ms, Language: ${language}`);
@@ -600,6 +599,7 @@ const App = () => {
       else { const errorText = await response.text(); console.error("Failed to send data to the server:", errorText); }
     } catch (error) { console.error("Error sending data to the server:", error); }
   };
+  // END: Sending player data to db
 
   useEffect(() => { localStorage.setItem('flowapp_lang', lang); }, [lang]);
   useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
