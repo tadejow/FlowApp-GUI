@@ -479,8 +479,8 @@ const SplashScreen = ({ onStart, lang, setLang, t }) => {
         ),
         React.createElement('div', { className: 'sponsor-bar' },
             React.createElement('div', { className: 'sponsor-logos-container' },
-                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/6e9aa9e0-5ae5-4e60-8852-b5e989e44088.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
-                React.createElement('img', { src: 'https://raw.githubusercontent.com/tadejow/FlowApp-GUI/refs/heads/FlowApp_MK/interreg.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
+                React.createElement('img', { src: './assets/sponsor_logo_1.png', alt: 'Sponsor Logo 1', className: 'sponsor-logo' }),
+                React.createElement('img', { src: './assets/sponsor_logo_2.jpg', alt: 'Sponsor Logo 2', className: 'sponsor-logo' })
             )
         )
     );
