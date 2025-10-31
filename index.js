@@ -1,3 +1,4 @@
+// Imports
 import React, { useState, useEffect, StrictMode, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
