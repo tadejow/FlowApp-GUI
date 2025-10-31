@@ -211,14 +211,26 @@
                     const response = await fetch(`https://flowapp-api.maciej-tadej.workers.dev/api/duck-race?playerName=${encodeURIComponent(userNickname)}`);
                     if (!response.ok) throw new Error('Network response was not ok');
                     const data = await response.json();
-                    const uniqueTopScores = [];
-                    const processedPlayers = new Set();
-                    if(data.top10) { for (const entry of data.top10) { if (!processedPlayers.has(entry.player_name)) { uniqueTopScores.push(entry); processedPlayers.add(entry.player_name); } } }
+                    
+                    // ZMIANA 1: Zmieniamy `uniqueTopScores` na prostsze `topScores`, bo API już zwraca unikalne wyniki.
+                    const topScores = data.top10 || [];
+
                     let html = `<table class="w-full text-left border-collapse"><thead><tr class="border-b border-gray-600"><th class="p-2">${t('leaderboard.rank')}</th><th class="p-2">${t('leaderboard.player')}</th><th class="p-2 text-right">${t('leaderboard.time')}</th></tr></thead><tbody>`;
-                    uniqueTopScores.forEach((entry, index) => { const isCurrentUser = entry.player_name === userNickname; html += `<tr class="${isCurrentUser ? 'text-yellow-300 font-bold' : ''} border-b border-gray-700/50"><td class="p-2">${index + 1}.</td><td class="p-2">${entry.player_name}</td><td class="p-2 text-right font-mono">${formatLeaderboardTime(entry.completion_time_ms)}</td></tr>`; });
+                    
+                    topScores.forEach((entry, index) => {
+                        const isCurrentUser = entry.player_name === userNickname;
+                        // ZMIANA 2: Odczytujemy pole `best_time` zamiast `completion_time_ms`
+                        html += `<tr class="${isCurrentUser ? 'text-yellow-300 font-bold' : ''} border-b border-gray-700/50"><td class="p-2">${index + 1}.</td><td class="p-2">${entry.player_name}</td><td class="p-2 text-right font-mono">${formatLeaderboardTime(entry.best_time)}</td></tr>`;
+                    });
+
                     html += '</tbody></table>';
-                    const isUserInTopList = uniqueTopScores.some(e => e.player_name === userNickname && e.completion_time_ms === data.userRank.time);
-                    if (data.userRank && !isUserInTopList) { html += `<div class="mt-6 text-center border-t border-gray-600 pt-4"><p class="text-lg">${t('leaderboard.yourBest')}</p><p class="text-yellow-300 font-bold text-xl">${data.userRank.rank}. ${userNickname} - ${formatLeaderboardTime(data.userRank.time)}s</p></div>`; }
+                    
+                    // ZMIANA 3: Poprawiamy logikę sprawdzania, czy użytkownik jest już na liście top.
+                    const isUserInTopList = topScores.some(e => e.player_name === userNickname && e.best_time === data.userRank.time);
+
+                    if (data.userRank && !isUserInTopList) {
+                        html += `<div class="mt-6 text-center border-t border-gray-600 pt-4"><p class="text-lg">${t('leaderboard.yourBest')}</p><p class="text-yellow-300 font-bold text-xl">${data.userRank.rank}. ${userNickname} - ${formatLeaderboardTime(data.userRank.time)}s</p></div>`;
+                    }
                     leaderboardContent.innerHTML = html;
                 } catch (error) { console.error("Failed to fetch leaderboard:", error); leaderboardContent.innerHTML = `<p class="text-center text-red-400">${t('leaderboard.error')}</p>`; }
             }
