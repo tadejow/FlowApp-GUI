@@ -645,15 +645,16 @@ const App = () => {
       //}
 
       if (msg.type === 'gameTime') {
-            const { completion_time_ms, language, game } = msg;
+            const { completion_time_ms, language, game } = event.data;
             if (typeof completion_time_ms === 'number') {
+              const gameData = { completion_time_ms, language };
               if (game === 'duck-race') {
-                // Duck Race – zapisz i zamknij
-                sendGameResultToServer('/api/duck-race', { completion_time_ms, language });
+                // Duck Race – zapisz i zamknij            
+                sendGameResultToServer('/api/duck-race', gameData);
                 setGameModal({ isOpen: false, url: null });
               } else if (game === 'Vortex Game') {
                 // Vortex – zapisz, ale NIE zamykaj (gracz może kliknąć "Play again")
-                sendGameResultToServer('/api/vortex-game', { completion_time_ms, language });
+                sendGameResultToServer('/api/vortex-game', gameData);
               }
             }
             return;
