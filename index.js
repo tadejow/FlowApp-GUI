@@ -651,7 +651,7 @@ const App = () => {
                 // Duck Race – zapisz i zamknij
                 sendGameResultToServer('/api/duck-race', { completion_time_ms, language });
                 setGameModal({ isOpen: false, url: null });
-              } else if (game === 'vortex') {
+              } else if (game === 'Vortex Game') {
                 // Vortex – zapisz, ale NIE zamykaj (gracz może kliknąć "Play again")
                 sendGameResultToServer('/api/vortex-game', { completion_time_ms, language });
               }
