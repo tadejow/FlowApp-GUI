@@ -239,11 +239,6 @@ function setupLevel(n){
   level=n;levelLbl.textContent='Level '+level;
   Object.assign(player,makeShip(false));
 
-  // Start kampanii tylko raz – na początku Level 1
-  if (level === 1) {
-    campaignStartTime = performance.now() / 1000; // zapamiętaj start w sekundach
-  }
-
   bullets.length=splashes.length=foams.length=hits.length=0;
   player.wake.length=0;
   enemies=[];debris=[];drops.length=0;boostExpiries.length=0;
@@ -270,7 +265,7 @@ function nextLevelOrEnd(){
     showEndScreen('Victory!','Continue');
   } else {
     // --- KONIEC KAMPANII: policz czas i wyślij wynik do aplikacji ---
-    const completionMs = Math.max(0, Math.round((gameTime - campaignStartTime) * 1000)); 
+    const completionMs = Math.round(stopCampaignAndGetTime());
     const lang = (new URLSearchParams(location.search)).get('lang') || (navigator.language || 'en').slice(0,2);
 
     // wyślij wynik do GUI (index.js ma już obsługę typu "saveResult")
