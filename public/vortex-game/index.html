@@ -276,7 +276,8 @@ function nextLevelOrEnd(){
           endpoint: '/api/vortex-game',
           data: {
             completion_time_ms: completionMs,
-            language: lang
+            language: lang,
+            closeOnSave: false
           }
         }
       }, '*');
