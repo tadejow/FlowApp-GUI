@@ -169,7 +169,7 @@ function makeShip(isEnemy=false){
     theta:isEnemy?Math.PI*0.35:0,
     vr:0,
     thrust:45,
-    hp: 100,           // <— tu ustawiasz bazowe HP (domyślnie 100)
+    hp: isEnemy ? 1 : 100,   // ← wróg ma 1 HP, gracz 100
     alive:true,
     sinking:false,
     sinkT:0,
