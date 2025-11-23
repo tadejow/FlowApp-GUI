@@ -223,8 +223,7 @@ function nextLevelOrEnd(){
     // CAMPAIGN COMPLETE — compute time & notify host
     totalCompletionTimeMs = Math.round(performance.now() - (totalStartTimeMs || performance.now()));
      try {
-      window.parent.postMessage({ type:'gameTime', completion_time_ms: totalCompletionTimeMs, playerName: userNickname, game: 'vortex' }, '*');
-    }
+      window.parent.postMessage({ type:'gameTime', completion_time_ms: totalCompletionTimeMs, playerName: userNickname, game: 'Vortex Game' }, '*');
     } catch (e) { /* ignore cross-origin */ }
     showEndScreen('Campaign complete!','Play again');
   }
