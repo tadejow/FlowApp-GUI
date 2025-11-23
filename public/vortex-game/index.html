@@ -239,6 +239,11 @@ function setupLevel(n){
   level=n;levelLbl.textContent='Level '+level;
   Object.assign(player,makeShip(false));
 
+  // Start kampanii tylko raz – na początku Level 1
+  if (level === 1) {
+    campaignStartTime = performance.now() / 1000; // zapamiętaj start w sekundach
+  }
+
   bullets.length=splashes.length=foams.length=hits.length=0;
   player.wake.length=0;
   enemies=[];debris=[];drops.length=0;boostExpiries.length=0;
@@ -261,15 +266,34 @@ function setupLevel(n){
   if(level>=2){ spawnDebrisField(10); }
 }
 function nextLevelOrEnd(){
-  if(level<3){
+  if (level < 3) {
     showEndScreen('Victory!','Continue');
-  }else{
-    // Campaign completed
-    const ms = stopCampaignAndGetTime();
-    const nice = formatMs(ms);
-    showEndScreen(`Wygrałeś! Twój czas ukończenia kampanii to ${nice}.`, 'Zagraj ponownie');
+  } else {
+    // --- KONIEC KAMPANII: policz czas i wyślij wynik do aplikacji ---
+    const completionMs = Math.max(0, Math.round((gameTime - campaignStartTime) * 1000)); 
+    const lang = (new URLSearchParams(location.search)).get('lang') || (navigator.language || 'en').slice(0,2);
+
+    // wyślij wynik do GUI (index.js ma już obsługę typu "saveResult")
+    try {
+      window.parent.postMessage({
+        type: 'saveResult',
+        payload: {
+          endpoint: '/api/vortex-game',
+          data: {
+            completion_time_ms: completionMs,
+            language: lang
+          }
+        }
+      }, '*');
+    } catch (e) {
+      console.error('postMessage failed', e);
+    }
+
+    // opcjonalnie także pokaż lokalny ekran końcowy
+    showEndScreen(`Wygrałeś! Twój czas ukończenia kampanii to ${formatMs(completionMs)}.`, 'Play again');
   }
 }
+
 
 /* ========= Physics ========= */
 function resolveShipCollision(a,b){const c=center();const ax=c.x+Math.cos(a.theta)*a.r,ay=c.y+Math.sin(a.theta)*a.r;const bx=c.x+Math.cos(b.theta)*b.r,by=c.y+Math.sin(b.theta)*b.r;const dx=bx-ax,dy=by-ay,dist=Math.hypot(dx,dy),minDist=SHIP_COLLISION_R*2;if(dist===0||dist>=minDist)return;const pen=minDist-dist,nx=dx/dist,ny=dy/dist,push=pen*0.5;const axN=ax-nx*push,ayN=ay-ny*push,bxN=bx+nx*push,byN=by+ny*push;a.r=Math.min(Math.max(Math.hypot(axN-c.x,ayN-c.y),R_MIN+SHIP_COLLISION_R),R_MAX-SHIP_COLLISION_R);b.r=Math.min(Math.max(Math.hypot(bxN-c.x,byN-c.y),R_MIN+SHIP_COLLISION_R),R_MAX-SHIP_COLLISION_R);a.theta=Math.atan2(ayN-c.y,axN-c.x);b.theta=Math.atan2(byN-c.y,bxN-c.x);const rel=b.vr-a.vr;if(rel<0){const imp=-rel*0.8;a.vr-=imp*0.5;b.vr+=imp*0.5;}}
