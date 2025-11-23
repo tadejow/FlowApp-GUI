@@ -145,7 +145,7 @@ const autoStart = urlParams.get('autostart') === '1';
 const skipTutorial = urlParams.get('skip_tutorial') === '1';
 
 /* ========= Entities ========= */
-function makeShip(isEnemy=false){return{isEnemy,r:isEnemy?Math.min(300*dpr,R_MAX*0.75):Math.min(260*dpr,R_MAX*0.6),theta:isEnemy?Math.PI*0.35:0,vr:0,thrust:45,hp:100,alive:true,sinking:false,sinkT:0,fireCD:0,wake:[]}}
+function makeShip(isEnemy=false){return{isEnemy,r:isEnemy?Math.min(300*dpr,R_MAX*0.75):Math.min(260*dpr,R_MAX*0.6),theta:isEnemy?Math.PI*0.35:0,vr:0,thrust:45,hp: isEnemy ? 1 : 100,alive:true,sinking:false,sinkT:0,fireCD:0,wake:[]}}
 const player=makeShip(false); let enemies=[], debris=[];
 const drops=[], DROP_RADIUS=10*dpr; let gameTime=0; const boostExpiries=[]; const BOOST_PER_STACK=0.10; const DROP_SPAWN_RATE=0.12; const DROP_MAX=3;
 function currentBoostMultiplier(now){for(let i=boostExpiries.length-1;i>=0;i--) if(boostExpiries[i]<=now) boostExpiries.splice(i,1); return 1+BOOST_PER_STACK*boostExpiries.length;}
