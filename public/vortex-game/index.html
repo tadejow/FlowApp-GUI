@@ -223,8 +223,21 @@ function nextLevelOrEnd(){
     // CAMPAIGN COMPLETE — compute time & notify host
     totalCompletionTimeMs = Math.round(performance.now() - (totalStartTimeMs || performance.now()));
     try {
-      window.parent.postMessage({ type:'gameTime', completion_time_ms: totalCompletionTimeMs, playerName: userNickname, game: 'vortex' }, '*');
-    } catch(e) { /* ignore cross-origin */ }
+      window.parent.postMessage({
+        type: 'saveResult',
+        payload: {
+          endpoint: '/api/vortex-game',
+          data: {
+            completion_time_ms: totalCompletionTimeMs,
+            player_name: userNickname || 'Guest',
+            // opcjonalnie: język, jeśli go masz w stanie gry
+            language: (window.lang || null)
+          },
+          // ważne: nie zamykaj modala po zapisie
+          closeModal: false
+        }
+      }, '*');
+    } catch (e) { /* ignore cross-origin */ }
     showEndScreen('Campaign complete!','Play again');
   }
 }
