@@ -661,12 +661,11 @@ const App = () => {
   useEffect(() => { localStorage.setItem('flowapp_scores', JSON.stringify(scores)); }, [scores]);
   useEffect(() => { const storedNickname = localStorage.getItem('userNickname'); if (storedNickname) setUserNickname(storedNickname); const storedScores = localStorage.getItem('flowapp_scores'); if (storedScores) setScores(JSON.parse(storedScores)); }, []);
 
-  /*
   useEffect(() => {
     const handleGameMessage = (event) => {
       if (event.data && event.data.type === 'gameScore') {
         const { station, score } = event.data;
-        if (station && typeof score === 'number') { setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) })); setGameModal({ isOpen: false, url: null }); }
+        if (station && typeof score === 'number') { setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) })); /*setGameModal({ isOpen: false, url: null }); */ }
       } else if (event.data && event.data.type === 'gameTime') {
         const { completion_time_ms, language } = event.data;
         if (typeof completion_time_ms === 'number') { sendGameTimeToServer(completion_time_ms, language); setGameModal({ isOpen: false, url: null }); }
@@ -675,37 +674,7 @@ const App = () => {
     window.addEventListener('message', handleGameMessage);
     return () => window.removeEventListener('message', handleGameMessage);
   }, [userNickname]); 
-  */
-
-  useEffect(() => {
-    const handleGameMessage = (event) => {
-      if (!event.data) return;
-
-      if (event.data.type === 'gameScore') {
-        const { station, score } = event.data;
-        if (station && typeof score === 'number') {
-          setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
-          //setGameModal({ isOpen: false, url: null });
-        }
-      } else if (event.data.type === 'gameTime') {
-        const { completion_time_ms, language } = event.data;
-        if (typeof completion_time_ms === 'number') {
-          sendGameTimeToServer(completion_time_ms, language);
-          setGameModal({ isOpen: false, url: null });
-        }
-      } else if (event.data.type === 'saveResult') {
-        const { endpoint, data } = event.data.payload;
-        if (endpoint && data) {
-          sendGameResultToServer(endpoint, data);
-          // Tutaj usunięto setGameModal, aby gra pozostała otwarta
-        }
-      }
-    };
-
-    window.addEventListener('message', handleGameMessage);
-    return () => window.removeEventListener('message', handleGameMessage);
-  }, [userNickname]);
-
+  
   useEffect(() => {
     const onFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
     document.addEventListener('fullscreenchange', onFullscreenChange);
