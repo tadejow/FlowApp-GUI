@@ -685,7 +685,7 @@ const App = () => {
         const { station, score } = event.data;
         if (station && typeof score === 'number') {
           setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
-          setGameModal({ isOpen: false, url: null });
+          //setGameModal({ isOpen: false, url: null });
         }
       } else if (event.data.type === 'gameTime') {
         const { completion_time_ms, language } = event.data;
