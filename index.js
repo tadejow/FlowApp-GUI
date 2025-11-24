@@ -631,7 +631,7 @@ const App = () => {
         const { station, score } = event.data;
         if (station && typeof score === 'number') {
           setScores(prev => ({ ...prev, [station]: Math.max(prev[station] || 0, score) }));
-          setGameModal({ isOpen: false, url: null });
+          //setGameModal({ isOpen: false, url: null });
         }
       } 
       // Obsługa Duck Race (stary format)
@@ -648,7 +648,7 @@ const App = () => {
         const { endpoint, data } = event.data.payload;
         if (endpoint && data) {
           sendGameResultToServer(endpoint, data);
-          setGameModal({ isOpen: false, url: null });
+          //setGameModal({ isOpen: false, url: null });
         }
       }
     };
